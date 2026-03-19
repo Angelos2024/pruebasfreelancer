@@ -40,7 +40,17 @@
         <p class="off-title"><strong>Escanee</strong> un código de barras o <strong>busque</strong> un producto</p>
           <form class="search-pill" id="barcode-form">
           <label class="search-left" for="barcode-input">#</label>
-          <input id="barcode-input" class="search-input" type="text" inputmode="numeric" placeholder="Buscar por código de barras" aria-label="Código de barras">
+          <input
+            id="barcode-input"
+            class="search-input"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            maxlength="14"
+            pattern="[0-9]{8,14}"
+            placeholder="Buscar por código de barras"
+            aria-label="Código de barras"
+          >
           <button class="search-btn" type="submit">⌕</button>
         </form>
  <p class="search-help" id="scanner-help">Activa la cámara para escanear en vivo, usa una foto o escribe el código manualmente.</p>
@@ -77,7 +87,10 @@
       </button>
     </nav>
   </div>
-   <script>
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.4/dist/quagga.min.js"></script>
+  <script>
+    const BARCODE_PATTERN = /^\d{8,14}$/;
+    const SCAN_REGION = { top: '28%', right: '10%', left: '10%', bottom: '28%' };
     const form = document.getElementById('barcode-form');
     const input = document.getElementById('barcode-input');
     const scannerStatus = document.getElementById('scanner-status');
@@ -93,15 +106,31 @@
     let lastDetectedCode = '';
     let torchEnabled = false;
     let supportsTorch = false;
+    let scanFailureCount = 0;
+    let quaggaReady = false;
+    let quaggaActive = false;
 
     function setScannerStatus(message, tone = 'neutral') {
       scannerStatus.textContent = message;
       scannerStatus.dataset.tone = tone;
     }
 
+function normalizeBarcode(value) {
+      return String(value || '').replace(/\D/g, '');
+    }
+
+    function isValidBarcode(value) {
+      return BARCODE_PATTERN.test(normalizeBarcode(value));
+    }
+
+    function updateHelpMessage(message) {
+      scannerHelp.textContent = message;
+    }
     function goToResult(barcode) {
-      const cleanCode = String(barcode || '').replace(/\D/g, '');
-      if (!cleanCode) {
+const cleanCode = normalizeBarcode(barcode);
+      if (!isValidBarcode(cleanCode)) {
+        setScannerStatus('El código debe contener entre 8 y 14 dígitos numéricos.', 'warning');
+              if (!cleanCode) {
         return;
       }
 
@@ -116,46 +145,133 @@
       }
 
       const barcodes = await detector.detect(canvas);
-      const detectedCode = barcodes.find((item) => /\d{8,14}/.test(item.rawValue || ''))?.rawValue;
-
+      const detectedCode = barcodes.find((item) => isValidBarcode(item.rawValue || ''))?.rawValue;
       if (!detectedCode) {
         throw new Error('No se encontró un código de barras válido en la imagen.');
       }
 
-      return detectedCode.replace(/\D/g, '');
+ return normalizeBarcode(detectedCode);
     }
 
+    function handleSuccessfulDetection(rawCode, sourceLabel = 'cámara') {
+      const detectedCode = normalizeBarcode(rawCode);
+      if (!isValidBarcode(detectedCode) || detectedCode === lastDetectedCode) {
+        return;
+      }
+
+      setScannerStatus(`Código leído desde ${sourceLabel}: ${detectedCode}.`, 'success');
+      goToResult(detectedCode);
+          }
+
     async function scanLoop() {
-      if (!scanning || !detector || video.readyState < 2) {
-        requestAnimationFrame(scanLoop);
+      if (!scanning || !detector || video.readyState < 2 || quaggaActive) {
+              requestAnimationFrame(scanLoop);
         return;
       }
 
       try {
         const barcodes = await detector.detect(video);
-        const detectedCode = barcodes.find((item) => /\d{8,14}/.test(item.rawValue || ''))?.rawValue?.replace(/\D/g, '');
+const detectedCode = barcodes.find((item) => isValidBarcode(item.rawValue || ''))?.rawValue;
 
-        if (detectedCode && detectedCode !== lastDetectedCode) {
-          goToResult(detectedCode);
+        if (detectedCode) {
+          scanFailureCount = 0;
+          handleSuccessfulDetection(detectedCode);
           return;
         }
+         scanFailureCount += 1;
+        if (scanFailureCount % 45 === 0) {
+          setScannerStatus('Alinea el código dentro del recuadro, evita reflejos y acerca un poco más la cámara.', 'neutral');
+        }
       } catch (error) {
-        setScannerStatus('La cámara está activa, pero este dispositivo no pudo leer el fotograma actual.', 'warning');
+        scanFailureCount += 1;
+        if (scanFailureCount % 30 === 0) {
+          setScannerStatus('No se pudo leer este fotograma. Intenta con mejor iluminación o más enfoque.', 'warning');
+        }
       }
 
       requestAnimationFrame(scanLoop);
     }
+async function initQuaggaScanner() {
+      if (!window.Quagga || quaggaReady) {
+        return;
+      }
+
+      await new Promise((resolve, reject) => {
+        window.Quagga.init({
+          inputStream: {
+            type: 'LiveStream',
+            target: video,
+            constraints: {
+              facingMode: 'environment',
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
+            area: SCAN_REGION
+          },
+          locator: {
+            patchSize: 'medium',
+            halfSample: true
+          },
+          numOfWorkers: navigator.hardwareConcurrency ? Math.max(1, Math.min(4, navigator.hardwareConcurrency - 1)) : 2,
+          frequency: 10,
+          decoder: {
+            readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader', 'code_128_reader']
+          },
+          locate: true
+        }, (error) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+
+          quaggaReady = true;
+          resolve();
+        });
+      });
+
+      window.Quagga.offDetected(handleQuaggaDetected);
+      window.Quagga.onDetected(handleQuaggaDetected);
+    }
+
+    function handleQuaggaDetected(result) {
+      const code = result?.codeResult?.code;
+      if (isValidBarcode(code)) {
+        handleSuccessfulDetection(code, 'cámara');
+      }
+    }
+
+    async function startScannerWithQuagga() {
+      if (!window.Quagga) {
+        updateHelpMessage('Tu navegador no soporta lectura automática nativa y no se pudo cargar el lector alternativo. Ingresa el código manualmente.');
+        setScannerStatus('Escáner alternativo no disponible; sigue activa la búsqueda manual.', 'warning');
+        return;
+      }
+
+      try {
+        await initQuaggaScanner();
+        window.Quagga.start();
+        quaggaActive = true;
+        scanning = true;
+        torchTrigger.disabled = true;
+        torchTrigger.title = 'La linterna no está disponible con el lector alternativo';
+        updateHelpMessage('Lector alternativo activo. Centra el código, evita reflejos y mantén el teléfono estable.');
+        setScannerStatus('Escáner alternativo activo. Apunta el código dentro del recuadro.', 'success');
+      } catch (error) {
+        updateHelpMessage('No se pudo iniciar el lector automático. Ingresa el código manualmente o prueba con otra foto.');
+        setScannerStatus(`No se pudo iniciar el lector alternativo: ${error.message}`, 'warning');
+      }
+    }
 
     async function startScanner() {
       if (!('mediaDevices' in navigator) || !navigator.mediaDevices.getUserMedia) {
-        scannerHelp.textContent = 'Tu navegador no permite acceso a la cámara. Usa una foto o escribe el código manualmente.';
-        setScannerStatus('Cámara no disponible en este navegador.', 'warning');
+        updateHelpMessage('Tu navegador no permite acceso a la cámara. Usa una foto o escribe el código manualmente.');
+                setScannerStatus('Cámara no disponible en este navegador.', 'warning');
         return;
       }
 
       if (!('BarcodeDetector' in window)) {
-        scannerHelp.textContent = 'Tu navegador no soporta escaneo automático en vivo. Puedes cargar una foto del código o escribirlo manualmente.';
-        setScannerStatus('Escaneo automático no soportado; sigue disponible la búsqueda manual.', 'warning');
+        updateHelpMessage('Tu navegador no soporta escaneo nativo; se intentará usar un lector alternativo.');
+        await startScannerWithQuagga();
         return;
       }
 
@@ -183,11 +299,13 @@
         }
 
         scanning = true;
+        updateHelpMessage('Cámara activa. Alinea el código dentro del recuadro y evita reflejos para una lectura más estable.');
         setScannerStatus('Cámara activa. Apunta el código dentro del recuadro para consultar el producto real.', 'success');
         requestAnimationFrame(scanLoop);
       } catch (error) {
-        scannerHelp.textContent = 'No se pudo abrir la cámara. Aun puedes cargar una foto del código o escribirlo manualmente.';
-        setScannerStatus(`No se pudo iniciar la cámara: ${error.message}`, 'warning');
+        updateHelpMessage('No se pudo abrir la cámara nativa. Se intentará un lector alternativo; si falla, escribe el código manualmente.');
+        setScannerStatus(`No se pudo iniciar la cámara nativa: ${error.message}`, 'warning');
+        await startScannerWithQuagga();
       }
     }
 
@@ -217,6 +335,7 @@
 
       if (!('BarcodeDetector' in window)) {
         setScannerStatus('Este navegador no permite analizar imágenes automáticamente. Ingresa el código manualmente.', 'warning');
+                event.target.value = '';
         return;
       }
 
@@ -230,20 +349,27 @@
         context.drawImage(bitmap, 0, 0);
         const detectedCode = await detectFromCanvas(canvas);
         goToResult(detectedCode);
+        handleSuccessfulDetection(detectedCode, 'imagen');
       } catch (error) {
         setScannerStatus(error.message || 'No se pudo analizar la imagen seleccionada.', 'warning');
       } finally {
         event.target.value = '';
       }
     }
+    input.addEventListener('input', () => {
+      const normalized = normalizeBarcode(input.value).slice(0, 14);
+      if (input.value !== normalized) {
+        input.value = normalized;
+      }
+    });
 
     form.addEventListener('submit', (event) => {
       event.preventDefault();
-      const barcode = input.value.replace(/\D/g, '');
+      const barcode = normalizeBarcode(input.value);
 
-      if (!barcode) {
-        input.focus();
-        setScannerStatus('Escribe un código válido o escanéalo con la cámara.', 'warning');
+      if (!isValidBarcode(barcode)) {
+              input.focus();
+setScannerStatus('Escribe un código válido de 8 a 14 dígitos o escanéalo con la cámara.', 'warning');
         return;
       }
 
@@ -255,6 +381,9 @@
     torchTrigger.addEventListener('click', toggleTorch);
     window.addEventListener('beforeunload', () => {
       videoStream?.getTracks?.().forEach((track) => track.stop());
+      if (window.Quagga && quaggaActive) {
+        window.Quagga.stop();
+      }
     });
 
     startScanner();

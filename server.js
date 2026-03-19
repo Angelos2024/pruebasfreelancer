@@ -46,7 +46,7 @@ function sendJson(res, statusCode, payload) {
 
 function sanitizePathname(urlPath) {
   const normalized = path.normalize(urlPath).replace(/^\.+[\\/]/, '');
-const target = normalized === '/' ? 'index.html' : normalized;
+const target = normalized === '/' || normalized === '/inicio.html' ? 'index.html' : normalized;
   const resolved = path.join(ROOT, target);
     if (!resolved.startsWith(ROOT)) {
     return null;

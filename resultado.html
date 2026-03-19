@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-  <title>resultado.html</title>
+  <title>resultado</title>
   <link rel="stylesheet" href="assets/css/master.css">
 </head>
 <body>
   <div class="app">
-    
  <header class="nav">
       <div class="nav_logo"><img src="assets/img/logo.svg" alt="Logo"></div>
       <a class="nav_lang" href="#"><img src="assets/img/uk.png" alt="Lang"></a>
@@ -31,7 +30,7 @@
         <h2 class="result-name" id="product-name">Sin datos todavía</h2>
         <p class="text" id="product-summary">Esta vista mostrará solo los campos solicitados al endpoint de OpenFoodFacts.</p>
         <div class="stack" style="margin-top:12px">
-          <a class="btn btn-primary" href="inicio.html">Buscar otro producto</a>
+          <a class="btn btn-primary" href="index.html">Buscar otro producto</a>
         </div>
       </div>
 
@@ -105,8 +104,8 @@
       }
     }
 
-    function renderError(message) {
-      setStatus('No se pudo completar la búsqueda', message);
+function renderError(message, title = 'No se pudo completar la búsqueda') {
+      setStatus(title, message);
       productName.textContent = 'Sin resultado';
       productSummary.textContent = message;
       resultBadges.innerHTML = '';
@@ -116,8 +115,13 @@
 
     async function loadProduct() {
       if (!barcode) {
-        renderError('Falta el código de barras en la URL.');
+ renderError('Falta el código de barras en la URL.', 'Búsqueda incompleta');
         return;
+      }
+
+      if (!/^\d{8,14}$/.test(barcode)) {
+        renderError('El código de barras recibido no es válido. Debe contener entre 8 y 14 dígitos.', 'Código inválido');
+                return;
       }
 
       setStatus('Consultando OpenFoodFacts', `Código ${barcode}`);
@@ -130,21 +134,17 @@
           throw new Error(payload.error || 'Error al consultar el producto.');
         }
 
-        if (!payload.product) {
-          throw new Error('OpenFoodFacts no devolvió datos de producto para ese código.');
+        if (!payload.product || payload.status === 0) {
+          throw new Error('Se leyó el código correctamente, pero OpenFoodFacts no tiene un producto registrado para ese código todavía.');
         }
 
         renderProduct(payload);
       } catch (error) {
-        renderError(error.message);
-      }
+        renderError(error.message, 'Producto no disponible');
+              }
     }
 
     loadProduct();
   </script>
-</body>
-</html>
-
-  </div>
 </body>
 </html>
