@@ -9,6 +9,8 @@
 <body>
   <div class="app home-app">
     <section class="scanner-stage">
+       <video class="scanner-video" id="scanner-video" autoplay playsinline muted></video>
+      <div class="scanner-overlay"></div>
       <div class="statusbar">
         <div>8:45</div>
         <div>52% 🔋</div>
@@ -25,8 +27,9 @@
         <div class="inner"></div>
       </div>
 
-      <div class="scan-side left">🖼️</div>
-      <div class="scan-side right">🔦</div>
+       <button class="scan-side left scanner-control" id="upload-trigger" type="button" title="Leer código desde una imagen">🖼️</button>
+      <button class="scan-side right scanner-control" id="torch-trigger" type="button" title="Encender o apagar linterna">🔦</button>
+      <input id="image-input" type="file" accept="image/*" capture="environment" hidden>
     </section>
 
     <section class="home-sheet">
@@ -35,13 +38,14 @@
           <img src="assets/img/logo.svg" alt="Open Food Facts">
         </div>
         <p class="off-title"><strong>Escanee</strong> un código de barras o <strong>busque</strong> un producto</p>
-<form class="search-pill" id="barcode-form">
+          <form class="search-pill" id="barcode-form">
           <label class="search-left" for="barcode-input">#</label>
           <input id="barcode-input" class="search-input" type="text" inputmode="numeric" placeholder="Buscar por código de barras" aria-label="Código de barras">
           <button class="search-btn" type="submit">⌕</button>
         </form>
-        <p class="search-help">Ingresa un código de barras y consulta OpenFoodFacts.</p>
-      </div>
+ <p class="search-help" id="scanner-help">Activa la cámara para escanear en vivo, usa una foto o escribe el código manualmente.</p>
+        <div class="scanner-status" id="scanner-status">Inicializando cámara…</div>
+              </div>
 
       <div class="help-card">
         <div class="help-top">● ¡Nuestra aplicación te necesita!</div>
@@ -50,8 +54,8 @@
           <div>
             <p class="help-text">¡Ayúdanos a informar a <strong>millones de consumidores</strong> sobre lo que comen!</p>
             <div class="help-actions">
-              <button class="help-btn">Apoyar →</button>
-            </div>
+              <button class="help-btn" type="button">Apoyar →</button>
+                          </div>
           </div>
         </div>
       </div>
@@ -59,15 +63,15 @@
     </section>
 
     <nav class="bottom-nav">
-      <button class="item">
-        <div class="icon-wrap">👤</div>
+      <button class="item" type="button">
+              <div class="icon-wrap">👤</div>
         <div>Community</div>
       </button>
-      <button class="item active">
+      <button class="item active" type="button">
         <div class="icon-wrap">⌕</div>
         <div>Escanear</div>
       </button>
-      <button class="item">
+      <button class="item" type="button">
         <div class="icon-wrap">☰</div>
         <div>Listas</div>
       </button>
@@ -76,6 +80,162 @@
    <script>
     const form = document.getElementById('barcode-form');
     const input = document.getElementById('barcode-input');
+    const scannerStatus = document.getElementById('scanner-status');
+    const scannerHelp = document.getElementById('scanner-help');
+    const video = document.getElementById('scanner-video');
+    const uploadTrigger = document.getElementById('upload-trigger');
+    const torchTrigger = document.getElementById('torch-trigger');
+    const imageInput = document.getElementById('image-input');
+
+    let videoStream = null;
+    let detector = null;
+    let scanning = false;
+    let lastDetectedCode = '';
+    let torchEnabled = false;
+    let supportsTorch = false;
+
+    function setScannerStatus(message, tone = 'neutral') {
+      scannerStatus.textContent = message;
+      scannerStatus.dataset.tone = tone;
+    }
+
+    function goToResult(barcode) {
+      const cleanCode = String(barcode || '').replace(/\D/g, '');
+      if (!cleanCode) {
+        return;
+      }
+
+      lastDetectedCode = cleanCode;
+      setScannerStatus(`Código detectado: ${cleanCode}. Consultando producto…`, 'success');
+      window.location.href = `resultado.html?barcode=${encodeURIComponent(cleanCode)}`;
+    }
+
+    async function detectFromCanvas(canvas) {
+      if (!detector) {
+        throw new Error('El navegador no soporta BarcodeDetector.');
+      }
+
+      const barcodes = await detector.detect(canvas);
+      const detectedCode = barcodes.find((item) => /\d{8,14}/.test(item.rawValue || ''))?.rawValue;
+
+      if (!detectedCode) {
+        throw new Error('No se encontró un código de barras válido en la imagen.');
+      }
+
+      return detectedCode.replace(/\D/g, '');
+    }
+
+    async function scanLoop() {
+      if (!scanning || !detector || video.readyState < 2) {
+        requestAnimationFrame(scanLoop);
+        return;
+      }
+
+      try {
+        const barcodes = await detector.detect(video);
+        const detectedCode = barcodes.find((item) => /\d{8,14}/.test(item.rawValue || ''))?.rawValue?.replace(/\D/g, '');
+
+        if (detectedCode && detectedCode !== lastDetectedCode) {
+          goToResult(detectedCode);
+          return;
+        }
+      } catch (error) {
+        setScannerStatus('La cámara está activa, pero este dispositivo no pudo leer el fotograma actual.', 'warning');
+      }
+
+      requestAnimationFrame(scanLoop);
+    }
+
+    async function startScanner() {
+      if (!('mediaDevices' in navigator) || !navigator.mediaDevices.getUserMedia) {
+        scannerHelp.textContent = 'Tu navegador no permite acceso a la cámara. Usa una foto o escribe el código manualmente.';
+        setScannerStatus('Cámara no disponible en este navegador.', 'warning');
+        return;
+      }
+
+      if (!('BarcodeDetector' in window)) {
+        scannerHelp.textContent = 'Tu navegador no soporta escaneo automático en vivo. Puedes cargar una foto del código o escribirlo manualmente.';
+        setScannerStatus('Escaneo automático no soportado; sigue disponible la búsqueda manual.', 'warning');
+        return;
+      }
+
+      try {
+        detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128'] });
+        videoStream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        });
+
+        video.srcObject = videoStream;
+        await video.play();
+
+        const [track] = videoStream.getVideoTracks();
+        const capabilities = track?.getCapabilities?.() || {};
+        supportsTorch = Boolean(capabilities.torch);
+        torchTrigger.disabled = !supportsTorch;
+
+        if (!supportsTorch) {
+          torchTrigger.title = 'La linterna no está disponible en este dispositivo';
+        }
+
+        scanning = true;
+        setScannerStatus('Cámara activa. Apunta el código dentro del recuadro para consultar el producto real.', 'success');
+        requestAnimationFrame(scanLoop);
+      } catch (error) {
+        scannerHelp.textContent = 'No se pudo abrir la cámara. Aun puedes cargar una foto del código o escribirlo manualmente.';
+        setScannerStatus(`No se pudo iniciar la cámara: ${error.message}`, 'warning');
+      }
+    }
+
+    async function toggleTorch() {
+      if (!videoStream || !supportsTorch) {
+        setScannerStatus('La linterna no está disponible en este dispositivo.', 'warning');
+        return;
+      }
+
+      const [track] = videoStream.getVideoTracks();
+      torchEnabled = !torchEnabled;
+
+      try {
+        await track.applyConstraints({ advanced: [{ torch: torchEnabled }] });
+        setScannerStatus(torchEnabled ? 'Linterna activada.' : 'Linterna desactivada.', 'success');
+      } catch (error) {
+        torchEnabled = !torchEnabled;
+        setScannerStatus('No fue posible cambiar el estado de la linterna.', 'warning');
+      }
+    }
+
+    async function handleImageSelection(event) {
+      const [file] = event.target.files || [];
+      if (!file) {
+        return;
+      }
+
+      if (!('BarcodeDetector' in window)) {
+        setScannerStatus('Este navegador no permite analizar imágenes automáticamente. Ingresa el código manualmente.', 'warning');
+        return;
+      }
+
+      try {
+        detector = detector || new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128'] });
+        const bitmap = await createImageBitmap(file);
+        const canvas = document.createElement('canvas');
+        canvas.width = bitmap.width;
+        canvas.height = bitmap.height;
+        const context = canvas.getContext('2d');
+        context.drawImage(bitmap, 0, 0);
+        const detectedCode = await detectFromCanvas(canvas);
+        goToResult(detectedCode);
+      } catch (error) {
+        setScannerStatus(error.message || 'No se pudo analizar la imagen seleccionada.', 'warning');
+      } finally {
+        event.target.value = '';
+      }
+    }
 
     form.addEventListener('submit', (event) => {
       event.preventDefault();
@@ -83,11 +243,21 @@
 
       if (!barcode) {
         input.focus();
+        setScannerStatus('Escribe un código válido o escanéalo con la cámara.', 'warning');
         return;
       }
 
-      window.location.href = `resultado.html?barcode=${encodeURIComponent(barcode)}`;
+ goToResult(barcode);
+     });
+
+    uploadTrigger.addEventListener('click', () => imageInput.click());
+    imageInput.addEventListener('change', handleImageSelection);
+    torchTrigger.addEventListener('click', toggleTorch);
+    window.addEventListener('beforeunload', () => {
+      videoStream?.getTracks?.().forEach((track) => track.stop());
     });
+
+    startScanner();
   </script>
 </body>
 </html>
