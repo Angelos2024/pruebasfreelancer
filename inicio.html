@@ -35,11 +35,12 @@
           <img src="assets/img/logo.svg" alt="Open Food Facts">
         </div>
         <p class="off-title"><strong>Escanee</strong> un código de barras o <strong>busque</strong> un producto</p>
-        <div class="search-pill">
-          <div class="search-left">📸</div>
-          <div class="search-placeholder">Buscar un producto</div>
-          <button class="search-btn">⌕</button>
-        </div>
+<form class="search-pill" id="barcode-form">
+          <label class="search-left" for="barcode-input">#</label>
+          <input id="barcode-input" class="search-input" type="text" inputmode="numeric" placeholder="Buscar por código de barras" aria-label="Código de barras">
+          <button class="search-btn" type="submit">⌕</button>
+        </form>
+        <p class="search-help">Ingresa un código de barras y consulta OpenFoodFacts.</p>
       </div>
 
       <div class="help-card">
@@ -72,5 +73,21 @@
       </button>
     </nav>
   </div>
+   <script>
+    const form = document.getElementById('barcode-form');
+    const input = document.getElementById('barcode-input');
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const barcode = input.value.replace(/\D/g, '');
+
+      if (!barcode) {
+        input.focus();
+        return;
+      }
+
+      window.location.href = `resultado.html?barcode=${encodeURIComponent(barcode)}`;
+    });
+  </script>
 </body>
 </html>
