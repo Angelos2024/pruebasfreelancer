@@ -464,3 +464,51 @@ body { background:#3b3b3b; }
   font-size: .92rem;
   line-height: 1.45;
 }
+.scanner-video,
+.scanner-overlay {
+  position: absolute;
+  inset: 0;
+}
+.scanner-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #1f1f1f;
+}
+.scanner-overlay {
+  background: linear-gradient(180deg, rgba(20, 20, 20, .35) 0%, rgba(20, 20, 20, .18) 45%, rgba(20, 20, 20, .48) 100%);
+  z-index: 1;
+}
+.scanner-control {
+  border: 0;
+  background: rgba(0, 0, 0, .28);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.scanner-control[disabled] {
+  opacity: .45;
+  cursor: not-allowed;
+}
+.scanner-status {
+  margin-top: 12px;
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, .08);
+  color: #d9d9d9;
+  font-size: .92rem;
+  line-height: 1.45;
+  text-align: center;
+}
+.scanner-status[data-tone="success"] {
+  background: rgba(76, 175, 80, .16);
+  color: #c8f1cb;
+}
+.scanner-status[data-tone="warning"] {
+  background: rgba(255, 152, 0, .14);
+  color: #ffd7a0;
+}
