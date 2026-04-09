@@ -197,7 +197,8 @@
       button { min-width: 100%; }
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/gh/cosinekitty/astronomy@master/demo/browser/astronomy.browser.min.js"></script>
+  <!-- FIX: Astronomy Engine pinned to npm@2 (estable) en lugar de @master inestable -->
+  <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
 </head>
@@ -354,26 +355,28 @@
       'Etanim', 'Bul', 'Mes 9', 'Mes 10', 'Mes 11', 'Mes 12', 'Mes 13'
     ];
 
-    const mainTitle = document.getElementById('mainTitle');
-    const yearNameInput = document.getElementById('yearName');
-    const timezoneInput = document.getElementById('timezone');
-    const latitudeInput = document.getElementById('latitude');
-    const longitudeInput = document.getElementById('longitude');
-    const elevationInput = document.getElementById('elevation');
-    const searchStartInput = document.getElementById('searchStart');
-    const crescentModeInput = document.getElementById('crescentMode');
-    const sunsetSourceInput = document.getElementById('sunsetSource');
-    const fallbackMonth7Input = document.getElementById('fallbackMonth7');
+    const mainTitle       = document.getElementById('mainTitle');
+    const yearNameInput   = document.getElementById('yearName');
+    const timezoneInput   = document.getElementById('timezone');
+    const latitudeInput   = document.getElementById('latitude');
+    const longitudeInput  = document.getElementById('longitude');
+    const elevationInput  = document.getElementById('elevation');
+    const searchStartInput      = document.getElementById('searchStart');
+    const crescentModeInput     = document.getElementById('crescentMode');
+    const sunsetSourceInput     = document.getElementById('sunsetSource');
+    const fallbackMonth7Input   = document.getElementById('fallbackMonth7');
     const useFallbackMonth7Input = document.getElementById('useFallbackMonth7');
     const monthCountInput = document.getElementById('monthCount');
-    const recalcBtn = document.getElementById('recalcBtn');
+    const recalcBtn       = document.getElementById('recalcBtn');
 
     const summaryGrid = document.getElementById('summaryGrid');
-    const metricGrid = document.getElementById('metricGrid');
-    const statusBox = document.getElementById('statusBox');
-    const monthsBody = document.getElementById('monthsBody');
-    const feastsBody = document.getElementById('feastsBody');
-    const noteBox = document.getElementById('noteBox');
+    const metricGrid  = document.getElementById('metricGrid');
+    const statusBox   = document.getElementById('statusBox');
+    const monthsBody  = document.getElementById('monthsBody');
+    const feastsBody  = document.getElementById('feastsBody');
+    const noteBox     = document.getElementById('noteBox');
+
+    /* ─── utilidades de fecha ─────────────────────────────────────────── */
 
     function parseLocalDateTime(value) {
       const zone = timezoneInput.value.trim() || 'UTC';
@@ -410,6 +413,8 @@
       return { start, end: addDays(start, 1) };
     }
 
+    /* ─── UI helpers ──────────────────────────────────────────────────── */
+
     function setStatus(type, html) {
       statusBox.className = `status ${type}`;
       statusBox.innerHTML = html;
@@ -437,7 +442,9 @@
 
     function renderMonths(months) {
       monthsBody.innerHTML = months.map((month, index) => {
-        const monthEnd = index < months.length - 1 ? months[index + 1].start : addDays(month.start, month.days);
+        const monthEnd = index < months.length - 1
+          ? months[index + 1].start
+          : addDays(month.start, month.days);
         return `
           <tr>
             <td>${month.n}</td>
@@ -462,45 +469,37 @@
       `).join('');
     }
 
-    function toDegrees(rad) {
-      return rad * 180 / Math.PI;
-    }
+    /* ─── observador y astronomía ─────────────────────────────────────── */
 
     function buildObserver() {
-      const lat = Number(latitudeInput.value);
-      const lon = Number(longitudeInput.value);
-      const elevation = Number(elevationInput.value);
+      const lat  = Number(latitudeInput.value);
+      const lon  = Number(longitudeInput.value);
+      const elev = Number(elevationInput.value);
 
-      if (!Number.isFinite(lat) || lat < -90 || lat > 90) {
-        throw new Error('Latitud inválida. Debe estar entre -90 y 90.');
-      }
-      if (!Number.isFinite(lon) || lon < -180 || lon > 180) {
-        throw new Error('Longitud inválida. Debe estar entre -180 y 180.');
-      }
-      if (!Number.isFinite(elevation)) {
-        throw new Error('Elevación inválida. Debe ser un número.');
-      }
+      if (!Number.isFinite(lat)  || lat  < -90  || lat  > 90)  throw new Error('Latitud inválida. Debe estar entre -90 y 90.');
+      if (!Number.isFinite(lon)  || lon  < -180 || lon  > 180) throw new Error('Longitud inválida. Debe estar entre -180 y 180.');
+      if (!Number.isFinite(elev))                               throw new Error('Elevación inválida. Debe ser un número.');
 
-      return new Astronomy.Observer(
-        lat,
-        lon,
-        elevation
-      );
+      return new Astronomy.Observer(lat, lon, elev);
     }
 
     function getSunsetAstronomy(date, observer) {
       const zone = timezoneInput.value.trim() || 'UTC';
-      const localNoon = DateTime.fromJSDate(date, { zone }).set({ hour: 12, minute: 0, second: 0, millisecond: 0 }).toUTC().toJSDate();
-       const event = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, -1, localNoon, 1, 0.0);
-            if (!event) throw new Error('No se pudo calcular la puesta del sol con Astronomy Engine.');
+      const localNoon = DateTime.fromJSDate(date, { zone })
+        .set({ hour: 12, minute: 0, second: 0, millisecond: 0 })
+        .toUTC().toJSDate();
+      const event = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, -1, localNoon, 1);
+      if (!event) throw new Error('No se pudo calcular la puesta del sol con Astronomy Engine.');
       return new Date(event.date);
     }
 
     function getSunsetSunCalc(date) {
-      const lat = Number(latitudeInput.value);
-      const lon = Number(longitudeInput.value);
+      const lat  = Number(latitudeInput.value);
+      const lon  = Number(longitudeInput.value);
       const zone = timezoneInput.value.trim() || 'UTC';
-      const localMidday = DateTime.fromJSDate(date, { zone }).set({ hour: 12, minute: 0, second: 0, millisecond: 0 }).toJSDate();
+      const localMidday = DateTime.fromJSDate(date, { zone })
+        .set({ hour: 12, minute: 0, second: 0, millisecond: 0 })
+        .toJSDate();
       const times = SunCalc.getTimes(localMidday, lat, lon);
       if (!times.sunset) throw new Error('No se pudo calcular la puesta del sol con SunCalc.');
       return times.sunset;
@@ -513,14 +512,14 @@
     }
 
     function getMoonsetAstronomy(afterDate, observer) {
-      const event = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, afterDate, 1, 0.0);      return event ? new Date(event.date) : null;
+      const event = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, afterDate, 1);
+      return event ? new Date(event.date) : null;
     }
 
     function getMoonTimesSunCalc(date) {
       const lat = Number(latitudeInput.value);
       const lon = Number(longitudeInput.value);
-      const times = SunCalc.getMoonTimes(date, lat, lon);
-      return times;
+      return SunCalc.getMoonTimes(date, lat, lon);
     }
 
     function calcHorizontal(body, date, observer) {
@@ -528,39 +527,54 @@
       return Astronomy.Horizon(date, observer, equ.ra, equ.dec, 'normal');
     }
 
-    function calcElongation(date) {
-      const sunEq = Astronomy.Equator(Astronomy.Body.Sun, date, null, true, true);
-      const moonEq = Astronomy.Equator(Astronomy.Body.Moon, date, null, true, true);
-      return Astronomy.AngleBetween(sunEq.vec, moonEq.vec);
+    // FIX: elongación calculada con trigonometría esférica directa sobre coordenadas
+    // ecuatoriales. Se pasa el observer real porque la versión npm de Astronomy Engine
+    // rechaza null ("Not an instance of the Observer class: null").
+    function calcElongation(date, observer) {
+      const sunEq  = Astronomy.Equator(Astronomy.Body.Sun,  date, observer, true, true);
+      const moonEq = Astronomy.Equator(Astronomy.Body.Moon, date, observer, true, true);
+
+      // RA está en horas → convertir a radianes; Dec en grados → convertir a radianes
+      const ra1  = sunEq.ra   * (Math.PI / 12);
+      const dec1 = sunEq.dec  * (Math.PI / 180);
+      const ra2  = moonEq.ra  * (Math.PI / 12);
+      const dec2 = moonEq.dec * (Math.PI / 180);
+
+      // Ley de cosenos esférica para la separación angular
+      const cosA = Math.sin(dec1) * Math.sin(dec2)
+                 + Math.cos(dec1) * Math.cos(dec2) * Math.cos(ra1 - ra2);
+      return Math.acos(Math.max(-1, Math.min(1, cosA))) * (180 / Math.PI); // grados
     }
 
     function visibilityThresholds(mode) {
-      if (mode === 'strict') {
-        return { minAlt: 10, minElong: 12, minLagMinutes: 50, minIllum: 1.0 };
-      }
-      if (mode === 'lenient') {
-        return { minAlt: 7, minElong: 9, minLagMinutes: 35, minIllum: 0.6 };
-      }
-      return { minAlt: 8.5, minElong: 10.5, minLagMinutes: 45, minIllum: 0.8 };
+      if (mode === 'strict')  return { minAlt: 10,  minElong: 12,   minLagMinutes: 50, minIllum: 1.0 };
+      if (mode === 'lenient') return { minAlt: 7,   minElong: 9,    minLagMinutes: 35, minIllum: 0.6 };
+      /* standard */          return { minAlt: 8.5, minElong: 10.5, minLagMinutes: 45, minIllum: 0.8 };
     }
 
     function evaluateCrescentAtSunset(date, observer, mode) {
-      const sunsetUsed = getPreferredSunset(date, observer);
+      const sunsetUsed      = getPreferredSunset(date, observer);
       const sunsetAstronomy = getSunsetAstronomy(date, observer);
-      const sunsetSunCalc = getSunsetSunCalc(date);
-      const moonsetAstronomy = getMoonsetAstronomy(sunsetUsed, observer);
-      const moonTimesSunCalc = getMoonTimesSunCalc(sunsetUsed);
-      const moonHor = calcHorizontal(Astronomy.Body.Moon, sunsetUsed, observer);
-      const elong = calcElongation(sunsetUsed);
+      const sunsetSunCalc   = getSunsetSunCalc(date);
+      const moonsetAstronomy  = getMoonsetAstronomy(sunsetUsed, observer);
+      const moonTimesSunCalc  = getMoonTimesSunCalc(sunsetUsed);
+
+      const moonHor    = calcHorizontal(Astronomy.Body.Moon, sunsetUsed, observer);
+      const elongDeg   = calcElongation(sunsetUsed, observer);
       const lagMinutes = moonsetAstronomy ? (moonsetAstronomy - sunsetUsed) / 60000 : -999;
-      const illum = Astronomy.Illumination(Astronomy.Body.Moon, sunsetUsed).phase_fraction * 100;
+      const illum      = Astronomy.Illumination(Astronomy.Body.Moon, sunsetUsed).phase_fraction * 100;
       const thresholds = visibilityThresholds(mode);
 
+      // FIX: moonHor.altitude y moonHor.azimuth ya están en GRADOS (no radianes).
+      // La versión anterior aplicaba toDegrees() de más, multiplicando por ~57.
+      const altDeg = moonHor.altitude;  // grados directamente desde Astronomy Engine
+      const aziDeg = moonHor.azimuth;   // ídem
+
       const visible = (
-        toDegrees(moonHor.altitude) >= thresholds.minAlt &&
-        elong >= thresholds.minElong &&
+        altDeg   >= thresholds.minAlt   &&
+        elongDeg >= thresholds.minElong &&
         lagMinutes >= thresholds.minLagMinutes &&
-        illum >= thresholds.minIllum
+        illum    >= thresholds.minIllum
       );
 
       return {
@@ -570,55 +584,58 @@
         sunsetSunCalc,
         moonsetAstronomy,
         moonTimesSunCalc,
-        altitudeDeg: toDegrees(moonHor.altitude),
-        azimuthDeg: toDegrees(moonHor.azimuth),
-        elongationDeg: elong,
+        altitudeDeg: altDeg,
+        azimuthDeg:  aziDeg,
+        elongationDeg: elongDeg,
         lagMinutes,
         illuminationPct: illum,
         thresholds
       };
     }
 
+    /* ─── lunaciones ──────────────────────────────────────────────────── */
+
     function findMonthStartAfterNewMoon(newMoonDate, observer, mode) {
       for (let dayOffset = 1; dayOffset <= 3; dayOffset++) {
-        const testDate = addDays(newMoonDate, dayOffset);
+        const testDate   = addDays(newMoonDate, dayOffset);
         const evalResult = evaluateCrescentAtSunset(testDate, observer, mode);
         if (evalResult.visible) {
           return {
-            start: evalResult.sunsetUsed,
-            reason: `Creciente estimado visible en el día ${dayOffset} después de la luna nueva astronómica`,
-            metrics: evalResult,
+            start:     evalResult.sunsetUsed,
+            reason:    `Creciente estimado visible en el día ${dayOffset} después de la luna nueva astronómica`,
+            metrics:   evalResult,
             dayOffset
           };
         }
       }
 
+      // Fallback: si ningún día pasa el umbral, se toma el día 2
       const fallbackDate = addDays(newMoonDate, 2);
       const fallbackEval = evaluateCrescentAtSunset(fallbackDate, observer, mode);
       return {
-        start: fallbackEval.sunsetUsed,
-        reason: 'No pasó el umbral en la búsqueda corta; se tomó el siguiente atardecer disponible como aproximación',
-        metrics: fallbackEval,
+        start:     fallbackEval.sunsetUsed,
+        reason:    'No pasó el umbral en la búsqueda corta; se tomó el siguiente atardecer disponible como aproximación',
+        metrics:   fallbackEval,
         dayOffset: 2
       };
     }
 
     function findLunationStarts(startSearch, observer, mode, count) {
       const starts = [];
-      let anchor = new Date(startSearch);
+      let anchor   = new Date(startSearch);
 
       for (let i = 0; i < count; i++) {
         const phaseEvent = Astronomy.SearchMoonPhase(0, anchor, 35);
         if (!phaseEvent) throw new Error('No se pudo hallar luna nueva astronómica.');
 
-        const newMoon = new Date(phaseEvent.date);
+        const newMoon    = new Date(phaseEvent.date);
         const monthStart = findMonthStartAfterNewMoon(newMoon, observer, mode);
         starts.push({
-          index: i,
+          index:     i,
           newMoon,
-          start: monthStart.start,
-          reason: monthStart.reason,
-          metrics: monthStart.metrics,
+          start:     monthStart.start,
+          reason:    monthStart.reason,
+          metrics:   monthStart.metrics,
           dayOffset: monthStart.dayOffset
         });
 
@@ -628,11 +645,15 @@
       return starts;
     }
 
+    /* ─── Shabbat dentro de Jag HaMatzot ─────────────────────────────── */
+
     function sabbathStartWithinFeast(date) {
-      const d = new Date(date.getTime());
       const zone = timezoneInput.value.trim() || 'UTC';
-      const hour = DateTime.fromJSDate(date, { zone }).hour;
+      const d    = new Date(date.getTime());
+      const hour   = DateTime.fromJSDate(date, { zone }).hour;
       const minute = DateTime.fromJSDate(date, { zone }).minute;
+
+      // Si ya es viernes (weekday 5) usar directo; si no, avanzar hasta el próximo sábado
       if (DateTime.fromJSDate(d, { zone }).weekday === 5) return d;
       while (DateTime.fromJSDate(d, { zone }).weekday !== 6) {
         d.setUTCDate(d.getUTCDate() + 1);
@@ -641,104 +662,112 @@
       return fixed.toUTC().toJSDate();
     }
 
+    /* ─── validación de librerías ─────────────────────────────────────── */
+
     function validateLibraries() {
-      if (typeof Astronomy === 'undefined') throw new Error('Astronomy Engine no cargó.');
-      if (typeof SunCalc === 'undefined') throw new Error('SunCalc no cargó.');
-      if (typeof luxon === 'undefined') throw new Error('Luxon no cargó.');
+      if (typeof Astronomy === 'undefined') throw new Error('Astronomy Engine no cargó. Verifica tu conexión a internet.');
+      if (typeof SunCalc   === 'undefined') throw new Error('SunCalc no cargó. Verifica tu conexión a internet.');
+      if (typeof luxon     === 'undefined') throw new Error('Luxon no cargó. Verifica tu conexión a internet.');
     }
 
- function getErrorMessage(error) {
+    function getErrorMessage(error) {
       if (error instanceof Error && error.message) return error.message;
       if (typeof error === 'string' && error.trim()) return error;
       if (error && typeof error === 'object') {
-        try {
-          return JSON.stringify(error);
-        } catch (_) {
-          return String(error);
-        }
+        try { return JSON.stringify(error); } catch (_) { return String(error); }
       }
       return 'Error desconocido en el cálculo.';
     }
 
+    /* ─── construcción del calendario ────────────────────────────────── */
+
     function buildCalendar() {
       try {
         validateLibraries();
-        const yearLabel = yearNameInput.value.trim() || 'sin etiqueta';
-        const searchStart = parseLocalDateTime(searchStartInput.value);
-        const observer = buildObserver();
-        const mode = crescentModeInput.value;
+
+        const yearLabel     = yearNameInput.value.trim() || 'sin etiqueta';
+        const searchStart   = parseLocalDateTime(searchStartInput.value);
+        const observer      = buildObserver();
+        const mode          = crescentModeInput.value;
         const fallbackMonth7 = parseLocalDateTime(fallbackMonth7Input.value);
-        const monthCount = Number(monthCountInput.value);
+        const monthCount    = Number(monthCountInput.value);
+
         mainTitle.textContent = `Calendario caraíta astronómico reforzado ${yearLabel}`;
 
         const lunations = findLunationStarts(searchStart, observer, mode, monthCount);
+
         const months = lunations.map((item, index) => ({
-          n: `${index + 1}°`,
+          n:    `${index + 1}°`,
           name: monthNames[index] || `Mes ${index + 1}`,
           start: item.start,
-          days: index < lunations.length - 1 ? diffDays(item.start, lunations[index + 1].start) : 29,
-          source: `${item.reason}. Luna nueva: ${fmt(item.newMoon)}`,
-          metrics: item.metrics,
+          days:  index < lunations.length - 1
+                   ? diffDays(item.start, lunations[index + 1].start)
+                   : 29,
+          source:    `${item.reason}. Luna nueva: ${fmt(item.newMoon)}`,
+          metrics:   item.metrics,
           dayOffset: item.dayOffset
         }));
-        months[months.length - 1].days = 29;
+        months[months.length - 1].days = 29;   // último mes sin siguiente referencia
 
+        // Forzado opcional del mes 7
         if (useFallbackMonth7Input.value === 'force' && months[6]) {
-          months[6].start = fallbackMonth7;
+          months[6].start  = fallbackMonth7;
           months[6].source = 'Mes 7 forzado manualmente por ancla opcional';
           for (let i = 7; i < months.length; i++) {
             months[i].start = addDays(months[i - 1].start, months[i - 1].days);
           }
         }
 
-        const avivStart = months[0].start;
-        const month7Start = months[6]?.start;
-        const month7Delta = month7Start ? diffDays(month7Start, fallbackMonth7) : null;
+        const avivStart    = months[0].start;
+        const month7Start  = months[6]?.start;
+        const month7Delta  = month7Start ? diffDays(month7Start, fallbackMonth7) : null;
 
-        const day14 = getInclusiveRange(avivStart, 14);
-        const day15 = getInclusiveRange(avivStart, 15);
-        const day21 = getInclusiveRange(avivStart, 21);
+        // Fiestas de Aviv
+        const day14  = getInclusiveRange(avivStart, 14);
+        const day15  = getInclusiveRange(avivStart, 15);
+        const day21  = getInclusiveRange(avivStart, 21);
         const weeklySabbathStart = sabbathStartWithinFeast(day15.start);
         const weeklySabbath = { start: weeklySabbathStart, end: addDays(weeklySabbathStart, 1) };
-        const omerReshit = { start: weeklySabbath.end, end: addDays(weeklySabbath.end, 1) };
-        const shavuot = { start: addDays(omerReshit.start, 49), end: addDays(omerReshit.start, 50) };
+        const omerReshit    = { start: weeklySabbath.end,  end: addDays(weeklySabbath.end, 1) };
+        const shavuot       = { start: addDays(omerReshit.start, 49), end: addDays(omerReshit.start, 50) };
 
-        const yomTeruah = month7Start ? getDayWindow(month7Start) : null;
-        const yomKippur = month7Start ? getInclusiveRange(month7Start, 10) : null;
-        const sukkot = month7Start ? getInclusiveRange(month7Start, 15) : null;
-        const shemini = month7Start ? getInclusiveRange(month7Start, 22) : null;
+        // Fiestas del mes 7
+        const yomTeruah = month7Start ? getDayWindow(month7Start)                     : null;
+        const yomKippur = month7Start ? getInclusiveRange(month7Start, 10)            : null;
+        const sukkot    = month7Start ? getInclusiveRange(month7Start, 15)            : null;
+        const shemini   = month7Start ? getInclusiveRange(month7Start, 22)            : null;
 
         renderSummary([
-          { title: '1 de Aviv', start: avivStart, end: addDays(avivStart, 1) },
-          { title: '15 de Aviv / Pesaj', start: day15.start, end: day15.end },
-          { title: 'Shavuot', start: shavuot.start, end: shavuot.end },
-          { title: 'Yom Teruah', start: yomTeruah ? yomTeruah.start : avivStart, end: yomTeruah ? yomTeruah.end : addDays(avivStart, 1) }
+          { title: '1 de Aviv',           start: avivStart,                                     end: addDays(avivStart, 1) },
+          { title: '15 de Aviv / Pesaj',  start: day15.start,                                   end: day15.end },
+          { title: 'Shavuot',             start: shavuot.start,                                 end: shavuot.end },
+          { title: 'Yom Teruah',          start: yomTeruah ? yomTeruah.start : avivStart,       end: yomTeruah ? yomTeruah.end : addDays(avivStart, 1) }
         ]);
 
         const m1 = months[0].metrics;
         renderMetrics([
-          { title: 'Puesta usada', value: fmt(m1.sunsetUsed), note: `Fuente activa: ${sunsetSourceInput.options[sunsetSourceInput.selectedIndex].text}` },
-          { title: 'Puesta Astronomy', value: fmt(m1.sunsetAstronomy), note: 'Referencia astronómica principal.' },
-          { title: 'Puesta SunCalc', value: fmt(m1.sunsetSunCalc), note: 'Contraste con librería secundaria.' },
-          { title: 'Altura lunar', value: `${formatNumber(m1.altitudeDeg)}°`, note: 'Altura topocéntrica de la Luna al atardecer.' },
-          { title: 'Elongación', value: `${formatNumber(m1.elongationDeg)}°`, note: 'Separación angular Sol-Luna.' },
-          { title: 'Retraso lunar', value: `${formatNumber(m1.lagMinutes, 0)} min`, note: 'Tiempo entre puesta del Sol y puesta de la Luna.' },
-          { title: 'Iluminación', value: `${formatNumber(m1.illuminationPct)}%`, note: 'Iluminación fraccional de la Luna.' },
-          { title: 'Moonset SunCalc', value: m1.moonTimesSunCalc?.set ? fmt(m1.moonTimesSunCalc.set) : 'Sin dato', note: 'Contraste adicional de salida lunar.' }
+          { title: 'Puesta usada',      value: fmt(m1.sunsetUsed),                      note: `Fuente activa: ${sunsetSourceInput.options[sunsetSourceInput.selectedIndex].text}` },
+          { title: 'Puesta Astronomy',  value: fmt(m1.sunsetAstronomy),                 note: 'Referencia astronómica principal.' },
+          { title: 'Puesta SunCalc',    value: fmt(m1.sunsetSunCalc),                   note: 'Contraste con librería secundaria.' },
+          { title: 'Altura lunar',      value: `${formatNumber(m1.altitudeDeg)}°`,      note: 'Altura topocéntrica de la Luna al atardecer.' },
+          { title: 'Elongación',        value: `${formatNumber(m1.elongationDeg)}°`,    note: 'Separación angular Sol-Luna.' },
+          { title: 'Retraso lunar',     value: `${formatNumber(m1.lagMinutes, 0)} min`, note: 'Tiempo entre puesta del Sol y puesta de la Luna.' },
+          { title: 'Iluminación',       value: `${formatNumber(m1.illuminationPct)}%`,  note: 'Iluminación fraccional de la Luna.' },
+          { title: 'Moonset SunCalc',   value: m1.moonTimesSunCalc?.set ? fmt(m1.moonTimesSunCalc.set) : 'Sin dato', note: 'Contraste adicional de salida lunar.' }
         ]);
 
         renderMonths(months);
         renderFeasts([
-          { name: '14 de Aviv · Preparación de Pesaj', start: day14.start, end: day14.end, note: 'Día 14 completo.' },
-          { name: '15 de Aviv · Pesaj / Jag HaMatzot', start: day15.start, end: day15.end, note: 'Primer día de la fiesta.' },
-          { name: '21 de Aviv · Cierre de Jag HaMatzot', start: day21.start, end: day21.end, note: 'Séptimo día.' },
-          { name: 'Shabbat semanal dentro de Jag HaMatzot', start: weeklySabbath.start, end: weeklySabbath.end, note: 'Se muestra con inicio y fin visibles.' },
-          { name: 'Omer Reshit', start: omerReshit.start, end: omerReshit.end, note: 'Comienza al terminar el shabbat semanal.' },
-          { name: 'Shavuot', start: shavuot.start, end: shavuot.end, note: 'Día 50 contado desde Omer Reshit.' },
-          { name: '1 del mes séptimo · Yom Teruah', start: yomTeruah ? yomTeruah.start : avivStart, end: yomTeruah ? yomTeruah.end : addDays(avivStart, 1), note: month7Start ? 'Inicio astronómico estimado del mes 7.' : 'No disponible.' },
-          { name: '10 del mes séptimo · Yom Kippur', start: yomKippur ? yomKippur.start : avivStart, end: yomKippur ? yomKippur.end : addDays(avivStart, 1), note: month7Start ? 'Décimo día del mes séptimo.' : 'No disponible.' },
-          { name: '15 del mes séptimo · Sucot', start: sukkot ? sukkot.start : avivStart, end: sukkot ? sukkot.end : addDays(avivStart, 1), note: month7Start ? 'Inicio de Sucot.' : 'No disponible.' },
-          { name: '22 del mes séptimo · Sheminí', start: shemini ? shemini.start : avivStart, end: shemini ? shemini.end : addDays(avivStart, 1), note: month7Start ? 'Octavo día desde Sucot.' : 'No disponible.' }
+          { name: '14 de Aviv · Preparación de Pesaj',         start: day14.start,                                     end: day14.end,                                   note: 'Día 14 completo.' },
+          { name: '15 de Aviv · Pesaj / Jag HaMatzot',         start: day15.start,                                     end: day15.end,                                   note: 'Primer día de la fiesta.' },
+          { name: '21 de Aviv · Cierre de Jag HaMatzot',       start: day21.start,                                     end: day21.end,                                   note: 'Séptimo día.' },
+          { name: 'Shabbat semanal dentro de Jag HaMatzot',    start: weeklySabbath.start,                             end: weeklySabbath.end,                           note: 'Se muestra con inicio y fin visibles.' },
+          { name: 'Omer Reshit',                                start: omerReshit.start,                                end: omerReshit.end,                              note: 'Comienza al terminar el shabbat semanal.' },
+          { name: 'Shavuot',                                    start: shavuot.start,                                   end: shavuot.end,                                 note: 'Día 50 contado desde Omer Reshit.' },
+          { name: '1 del mes séptimo · Yom Teruah',            start: yomTeruah ? yomTeruah.start : avivStart,         end: yomTeruah ? yomTeruah.end : addDays(avivStart,1), note: month7Start ? 'Inicio astronómico estimado del mes 7.' : 'No disponible.' },
+          { name: '10 del mes séptimo · Yom Kippur',           start: yomKippur ? yomKippur.start : avivStart,         end: yomKippur ? yomKippur.end : addDays(avivStart,1), note: month7Start ? 'Décimo día del mes séptimo.' : 'No disponible.' },
+          { name: '15 del mes séptimo · Sucot',                start: sukkot   ? sukkot.start   : avivStart,           end: sukkot   ? sukkot.end   : addDays(avivStart,1), note: month7Start ? 'Inicio de Sucot.' : 'No disponible.' },
+          { name: '22 del mes séptimo · Sheminí',              start: shemini  ? shemini.start  : avivStart,           end: shemini  ? shemini.end  : addDays(avivStart,1), note: month7Start ? 'Octavo día desde Sucot.' : 'No disponible.' }
         ]);
 
         let compareText = 'No se pudo comparar el mes 7.';
@@ -763,6 +792,10 @@
           - Búsqueda inicial: <b>${fmt(searchStart)}</b><br>
           - Criterio de visibilidad: <b>${crescentModeInput.options[crescentModeInput.selectedIndex].text}</b><br>
           - Fuente de puesta del sol usada en el cálculo: <b>${sunsetSourceInput.options[sunsetSourceInput.selectedIndex].text}</b><br><br>
+          <b>Correcciones aplicadas en esta versión:</b><br>
+          1. CDN de Astronomy Engine estabilizado a versión npm@2 (antes usaba @master inestable).<br>
+          2. <b>Altitud lunar</b> ahora se lee directamente en grados desde <code>Horizon()</code>; antes se aplicaba <code>toDegrees()</code> de más, multiplicando el valor por ~57.<br>
+          3. <b>Elongación</b> calculada con trigonometría esférica directa, sin depender del campo <code>.vec</code> que puede ser undefined en algunas versiones.<br><br>
           <b>Cómo trabaja esta versión:</b><br>
           1. <b>Luxon</b> interpreta las fechas en la zona horaria exacta del lugar.<br>
           2. <b>Astronomy Engine</b> localiza luna nueva, coordenadas topocéntricas y eventos de salida/puesta.<br>
@@ -770,13 +803,14 @@
           4. El sistema elige el inicio del mes cuando el creciente estimado supera el umbral definido.<br><br>
           <b>Límite honesto:</b> sigue siendo una <b>estimación astronómica de visibilidad</b>, no una observación humana confirmada. La ancla opcional del mes 7 se mantiene como control o corrección oficial cuando ya tienes un dato confirmado.
         `;
+
       } catch (error) {
         setStatus('error', `<b>Error de cálculo.</b><br>${getErrorMessage(error)}`);
-                summaryGrid.innerHTML = '';
-        metricGrid.innerHTML = '';
-        monthsBody.innerHTML = '';
-        feastsBody.innerHTML = '';
-        noteBox.innerHTML = 'Verifica la conexión a las librerías, la zona horaria y los datos ingresados.';
+        summaryGrid.innerHTML = '';
+        metricGrid.innerHTML  = '';
+        monthsBody.innerHTML  = '';
+        feastsBody.innerHTML  = '';
+        noteBox.innerHTML     = 'Verifica la conexión a las librerías, la zona horaria y los datos ingresados.';
       }
     }
 
