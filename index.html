@@ -467,10 +467,24 @@
     }
 
     function buildObserver() {
+      const lat = Number(latitudeInput.value);
+      const lon = Number(longitudeInput.value);
+      const elevation = Number(elevationInput.value);
+
+      if (!Number.isFinite(lat) || lat < -90 || lat > 90) {
+        throw new Error('Latitud inválida. Debe estar entre -90 y 90.');
+      }
+      if (!Number.isFinite(lon) || lon < -180 || lon > 180) {
+        throw new Error('Longitud inválida. Debe estar entre -180 y 180.');
+      }
+      if (!Number.isFinite(elevation)) {
+        throw new Error('Elevación inválida. Debe ser un número.');
+      }
+
       return new Astronomy.Observer(
-        Number(latitudeInput.value),
-        Number(longitudeInput.value),
-        Number(elevationInput.value)
+        lat,
+        lon,
+        elevation
       );
     }
 
@@ -633,6 +647,19 @@
       if (typeof luxon === 'undefined') throw new Error('Luxon no cargó.');
     }
 
+ function getErrorMessage(error) {
+      if (error instanceof Error && error.message) return error.message;
+      if (typeof error === 'string' && error.trim()) return error;
+      if (error && typeof error === 'object') {
+        try {
+          return JSON.stringify(error);
+        } catch (_) {
+          return String(error);
+        }
+      }
+      return 'Error desconocido en el cálculo.';
+    }
+
     function buildCalendar() {
       try {
         validateLibraries();
@@ -744,8 +771,8 @@
           <b>Límite honesto:</b> sigue siendo una <b>estimación astronómica de visibilidad</b>, no una observación humana confirmada. La ancla opcional del mes 7 se mantiene como control o corrección oficial cuando ya tienes un dato confirmado.
         `;
       } catch (error) {
-        setStatus('error', `<b>Error de cálculo.</b><br>${error.message}`);
-        summaryGrid.innerHTML = '';
+        setStatus('error', `<b>Error de cálculo.</b><br>${getErrorMessage(error)}`);
+                summaryGrid.innerHTML = '';
         metricGrid.innerHTML = '';
         monthsBody.innerHTML = '';
         feastsBody.innerHTML = '';
