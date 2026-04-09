@@ -714,7 +714,7 @@ function moonIllumProfile(sunsetStart, sunsetEnd) {
 function fmtFull(date) {
   const z = tz();
   return DateTime.fromJSDate(date, {zone:'utc'}).setZone(z)
-    .toFormat("cccc d 'de' LLLL, HH:mm 'h'");
+    .setLocale('es').toFormat("cccc d 'de' LLLL, HH:mm 'h'");
 }
 
 function closeModal() {
@@ -736,7 +736,7 @@ function showDayModal(dateStr) {
   // Título gregoriano
   const z = tz();
   const dtLabel = DateTime.fromObject({year, month, day}, {zone: z})
-    .toFormat("cccc, d 'de' LLLL yyyy");
+    .setLocale('es').toFormat("cccc, d 'de' LLLL yyyy");
   document.getElementById('modalTitleText').textContent = dtLabel;
 
   // Eventos del día
