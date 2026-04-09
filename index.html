@@ -144,6 +144,42 @@
     }
     .modal-loading{padding:24px;text-align:center;color:#888;font-size:.9rem;}
 
+    /* Panel de iluminación lunar mejorado */
+    .illum-panel{
+      background:#1a1a2e;border-radius:10px;padding:14px 16px;margin-top:10px;
+      color:#e0e0e0;
+    }
+    .illum-panel-title{
+      font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      color:#a78bfa;margin-bottom:10px;display:flex;align-items:center;gap:6px;
+    }
+    .illum-bars{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+    .illum-col{text-align:center;}
+    .illum-col-label{font-size:.65rem;color:#9ca3af;text-transform:uppercase;
+      letter-spacing:.06em;margin-bottom:4px;}
+    .illum-pct{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;}
+    .illum-pct.low   {color:#f9a825;}
+    .illum-pct.mid   {color:#fb923c;}
+    .illum-pct.high  {color:#f0abfc;}
+    .illum-pct.full  {color:#facc15;}
+    .illum-track{
+      width:100%;height:6px;background:#2d2d4a;border-radius:99px;
+      overflow:hidden;margin-top:4px;
+    }
+    .illum-fill{height:100%;border-radius:99px;
+      background:linear-gradient(90deg,#a78bfa,#f0abfc);}
+    .illum-note{
+      font-size:.72rem;color:#9ca3af;text-align:center;
+      border-top:1px solid #2d2d4a;padding-top:8px;margin-top:2px;line-height:1.5;
+    }
+    .illum-note b{color:#c4b5fd;}
+    .illum-naked-eye{
+      display:inline-block;padding:3px 10px;border-radius:12px;font-size:.72rem;
+      font-weight:700;margin-top:6px;
+    }
+    .illum-naked-eye.yes{background:#14532d;color:#86efac;}
+    .illum-naked-eye.no {background:#7f1d1d;color:#fca5a5;}
+
     @media(max-width:900px){
       .months-grid{grid-template-columns:1fr;}
     }
@@ -610,15 +646,15 @@ recalcBtn.addEventListener('click', buildCalendar);
 let currentObs       = null;   // observer activo tras el último cálculo
 let currentEventMap  = {};     // mapa de eventos activo
 
-/* Fase lunar: retorna emoji, nombre y % iluminación */
+/* Fase lunar: retorna emoji, nombre y % iluminación para una fecha */
 function moonPhaseData(date) {
   const illumNow  = Astronomy.Illumination(Astronomy.Body.Moon, date).phase_fraction;
   const illumNext = Astronomy.Illumination(Astronomy.Body.Moon,
                       new Date(date.getTime() + 3600000)).phase_fraction;
   const waxing    = illumNext >= illumNow;
   const pct       = (illumNow * 100).toFixed(1);
-  const ph        = Astronomy.Illumination(Astronomy.Body.Moon, date).phase_angle; // 0-180
-  const angle     = waxing ? ph : 360 - ph; // 0-360
+  const ph        = Astronomy.Illumination(Astronomy.Body.Moon, date).phase_angle;
+  const angle     = waxing ? ph : 360 - ph;
 
   let emoji, name;
   if      (angle <  15 || angle >= 345) { emoji='🌑'; name='Luna nueva';          }
@@ -630,7 +666,48 @@ function moonPhaseData(date) {
   else if (angle < 285)                  { emoji='🌗'; name='Cuarto menguante';    }
   else                                   { emoji='🌘'; name='Creciente menguante'; }
 
-  return { emoji, name, pct, waxing };
+  return { emoji, name, pct, waxing, angle };
+}
+
+/* Calcula muestras de iluminación lunar durante el día hebreo
+   (de sunsetStart a sunsetEnd) usando solo horas ANTES del atardecer final,
+   ya que el % después del ocaso ya pertenece al día siguiente. */
+function moonIllumProfile(sunsetStart, sunsetEnd) {
+  // Muestreamos cada 30 minutos dentro del día hebreo
+  const samples = [];
+  const step = 30 * 60 * 1000; // 30 min en ms
+  const duration = sunsetEnd - sunsetStart;
+  const steps = Math.ceil(duration / step);
+
+  for (let i = 0; i <= steps; i++) {
+    const t = new Date(sunsetStart.getTime() + i * step);
+    if (t > sunsetEnd) break;
+    const frac = Astronomy.Illumination(Astronomy.Body.Moon, t).phase_fraction;
+    samples.push({ t, pct: frac * 100 });
+  }
+
+  if (!samples.length) return null;
+
+  // Inicio = primera muestra (al atardecer que abre el día hebreo)
+  const inicio = samples[0].pct;
+  // Fin = última muestra (justo antes del atardecer que cierra el día)
+  const fin = samples[samples.length - 1].pct;
+  // Máximo = mayor valor en todo el rango
+  const maxSample = samples.reduce((a, b) => a.pct >= b.pct ? a : b);
+  // Meridiano = muestra más cercana al punto medio temporal del día
+  const midTime = new Date(sunsetStart.getTime() + duration / 2);
+  const midSample = samples.reduce((best, s) =>
+    Math.abs(s.t - midTime) < Math.abs(best.t - midTime) ? s : best
+  );
+
+  return {
+    inicio: inicio.toFixed(2),
+    meridiano: midSample.pct.toFixed(2),
+    maximo: maxSample.pct.toFixed(2),
+    maxTime: maxSample.t,
+    // ¿Es visible a ojo desnudo? Referencia práctica: > ~1.5-2% aprox
+    visible: maxSample.pct >= 1.5
+  };
 }
 
 /* Formatea un Date en la zona horaria configurada */
@@ -683,8 +760,43 @@ function showDayModal(dateStr) {
       const durH   = Math.floor(durMs / 3600000);
       const durMin = Math.floor((durMs % 3600000) / 60000);
 
-      // Fase lunar al inicio del día hebreo (al atardecer anterior)
+      // Fase lunar al inicio del día hebreo
       const phase = moonPhaseData(sunsetStart);
+
+      // Perfil de iluminación durante el día hebreo
+      const illum = moonIllumProfile(sunsetStart, sunsetEnd);
+
+      // Helper: clase de color según porcentaje
+      function illumClass(pct) {
+        const v = parseFloat(pct);
+        if (v < 2)   return 'low';
+        if (v < 50)  return 'mid';
+        if (v < 95)  return 'high';
+        return 'full';
+      }
+      function fillWidth(pct) {
+        return Math.min(100, parseFloat(pct)).toFixed(1);
+      }
+
+      // Nota de visibilidad
+      const maxPct = parseFloat(illum.maximo);
+      let visNote = '';
+      if (maxPct < 1) {
+        visNote = `<b>${illum.maximo}%</b> máx — prácticamente invisible a ojo desnudo (luna nueva).`;
+      } else if (maxPct < 2) {
+        visNote = `<b>${illum.maximo}%</b> máx — requiere condiciones perfectas y horizonte despejado.`;
+      } else if (maxPct < 10) {
+        visNote = `<b>${illum.maximo}%</b> máx — creciente joven, visible con cielo oscuro.`;
+      } else if (maxPct < 50) {
+        visNote = `<b>${illum.maximo}%</b> máx — visible a simple vista.`;
+      } else if (maxPct < 95) {
+        visNote = `<b>${illum.maximo}%</b> máx — luna muy brillante.`;
+      } else {
+        visNote = `<b>${illum.maximo}%</b> máx — luna llena o casi llena.`;
+      }
+
+      const eyeClass = illum.visible ? 'yes' : 'no';
+      const eyeText  = illum.visible ? '👁 Potencialmente visible' : '🚫 Difícil visibilidad a ojo desnudo';
 
       body.innerHTML = `
         <div class="modal-time-row">
@@ -701,15 +813,40 @@ function showDayModal(dateStr) {
             <div class="modal-time">${fmtFull(sunsetEnd)}</div>
           </div>
         </div>
+
         <div class="modal-phase-bar">
           <div class="phase-emoji">${phase.emoji}</div>
           <div class="phase-info">
             <div class="phase-name">${phase.name}</div>
-            <div class="phase-detail">
-              ${phase.pct}% iluminada · ${phase.waxing ? 'Creciente' : 'Menguante'}
-            </div>
+            <div class="phase-detail">${phase.waxing ? 'Creciente ↑' : 'Menguante ↓'}</div>
           </div>
         </div>
+
+        <div class="illum-panel">
+          <div class="illum-panel-title">🌙 Iluminación lunar · día hebreo completo</div>
+          <div class="illum-bars">
+            <div class="illum-col">
+              <div class="illum-col-label">🌅 Inicio<br>(atardecer)</div>
+              <div class="illum-pct ${illumClass(illum.inicio)}">${illum.inicio}%</div>
+              <div class="illum-track"><div class="illum-fill" style="width:${fillWidth(illum.inicio)}%"></div></div>
+            </div>
+            <div class="illum-col">
+              <div class="illum-col-label">🌙 Meridiano<br>(punto medio)</div>
+              <div class="illum-pct ${illumClass(illum.meridiano)}">${illum.meridiano}%</div>
+              <div class="illum-track"><div class="illum-fill" style="width:${fillWidth(illum.meridiano)}%"></div></div>
+            </div>
+            <div class="illum-col">
+              <div class="illum-col-label">⬆ Máximo<br>(del día)</div>
+              <div class="illum-pct ${illumClass(illum.maximo)}">${illum.maximo}%</div>
+              <div class="illum-track"><div class="illum-fill" style="width:${fillWidth(illum.maximo)}%"></div></div>
+            </div>
+          </div>
+          <div class="illum-note">
+            ${visNote}<br>
+            <span class="illum-naked-eye ${eyeClass}">${eyeText}</span>
+          </div>
+        </div>
+
         <div class="modal-duration">⏱ Duración del día hebreo: ${durH}h ${durMin}min</div>
       `;
     } catch(e) {
