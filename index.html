@@ -343,11 +343,22 @@ function buildEventMap(months, avivStart, m7Start) {
 }
 
 /* Renderizar un mes gregoriano */
-function renderMonth(year, month, eventMap) {
+// Día de la semana puramente en UTC (evita bugs de DST/timezone con Luxon)
+  // Retorna 1=Lun, 2=Mar, ..., 6=Sab, 7=Dom (ISO 8601)
+  function isoWeekday(year, month, day) {
+    const d = new Date(Date.UTC(year, month - 1, day));
+    const w = d.getUTCDay(); // 0=Dom,1=Lun,...,6=Sab
+    return w === 0 ? 7 : w;  // Dom pasa a 7
+  }
+  // Días en el mes sin depender del timezone
+  function daysInMonth(year, month) {
+    return new Date(Date.UTC(year, month, 0)).getUTCDate();
+  }
+
+  function renderMonth(year, month, eventMap) {
   const z = tz();
-  const first = DateTime.fromObject({year, month, day:1}, {zone:z});
-  const total = first.daysInMonth;
-  const offset = first.weekday - 1; // Luxon 1=Lun
+  const total  = daysInMonth(year, month);
+  const offset = isoWeekday(year, month, 1) - 1; // 0=Lun...6=Dom
 
   let html = `<div class="cal-month">
     <div class="cal-month-title">${MESES_ES[month-1]} ${year}</div>
@@ -364,7 +375,7 @@ function renderMonth(year, month, eventMap) {
   for (let day=1; day<=total; day++) {
     const k = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
     const evs = eventMap[k] || [];
-    const dow = DateTime.fromObject({year,month,day},{zone:z}).weekday;
+    const dow = isoWeekday(year, month, day);
     const wk  = dow===6 ? ' wsat' : dow===7 ? ' wsun' : '';
     const evHtml = evs.map(e =>
       `<div class="ev" style="background:${e.color}" title="${e.label}">${e.label}</div>`
@@ -380,11 +391,16 @@ function renderMonth(year, month, eventMap) {
 function gregRange(eventMap) {
   const keys = Object.keys(eventMap).sort();
   if (!keys.length) return [];
-  const first = DateTime.fromISO(keys[0]).startOf('month');
-  const last  = DateTime.fromISO(keys[keys.length-1]).startOf('month');
+  // Parsear "yyyy-MM-dd" directamente, sin dependencia de timezone
+  const parseKey = k => ({ year: +k.slice(0,4), month: +k.slice(5,7) });
+  const f = parseKey(keys[0]);
+  const l = parseKey(keys[keys.length-1]);
   const out = [];
-  let cur = first;
-  while (cur <= last) { out.push({year:cur.year, month:cur.month}); cur=cur.plus({months:1}); }
+  let y = f.year, m = f.month;
+  while (y < l.year || (y === l.year && m <= l.month)) {
+    out.push({year:y, month:m});
+    m++; if (m > 12) { m = 1; y++; }
+  }
   return out;
 }
 
