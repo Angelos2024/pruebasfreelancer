@@ -3,811 +3,474 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Calendario caraíta astronómico reforzado</title>
-  <style>
-    :root {
-      --bg: #f4f1e8;
-      --panel: #ffffff;
-      --border: #c8b78a;
-      --border-strong: #9f8750;
-      --head: #a64612;
-      --subhead: #d7b25c;
-      --text: #1d1d1d;
-      --muted: #5a5a5a;
-      --accent: #7a5c1e;
-      --soft: #fbf8f1;
-      --ok: #1e6b3d;
-      --warn: #8a4b00;
-      --error: #9b1c1c;
-    }
+  <title>Calendario Caraita Astronomico</title>
 
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-    .wrap {
-      max-width: 1220px;
-      margin: 0 auto;
-      padding: 18px;
-    }
-    .panel, table {
-      background: var(--panel);
-      border: 2px solid var(--border-strong);
-    }
-    .title-box { margin-bottom: 18px; }
-    .title-bar {
-      background: var(--head);
-      color: #fff;
-      text-align: center;
-      padding: 10px 12px;
-      font-size: 1.7rem;
-      font-weight: 700;
-      letter-spacing: .02em;
-    }
-    .subtitle {
-      text-align: center;
-      padding: 10px 14px 14px;
-      color: var(--muted);
-      font-size: .97rem;
-      line-height: 1.5;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 18px;
-    }
-    .controls, .summary-box, .rules-box, .note {
-      padding: 14px;
-      background: #fffaf0;
-    }
-    .controls-grid,
-    .controls-grid-2,
-    .controls-grid-3 {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      align-items: end;
-    }
-    .controls-grid-2,
-    .controls-grid-3 {
-      margin-top: 12px;
-    }
-    label {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 10px 12px;
-      font: inherit;
-      border: 1px solid var(--border);
-      background: #fffdf8;
-      color: var(--text);
-    }
-    button {
-      background: var(--head);
-      color: #fff;
-      border-color: var(--head);
-      font-weight: 700;
-      cursor: pointer;
-      min-width: 150px;
-    }
-    .summary-title, .rules-title {
-      font-weight: 700;
-      margin-bottom: 10px;
-      color: var(--accent);
-    }
-    .summary-grid,
-    .metric-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
-    .summary-item,
-    .metric {
-      border: 1px solid var(--border);
-      background: #fff;
-      padding: 10px 12px;
-    }
-    .summary-item b,
-    .metric b {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--accent);
-    }
-    .rules-box ul {
-      margin: 0;
-      padding-left: 18px;
-      line-height: 1.55;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    caption {
-      caption-side: top;
-      text-align: left;
-      background: var(--subhead);
-      color: #111;
-      font-weight: 700;
-      padding: 10px 12px;
-      border: 2px solid var(--border-strong);
-      border-bottom: 0;
-      font-size: 1.06rem;
-    }
-    th, td {
-      border: 1px solid var(--border);
-      padding: 10px 12px;
-      text-align: left;
-      vertical-align: top;
-      font-size: .98rem;
-    }
-    thead th {
-      background: #efe1b7;
-      color: #111;
-      font-weight: 700;
-    }
-    tbody tr:nth-child(even) td {
-      background: var(--soft);
-    }
-    .month-name, .feast-name {
-      font-weight: 700;
-      color: var(--accent);
-    }
-    .small {
-      font-size: .9rem;
-      color: var(--muted);
-      line-height: 1.45;
-    }
-    .status {
-      padding: 12px 14px;
-      font-size: .95rem;
-      line-height: 1.55;
-      border-left: 6px solid var(--border-strong);
-      background: #fff;
-    }
-    .status.ok { border-left-color: var(--ok); }
-    .status.warn { border-left-color: var(--warn); }
-    .status.error { border-left-color: var(--error); }
-    .pill {
-      display: inline-block;
-      padding: 4px 8px;
-      border: 1px solid var(--border);
-      background: #fff;
-      font-size: .86rem;
-      margin-top: 4px;
-    }
-    @media (max-width: 1100px) {
-      .controls-grid,
-      .controls-grid-2,
-      .controls-grid-3,
-      .summary-grid,
-      .metric-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-    @media (max-width: 760px) {
-      .wrap { padding: 10px; }
-      .title-bar { font-size: 1.3rem; }
-      th, td { padding: 8px 9px; font-size: .92rem; }
-      button { min-width: 100%; }
-    }
-  </style>
-  <!-- Astronomy Engine: tag fijo v2.1.18 con ruta comprobada del browser build -->
   <script src="https://cdn.jsdelivr.net/gh/cosinekitty/astronomy@v2.1.18/demo/browser/astronomy.browser.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+
+  <style>
+    :root {
+      --bg:#f0ede4; --panel:#fff; --border:#c8b78a; --strong:#9f8750;
+      --head:#7a3a0a; --text:#1d1d1d; --muted:#666; --accent:#7a5c1e;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);}
+
+    /* HEADER */
+    .app-header{background:var(--head);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:12px;}
+    .app-header h1{font-size:1.2rem;font-weight:700;}
+    .app-header small{font-size:.78rem;opacity:.75;}
+
+    /* CONTROLES */
+    .ctrl-wrap{background:#fff;border-bottom:2px solid var(--strong);padding:14px 22px;}
+    .ctrl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;align-items:end;}
+    .field label{display:block;font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:4px;}
+    .field input,.field select{
+      width:100%;padding:7px 9px;font:inherit;font-size:.85rem;
+      border:1px solid var(--border);border-radius:5px;background:#fffdf8;
+    }
+    .btn-calc{
+      background:var(--head);color:#fff;border:none;border-radius:5px;
+      padding:9px 18px;font:inherit;font-size:.9rem;font-weight:700;
+      cursor:pointer;width:100%;transition:opacity .15s;
+    }
+    .btn-calc:hover{opacity:.88;}
+    .btn-calc:disabled{opacity:.55;cursor:default;}
+
+    /* STATUS */
+    #statusBox{margin:10px 22px 0;padding:9px 14px;border-radius:5px;font-size:.86rem;display:none;}
+    #statusBox.ok   {display:block;background:#f0faf3;border:1px solid #68d391;color:#276749;}
+    #statusBox.warn {display:block;background:#fffbeb;border:1px solid #f6ad55;color:#7b341e;}
+    #statusBox.error{display:block;background:#fff5f5;border:1px solid #fc8181;color:#9b2c2c;}
+
+    /* PLACEHOLDER */
+    #placeholder{text-align:center;padding:70px 20px;color:var(--muted);}
+    #placeholder .ico{font-size:3rem;margin-bottom:14px;}
+
+    /* OUTPUT */
+    #calOutput{padding:18px 22px;display:none;}
+
+    /* LEYENDA */
+    .legend{
+      display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;
+      padding:11px 14px;background:#fff;
+      border:1px solid var(--border);border-radius:5px;
+    }
+    .lg-item{display:flex;align-items:center;gap:5px;font-size:.75rem;}
+    .lg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+    /* MESES GRID */
+    .months-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(295px,1fr));gap:16px;}
+
+    /* CALENDARIO MENSUAL */
+    .cal-month{background:#fff;border:1px solid var(--border);border-radius:5px;overflow:hidden;}
+    .cal-month-title{
+      background:var(--head);color:#fff;padding:8px 12px;
+      font-weight:700;font-size:.92rem;letter-spacing:.03em;
+    }
+    .cal-dow-row{
+      display:grid;grid-template-columns:repeat(7,1fr);
+      background:#f7f3ea;border-bottom:1px solid var(--border);
+    }
+    .cal-dow{text-align:center;padding:5px 2px;font-size:.7rem;font-weight:700;color:var(--muted);}
+    .cal-dow.sat{color:#2563eb;} .cal-dow.sun{color:#c53030;}
+
+    .cal-cells{display:grid;grid-template-columns:repeat(7,1fr);}
+    .cal-cell{
+      border-right:1px solid #ece8df;border-bottom:1px solid #ece8df;
+      min-height:64px;padding:4px 4px 4px 5px;
+    }
+    .cal-cell:nth-child(7n){border-right:0;}
+    .cal-cell.empty{background:#faf8f4;}
+    .cal-cell.wsat .dn{color:#2563eb;} .cal-cell.wsun .dn{color:#c53030;}
+
+    .dn{font-size:.78rem;font-weight:700;color:#444;margin-bottom:3px;}
+    .ev{
+      font-size:.63rem;font-weight:600;color:#fff;
+      border-radius:3px;padding:1px 4px;margin-bottom:2px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.55;
+    }
+
+    @media(max-width:600px){
+      .ctrl-grid{grid-template-columns:1fr 1fr;}
+      .months-grid{grid-template-columns:1fr;}
+      #calOutput,#placeholder,.ctrl-wrap{padding-left:12px;padding-right:12px;}
+    }
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <section class="panel title-box">
-      <div class="title-bar" id="mainTitle">Calendario caraíta astronómico reforzado</div>
-      <div class="subtitle">
-        Sistema reforzado para navegador usando <b>Astronomy Engine</b> para posiciones astronómicas,
-        <b>SunCalc</b> para contraste solar/lunar y <b>Luxon</b> para zona horaria y formato.
-        Cada evento se muestra con inicio y fin visibles.
-      </div>
-    </section>
 
-    <div class="grid">
-      <section class="panel controls">
-        <div class="controls-grid">
-          <div>
-            <label for="yearName">Año visible</label>
-            <input id="yearName" type="text" value="2026" />
-          </div>
-          <div>
-            <label for="timezone">Zona horaria</label>
-            <input id="timezone" type="text" value="Asia/Jerusalem" />
-          </div>
-          <div>
-            <label for="latitude">Latitud</label>
-            <input id="latitude" type="number" step="0.000001" value="31.768300" />
-          </div>
-          <div>
-            <label for="longitude">Longitud</label>
-            <input id="longitude" type="number" step="0.000001" value="35.213700" />
-          </div>
-        </div>
+<header class="app-header">
+  <div>
+    <h1>&#128197; Calendario Caraita Astronomico</h1>
+    <small>Astronomy Engine &bull; SunCalc &bull; Luxon</small>
+  </div>
+</header>
 
-        <div class="controls-grid-2">
-          <div>
-            <label for="elevation">Elevación (m)</label>
-            <input id="elevation" type="number" step="1" value="800" />
-          </div>
-          <div>
-            <label for="searchStart">Buscar año desde</label>
-            <input id="searchStart" type="datetime-local" value="2026-03-01T12:00" />
-          </div>
-          <div>
-            <label for="crescentMode">Criterio de visibilidad</label>
-            <select id="crescentMode">
-              <option value="strict">Estricto</option>
-              <option value="standard" selected>Estándar</option>
-              <option value="lenient">Flexible</option>
-            </select>
-          </div>
-          <div>
-            <label for="sunsetSource">Puesta del sol a usar</label>
-            <select id="sunsetSource">
-              <option value="astronomy" selected>Astronomy Engine</option>
-              <option value="suncalc">SunCalc</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="controls-grid-3">
-          <div>
-            <label for="fallbackMonth7">Ancla opcional Yom Teruah</label>
-            <input id="fallbackMonth7" type="datetime-local" value="2026-09-12T19:00" />
-          </div>
-          <div>
-            <label for="useFallbackMonth7">Uso del ancla opcional</label>
-            <select id="useFallbackMonth7">
-              <option value="compare" selected>Solo comparar</option>
-              <option value="force">Forzar mes 7</option>
-            </select>
-          </div>
-          <div>
-            <label for="monthCount">Meses a generar</label>
-            <select id="monthCount">
-              <option value="12" selected>12 meses</option>
-              <option value="13">13 meses</option>
-            </select>
-          </div>
-          <div>
-            <label>&nbsp;</label>
-            <button id="recalcBtn">Calcular calendario</button>
-          </div>
-        </div>
-
-        <div style="margin-top:12px;" class="small">
-          Este modo usa varias capas: astronomía precisa, contraste solar/lunar y control explícito de zona horaria.
-          La ancla opcional del mes 7 sirve para comparar el resultado o fijarlo manualmente si ya tienes el dato oficial.
-        </div>
-      </section>
-
-      <section class="panel rules-box">
-        <div class="rules-title">Reglas astronómicas aplicadas</div>
-        <ul>
-          <li>Se busca una <b>luna nueva astronómica</b> cercana al inicio del año.</li>
-          <li>Se revisan los atardeceres posteriores y se calcula una <b>visibilidad estimada del creciente</b>.</li>
-          <li>La decisión de inicio de mes usa: <b>altura lunar</b>, <b>elongación Sol-Luna</b>, <b>retraso lunar</b>, <b>iluminación</b> y la hora de <b>puesta del sol</b>.</li>
-          <li><b>Astronomy Engine</b> aporta posiciones topocéntricas y luna nueva; <b>SunCalc</b> se usa para contraste de atardecer y tiempos lunares; <b>Luxon</b> controla interpretación y salida en una zona horaria definida.</li>
-          <li><b>Omer Reshit</b> comienza al terminar el shabbat semanal dentro de Jag HaMatzot.</li>
-          <li><b>Shavuot</b> se calcula como el día 50 desde Omer Reshit.</li>
-        </ul>
-      </section>
-
-      <section class="panel summary-box">
-        <div class="summary-title">Resumen visible de los tramos importantes</div>
-        <div class="summary-grid" id="summaryGrid"></div>
-      </section>
-
-      <div id="statusBox" class="status ok"></div>
-
-      <section class="panel summary-box">
-        <div class="summary-title">Métricas astronómicas del mes 1</div>
-        <div class="metric-grid" id="metricGrid"></div>
-      </section>
-
-      <table>
-        <caption>Inicio de meses</caption>
-        <thead>
-          <tr>
-            <th style="width: 8%;">N</th>
-            <th style="width: 16%;">Mes</th>
-            <th style="width: 22%;">Inicia</th>
-            <th style="width: 22%;">Termina</th>
-            <th style="width: 8%;">Días</th>
-            <th style="width: 24%;">Determinación</th>
-          </tr>
-        </thead>
-        <tbody id="monthsBody"></tbody>
-      </table>
-
-      <table>
-        <caption>Fiestas y días clave</caption>
-        <thead>
-          <tr>
-            <th style="width: 28%;">Evento</th>
-            <th style="width: 22%;">Inicia</th>
-            <th style="width: 22%;">Termina</th>
-            <th style="width: 28%;">Nota</th>
-          </tr>
-        </thead>
-        <tbody id="feastsBody"></tbody>
-      </table>
-
-      <div class="panel note" id="noteBox"></div>
+<div class="ctrl-wrap">
+  <div class="ctrl-grid">
+    <div class="field"><label>Ano</label>
+      <input id="yearName" type="text" value="2026"/></div>
+    <div class="field"><label>Zona horaria</label>
+      <input id="timezone" type="text" value="Asia/Jerusalem"/></div>
+    <div class="field"><label>Latitud</label>
+      <input id="latitude" type="number" step="0.000001" value="31.768300"/></div>
+    <div class="field"><label>Longitud</label>
+      <input id="longitude" type="number" step="0.000001" value="35.213700"/></div>
+    <div class="field"><label>Elevacion (m)</label>
+      <input id="elevation" type="number" value="800"/></div>
+    <div class="field"><label>Buscar desde</label>
+      <input id="searchStart" type="datetime-local" value="2026-03-01T12:00"/></div>
+    <div class="field"><label>Visibilidad</label>
+      <select id="crescentMode">
+        <option value="strict">Estricto</option>
+        <option value="standard" selected>Estandar</option>
+        <option value="lenient">Flexible</option>
+      </select></div>
+    <div class="field"><label>Ancla Yom Teruah</label>
+      <input id="fallbackMonth7" type="datetime-local" value="2026-09-12T19:00"/></div>
+    <div class="field"><label>Uso ancla mes 7</label>
+      <select id="useFallbackMonth7">
+        <option value="compare" selected>Solo comparar</option>
+        <option value="force">Forzar mes 7</option>
+      </select></div>
+    <div class="field"><label>Meses</label>
+      <select id="monthCount">
+        <option value="12" selected>12 meses</option>
+        <option value="13">13 meses</option>
+      </select></div>
+    <div class="field" style="align-self:end">
+      <label>&nbsp;</label>
+      <button class="btn-calc" id="recalcBtn">Calcular calendario</button>
     </div>
   </div>
+</div>
 
-  <script>
-    const { DateTime } = luxon;
+<div id="statusBox"></div>
 
-    const monthNames = [
-      'Aviv', 'Ziv', 'Siván', 'Tamuz', 'Av', 'Elul',
-      'Etanim', 'Bul', 'Mes 9', 'Mes 10', 'Mes 11', 'Mes 12', 'Mes 13'
-    ];
+<div id="placeholder">
+  <div class="ico">&#127769;</div>
+  <p>Configura los parametros y presiona <b>Calcular calendario</b>.</p>
+</div>
 
-    const mainTitle       = document.getElementById('mainTitle');
-    const yearNameInput   = document.getElementById('yearName');
-    const timezoneInput   = document.getElementById('timezone');
-    const latitudeInput   = document.getElementById('latitude');
-    const longitudeInput  = document.getElementById('longitude');
-    const elevationInput  = document.getElementById('elevation');
-    const searchStartInput      = document.getElementById('searchStart');
-    const crescentModeInput     = document.getElementById('crescentMode');
-    const sunsetSourceInput     = document.getElementById('sunsetSource');
-    const fallbackMonth7Input   = document.getElementById('fallbackMonth7');
-    const useFallbackMonth7Input = document.getElementById('useFallbackMonth7');
-    const monthCountInput = document.getElementById('monthCount');
-    const recalcBtn       = document.getElementById('recalcBtn');
+<div id="calOutput">
+  <div class="legend" id="legend"></div>
+  <div class="months-grid" id="monthsGrid"></div>
+</div>
 
-    const summaryGrid = document.getElementById('summaryGrid');
-    const metricGrid  = document.getElementById('metricGrid');
-    const statusBox   = document.getElementById('statusBox');
-    const monthsBody  = document.getElementById('monthsBody');
-    const feastsBody  = document.getElementById('feastsBody');
-    const noteBox     = document.getElementById('noteBox');
+<script>
+const { DateTime } = luxon;
 
-    /* ─── utilidades de fecha ─────────────────────────────────────────── */
+/* Paleta */
+const C = {
+  mes:'#6b46c1', prep:'#c05621', fiesta:'#276749', fiestaFin:'#22543d',
+  shabbat:'#718096', omer:'#553c9a', shavuot:'#1a56db',
+  teruah:'#0694a2', kippur:'#c53030', shemini:'#805ad5'
+};
 
-    function parseLocalDateTime(value) {
-      const zone = timezoneInput.value.trim() || 'UTC';
-      const dt = DateTime.fromISO(value, { zone });
-      if (!dt.isValid) throw new Error('Fecha inválida para la zona horaria indicada.');
-      return dt.toJSDate();
-    }
+const LEGEND = [
+  {color:C.mes,    label:'Inicio mes hebreo'},
+  {color:C.prep,   label:'14 Aviv - Preparacion'},
+  {color:C.fiesta, label:'Jag HaMatzot / Sucot'},
+  {color:C.shabbat,label:'Shabbat en la fiesta'},
+  {color:C.omer,   label:'Omer Reshit'},
+  {color:C.shavuot,label:'Shavuot'},
+  {color:C.teruah, label:'Yom Teruah'},
+  {color:C.kippur, label:'Yom Kippur'},
+  {color:C.shemini,label:'Shemini Atzeret'},
+];
 
-    function addDays(date, days) {
-      return DateTime.fromJSDate(date, { zone: 'utc' }).plus({ days }).toJSDate();
-    }
+const MESES_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MESES_HEB = ['Aviv','Ziv','Sivan','Tamuz','Av','Elul',
+                   'Etanim','Bul','Mes 9','Mes 10','Mes 11','Mes 12','Mes 13'];
 
-    function diffDays(start, end) {
-      return Math.round((end - start) / 86400000);
-    }
+/* DOM */
+const $ = id => document.getElementById(id);
+const yearNameInput       = $('yearName');
+const timezoneInput       = $('timezone');
+const latitudeInput       = $('latitude');
+const longitudeInput      = $('longitude');
+const elevationInput      = $('elevation');
+const searchStartInput    = $('searchStart');
+const crescentModeInput   = $('crescentMode');
+const fallbackMonth7Input = $('fallbackMonth7');
+const useFallbackMonth7Input = $('useFallbackMonth7');
+const monthCountInput     = $('monthCount');
+const recalcBtn           = $('recalcBtn');
+const statusBox           = $('statusBox');
+const placeholder         = $('placeholder');
+const calOutput           = $('calOutput');
+const legendEl            = $('legend');
+const monthsGrid          = $('monthsGrid');
 
-    function fmt(date) {
-      const zone = timezoneInput.value.trim() || 'UTC';
-      return DateTime.fromJSDate(date, { zone: 'utc' })
-        .setZone(zone)
-        .toFormat("cccc, dd LLLL yyyy, HH:mm");
-    }
+/* Helpers fecha */
+const tz = () => timezoneInput.value.trim() || 'UTC';
 
-    function formatNumber(value, decimals = 2) {
-      return Number(value).toFixed(decimals);
-    }
+function parseDT(v) {
+  const dt = DateTime.fromISO(v, { zone: tz() });
+  if (!dt.isValid) throw new Error('Fecha invalida.');
+  return dt.toJSDate();
+}
+function addDays(d, n) {
+  return DateTime.fromJSDate(d, { zone:'utc' }).plus({ days:n }).toJSDate();
+}
+function diffDays(a, b) { return Math.round((b - a) / 86400000); }
+function dateKey(d) {
+  return DateTime.fromJSDate(d, { zone:'utc' }).setZone(tz()).toFormat('yyyy-MM-dd');
+}
+function incRange(start, n) {
+  return addDays(start, n - 1);
+}
 
-    function getDayWindow(start) {
-      return { start, end: addDays(start, 1) };
-    }
+/* Observer */
+function buildObserver() {
+  const lat = Number(latitudeInput.value),
+        lon = Number(longitudeInput.value),
+        el  = Number(elevationInput.value);
+  if (!Number.isFinite(lat)||lat<-90||lat>90)  throw new Error('Latitud invalida.');
+  if (!Number.isFinite(lon)||lon<-180||lon>180) throw new Error('Longitud invalida.');
+  if (!Number.isFinite(el))                     throw new Error('Elevacion invalida.');
+  return new Astronomy.Observer(lat, lon, el);
+}
 
-    function getInclusiveRange(dayStart, dayNumber) {
-      const start = addDays(dayStart, dayNumber - 1);
-      return { start, end: addDays(start, 1) };
-    }
+/* Astronomia */
+function getSunset(date, obs) {
+  const noon = DateTime.fromJSDate(date, { zone:tz() })
+    .set({ hour:12, minute:0, second:0, millisecond:0 }).toUTC().toJSDate();
+  const ev = Astronomy.SearchRiseSet(Astronomy.Body.Sun, obs, -1, noon, 1);
+  if (!ev) throw new Error('No se pudo calcular puesta del sol.');
+  return new Date(ev.date);
+}
+function getMoonset(after, obs) {
+  const ev = Astronomy.SearchRiseSet(Astronomy.Body.Moon, obs, -1, after, 1);
+  return ev ? new Date(ev.date) : null;
+}
+function horizAlt(date, obs) {
+  const equ = Astronomy.Equator(Astronomy.Body.Moon, date, obs, true, true);
+  return Astronomy.Horizon(date, obs, equ.ra, equ.dec, 'normal').altitude;
+}
+function elongation(date) {
+  const mv = Astronomy.GeoMoon(date);
+  const sv = Astronomy.GeoVector(Astronomy.Body.Sun, date, true);
+  const dot = mv.x*sv.x + mv.y*sv.y + mv.z*sv.z;
+  const ml  = Math.sqrt(mv.x**2 + mv.y**2 + mv.z**2);
+  const sl  = Math.sqrt(sv.x**2 + sv.y**2 + sv.z**2);
+  return Math.acos(Math.max(-1, Math.min(1, dot/(ml*sl)))) * (180/Math.PI);
+}
+function thresholds(mode) {
+  if (mode==='strict')  return {alt:10,  el:12,   lag:50, illum:1.0};
+  if (mode==='lenient') return {alt:7,   el:9,    lag:35, illum:0.6};
+  return                       {alt:8.5, el:10.5, lag:45, illum:0.8};
+}
+function evalCrescent(date, obs, mode) {
+  const su   = getSunset(date, obs);
+  const ms   = getMoonset(su, obs);
+  const alt  = horizAlt(su, obs);
+  const elo  = elongation(su);
+  const lag  = ms ? (ms - su) / 60000 : -999;
+  const illu = Astronomy.Illumination(Astronomy.Body.Moon, su).phase_fraction * 100;
+  const thr  = thresholds(mode);
+  return {
+    visible: alt>=thr.alt && elo>=thr.el && lag>=thr.lag && illu>=thr.illum,
+    sunset: su
+  };
+}
+function findMonthStart(nm, obs, mode) {
+  for (let d=1; d<=3; d++) {
+    const r = evalCrescent(addDays(nm, d), obs, mode);
+    if (r.visible) return r.sunset;
+  }
+  return evalCrescent(addDays(nm, 2), obs, mode).sunset;
+}
+function findLunations(start, obs, mode, n) {
+  const list = [];
+  let anchor = new Date(start);
+  for (let i=0; i<n; i++) {
+    const ph = Astronomy.SearchMoonPhase(0, anchor, 35);
+    if (!ph) throw new Error('No se encontro luna nueva.');
+    const nm = new Date(ph.date);
+    list.push({ newMoon:nm, start:findMonthStart(nm, obs, mode) });
+    anchor = addDays(nm, 25);
+  }
+  return list;
+}
+function sabbathInFeast(date) {
+  const z = tz();
+  const d = new Date(date.getTime());
+  const h = DateTime.fromJSDate(date,{zone:z}).hour;
+  const m = DateTime.fromJSDate(date,{zone:z}).minute;
+  if (DateTime.fromJSDate(d,{zone:z}).weekday===5) return d;
+  while (DateTime.fromJSDate(d,{zone:z}).weekday!==6) d.setUTCDate(d.getUTCDate()+1);
+  return DateTime.fromJSDate(d,{zone:z}).set({hour:h,minute:m,second:0,millisecond:0}).toUTC().toJSDate();
+}
 
-    /* ─── UI helpers ──────────────────────────────────────────────────── */
+/* Mapa de eventos */
+function buildEventMap(months, avivStart, m7Start) {
+  const map = {};
+  function mark(date, label, color) {
+    const k = dateKey(date);
+    if (!map[k]) map[k] = [];
+    map[k].push({label, color});
+  }
+  function markRange(start, days, label, color, firstLabel) {
+    for (let d=0; d<days; d++)
+      mark(addDays(start,d), d===0&&firstLabel ? firstLabel : label, color);
+  }
 
-    function setStatus(type, html) {
-      statusBox.className = `status ${type}`;
-      statusBox.innerHTML = html;
-    }
+  // Inicio de cada mes hebreo
+  months.forEach((m, i) => mark(m.start, `\u{1F319} 1 ${MESES_HEB[i]||'Mes '+(i+1)}`, C.mes));
 
-    function renderSummary(items) {
-      summaryGrid.innerHTML = items.map(item => `
-        <div class="summary-item">
-          <b>${item.title}</b>
-          <div><span class="small">Inicia:</span><br>${fmt(item.start)}</div>
-          <div style="margin-top:8px;"><span class="small">Termina:</span><br>${fmt(item.end)}</div>
-        </div>
-      `).join('');
-    }
+  // Aviv
+  mark(incRange(avivStart,14),   '14 Aviv Prep.',    C.prep);
+  markRange(incRange(avivStart,15), 7, '\u{1F33E} Jag HaMatzot', C.fiesta, '\u{1F33E} 15 Aviv Pesaj');
+  mark(incRange(avivStart,21),   '21 Aviv Cierre',   C.fiestaFin);
+  const shab = sabbathInFeast(incRange(avivStart,15));
+  mark(shab,                      '\u2721 Shabbat',  C.shabbat);
+  const omer = addDays(shab, 1);
+  mark(omer,                      '\u{1F33F} Omer Reshit', C.omer);
+  mark(addDays(omer, 49),         '\u2728 Shavuot',  C.shavuot);
 
-    function renderMetrics(metrics) {
-      metricGrid.innerHTML = metrics.map(item => `
-        <div class="metric">
-          <b>${item.title}</b>
-          <div>${item.value}</div>
-          ${item.note ? `<div class="small" style="margin-top:6px;">${item.note}</div>` : ''}
-        </div>
-      `).join('');
-    }
+  // Mes 7
+  if (m7Start) {
+    mark(m7Start,                   '\u{1F4EF} Yom Teruah',    C.teruah);
+    mark(incRange(m7Start,10),      '\u{1F56F} Yom Kippur',    C.kippur);
+    markRange(incRange(m7Start,15), 7, '\u{1F33F} Sucot', C.fiesta, '\u{1F33F} 15 Sucot');
+    mark(incRange(m7Start,22),      '\u{1F389} Shemini Atz.',  C.shemini);
+  }
+  return map;
+}
 
-    function renderMonths(months) {
-      monthsBody.innerHTML = months.map((month, index) => {
-        const monthEnd = index < months.length - 1
-          ? months[index + 1].start
-          : addDays(month.start, month.days);
-        return `
-          <tr>
-            <td>${month.n}</td>
-            <td class="month-name">${month.name}</td>
-            <td>${fmt(month.start)}</td>
-            <td>${fmt(monthEnd)}</td>
-            <td>${month.days}</td>
-            <td class="small">${month.source}</td>
-          </tr>
-        `;
-      }).join('');
-    }
+/* Renderizar un mes gregoriano */
+function renderMonth(year, month, eventMap) {
+  const z = tz();
+  const first = DateTime.fromObject({year, month, day:1}, {zone:z});
+  const total = first.daysInMonth;
+  const offset = first.weekday - 1; // Luxon 1=Lun
 
-    function renderFeasts(feasts) {
-      feastsBody.innerHTML = feasts.map(feast => `
-        <tr>
-          <td class="feast-name">${feast.name}</td>
-          <td>${fmt(feast.start)}</td>
-          <td>${fmt(feast.end)}</td>
-          <td class="small">${feast.note}</td>
-        </tr>
-      `).join('');
-    }
+  let html = `<div class="cal-month">
+    <div class="cal-month-title">${MESES_ES[month-1]} ${year}</div>
+    <div class="cal-dow-row">
+      <div class="cal-dow">L</div><div class="cal-dow">M</div>
+      <div class="cal-dow">M</div><div class="cal-dow">J</div>
+      <div class="cal-dow">V</div>
+      <div class="cal-dow sat">S</div><div class="cal-dow sun">D</div>
+    </div>
+    <div class="cal-cells">`;
 
-    /* ─── observador y astronomía ─────────────────────────────────────── */
+  for (let i=0; i<offset; i++) html += `<div class="cal-cell empty"></div>`;
 
-    function buildObserver() {
-      const lat  = Number(latitudeInput.value);
-      const lon  = Number(longitudeInput.value);
-      const elev = Number(elevationInput.value);
+  for (let day=1; day<=total; day++) {
+    const k = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const evs = eventMap[k] || [];
+    const dow = DateTime.fromObject({year,month,day},{zone:z}).weekday;
+    const wk  = dow===6 ? ' wsat' : dow===7 ? ' wsun' : '';
+    const evHtml = evs.map(e =>
+      `<div class="ev" style="background:${e.color}" title="${e.label}">${e.label}</div>`
+    ).join('');
+    html += `<div class="cal-cell${wk}"><div class="dn">${day}</div>${evHtml}</div>`;
+  }
 
-      if (!Number.isFinite(lat)  || lat  < -90  || lat  > 90)  throw new Error('Latitud inválida. Debe estar entre -90 y 90.');
-      if (!Number.isFinite(lon)  || lon  < -180 || lon  > 180) throw new Error('Longitud inválida. Debe estar entre -180 y 180.');
-      if (!Number.isFinite(elev))                               throw new Error('Elevación inválida. Debe ser un número.');
+  html += `</div></div>`;
+  return html;
+}
 
-      return new Astronomy.Observer(lat, lon, elev);
-    }
+/* Rango de meses gregorianos a mostrar */
+function gregRange(eventMap) {
+  const keys = Object.keys(eventMap).sort();
+  if (!keys.length) return [];
+  const first = DateTime.fromISO(keys[0]).startOf('month');
+  const last  = DateTime.fromISO(keys[keys.length-1]).startOf('month');
+  const out = [];
+  let cur = first;
+  while (cur <= last) { out.push({year:cur.year, month:cur.month}); cur=cur.plus({months:1}); }
+  return out;
+}
 
-    function getSunsetAstronomy(date, observer) {
-      const zone = timezoneInput.value.trim() || 'UTC';
-      const localNoon = DateTime.fromJSDate(date, { zone })
-        .set({ hour: 12, minute: 0, second: 0, millisecond: 0 })
-        .toUTC().toJSDate();
-      const event = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, -1, localNoon, 1);
-      if (!event) throw new Error('No se pudo calcular la puesta del sol con Astronomy Engine.');
-      return new Date(event.date);
-    }
+/* Validar librerias */
+function validateLibs() {
+  if (typeof Astronomy==='undefined') throw new Error('Astronomy Engine no cargo. Verifica conexion.');
+  if (typeof SunCalc==='undefined')   throw new Error('SunCalc no cargo.');
+  if (typeof luxon==='undefined')     throw new Error('Luxon no cargo.');
+}
 
-    function getSunsetSunCalc(date) {
-      const lat  = Number(latitudeInput.value);
-      const lon  = Number(longitudeInput.value);
-      const zone = timezoneInput.value.trim() || 'UTC';
-      const localMidday = DateTime.fromJSDate(date, { zone })
-        .set({ hour: 12, minute: 0, second: 0, millisecond: 0 })
-        .toJSDate();
-      const times = SunCalc.getTimes(localMidday, lat, lon);
-      if (!times.sunset) throw new Error('No se pudo calcular la puesta del sol con SunCalc.');
-      return times.sunset;
-    }
+function errMsg(e) {
+  if (e instanceof Error) return e.message;
+  if (typeof e==='string') return e;
+  try { return JSON.stringify(e); } catch(_) { return String(e); }
+}
 
-    function getPreferredSunset(date, observer) {
-      return sunsetSourceInput.value === 'suncalc'
-        ? getSunsetSunCalc(date)
-        : getSunsetAstronomy(date, observer);
-    }
+/* ---- MAIN ---- */
+function buildCalendar() {
+  statusBox.className = '';
+  recalcBtn.disabled = true;
+  recalcBtn.textContent = 'Calculando...';
 
-    function getMoonsetAstronomy(afterDate, observer) {
-      const event = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, afterDate, 1);
-      return event ? new Date(event.date) : null;
-    }
+  setTimeout(() => {
+    try {
+      validateLibs();
 
-    function getMoonTimesSunCalc(date) {
-      const lat = Number(latitudeInput.value);
-      const lon = Number(longitudeInput.value);
-      return SunCalc.getMoonTimes(date, lat, lon);
-    }
+      const start  = parseDT(searchStartInput.value);
+      const obs    = buildObserver();
+      const mode   = crescentModeInput.value;
+      const fb7    = parseDT(fallbackMonth7Input.value);
+      const count  = Number(monthCountInput.value);
+      const year   = yearNameInput.value.trim();
 
-    function calcHorizontal(body, date, observer) {
-      const equ = Astronomy.Equator(body, date, observer, true, true);
-      return Astronomy.Horizon(date, observer, equ.ra, equ.dec, 'normal');
-    }
+      const luns = findLunations(start, obs, mode, count);
 
-    // Elongación: vectores geocéntricos cartesianos, sin Equator, sin observer.
-    // GeoMoon y GeoVector no llaman a VerifyObserver → elimina el error null.
-    function calcElongation(date) {
-      const moonVec = Astronomy.GeoMoon(date);
-      const sunVec  = Astronomy.GeoVector(Astronomy.Body.Sun, date, true);
-      const dot  = moonVec.x*sunVec.x + moonVec.y*sunVec.y + moonVec.z*sunVec.z;
-      const mLen = Math.sqrt(moonVec.x**2 + moonVec.y**2 + moonVec.z**2);
-      const sLen = Math.sqrt(sunVec.x**2  + sunVec.y**2  + sunVec.z**2);
-      return Math.acos(Math.max(-1, Math.min(1, dot / (mLen * sLen)))) * (180 / Math.PI);
-    }
+      const months = luns.map((item, i) => ({
+        start: item.start,
+        days:  i < luns.length-1 ? diffDays(item.start, luns[i+1].start) : 29
+      }));
+      months[months.length-1].days = 29;
 
-    function visibilityThresholds(mode) {
-      if (mode === 'strict')  return { minAlt: 10,  minElong: 12,   minLagMinutes: 50, minIllum: 1.0 };
-      if (mode === 'lenient') return { minAlt: 7,   minElong: 9,    minLagMinutes: 35, minIllum: 0.6 };
-      /* standard */          return { minAlt: 8.5, minElong: 10.5, minLagMinutes: 45, minIllum: 0.8 };
-    }
-
-    function evaluateCrescentAtSunset(date, observer, mode) {
-      const sunsetUsed      = getPreferredSunset(date, observer);
-      const sunsetAstronomy = getSunsetAstronomy(date, observer);
-      const sunsetSunCalc   = getSunsetSunCalc(date);
-      const moonsetAstronomy  = getMoonsetAstronomy(sunsetUsed, observer);
-      const moonTimesSunCalc  = getMoonTimesSunCalc(sunsetUsed);
-
-      const moonHor    = calcHorizontal(Astronomy.Body.Moon, sunsetUsed, observer);
-      const elongDeg   = calcElongation(sunsetUsed);
-      const lagMinutes = moonsetAstronomy ? (moonsetAstronomy - sunsetUsed) / 60000 : -999;
-      const illum      = Astronomy.Illumination(Astronomy.Body.Moon, sunsetUsed).phase_fraction * 100;
-      const thresholds = visibilityThresholds(mode);
-
-      // FIX: moonHor.altitude y moonHor.azimuth ya están en GRADOS (no radianes).
-      // La versión anterior aplicaba toDegrees() de más, multiplicando por ~57.
-      const altDeg = moonHor.altitude;  // grados directamente desde Astronomy Engine
-      const aziDeg = moonHor.azimuth;   // ídem
-
-      const visible = (
-        altDeg   >= thresholds.minAlt   &&
-        elongDeg >= thresholds.minElong &&
-        lagMinutes >= thresholds.minLagMinutes &&
-        illum    >= thresholds.minIllum
-      );
-
-      return {
-        visible,
-        sunsetUsed,
-        sunsetAstronomy,
-        sunsetSunCalc,
-        moonsetAstronomy,
-        moonTimesSunCalc,
-        altitudeDeg: altDeg,
-        azimuthDeg:  aziDeg,
-        elongationDeg: elongDeg,
-        lagMinutes,
-        illuminationPct: illum,
-        thresholds
-      };
-    }
-
-    /* ─── lunaciones ──────────────────────────────────────────────────── */
-
-    function findMonthStartAfterNewMoon(newMoonDate, observer, mode) {
-      for (let dayOffset = 1; dayOffset <= 3; dayOffset++) {
-        const testDate   = addDays(newMoonDate, dayOffset);
-        const evalResult = evaluateCrescentAtSunset(testDate, observer, mode);
-        if (evalResult.visible) {
-          return {
-            start:     evalResult.sunsetUsed,
-            reason:    `Creciente estimado visible en el día ${dayOffset} después de la luna nueva astronómica`,
-            metrics:   evalResult,
-            dayOffset
-          };
-        }
+      if (useFallbackMonth7Input.value==='force' && months[6]) {
+        months[6].start = fb7;
+        for (let i=7; i<months.length; i++)
+          months[i].start = addDays(months[i-1].start, months[i-1].days);
       }
 
-      // Fallback: si ningún día pasa el umbral, se toma el día 2
-      const fallbackDate = addDays(newMoonDate, 2);
-      const fallbackEval = evaluateCrescentAtSunset(fallbackDate, observer, mode);
-      return {
-        start:     fallbackEval.sunsetUsed,
-        reason:    'No pasó el umbral en la búsqueda corta; se tomó el siguiente atardecer disponible como aproximación',
-        metrics:   fallbackEval,
-        dayOffset: 2
-      };
+      const avivStart = months[0].start;
+      const m7Start   = months[6]?.start;
+      const delta     = m7Start ? diffDays(m7Start, fb7) : null;
+
+      const evMap = buildEventMap(months, avivStart, m7Start);
+
+      // Leyenda
+      legendEl.innerHTML = LEGEND.map(l =>
+        `<div class="lg-item"><div class="lg-dot" style="background:${l.color}"></div><span>${l.label}</span></div>`
+      ).join('');
+
+      // Meses
+      monthsGrid.innerHTML = gregRange(evMap)
+        .map(({year:y, month:m}) => renderMonth(y, m, evMap))
+        .join('');
+
+      placeholder.style.display = 'none';
+      calOutput.style.display   = 'block';
+
+      const cmp = delta===null ? '' : delta===0
+        ? ' \u00b7 Mes 7 coincide con ancla.'
+        : ` \u00b7 Mes 7 difiere ${delta} dia(s) del ancla.`;
+      statusBox.className = (delta===null||Math.abs(delta)<=1) ? 'ok' : 'warn';
+      statusBox.innerHTML = `<b>\u2713 Calendario ${year} generado.</b>${cmp}`;
+
+    } catch(err) {
+      placeholder.style.display = 'block';
+      calOutput.style.display   = 'none';
+      statusBox.className = 'error';
+      statusBox.innerHTML = `<b>Error:</b> ${errMsg(err)}`;
+    } finally {
+      recalcBtn.disabled    = false;
+      recalcBtn.textContent = 'Calcular calendario';
     }
+  }, 30);
+}
 
-    function findLunationStarts(startSearch, observer, mode, count) {
-      const starts = [];
-      let anchor   = new Date(startSearch);
-
-      for (let i = 0; i < count; i++) {
-        const phaseEvent = Astronomy.SearchMoonPhase(0, anchor, 35);
-        if (!phaseEvent) throw new Error('No se pudo hallar luna nueva astronómica.');
-
-        const newMoon    = new Date(phaseEvent.date);
-        const monthStart = findMonthStartAfterNewMoon(newMoon, observer, mode);
-        starts.push({
-          index:     i,
-          newMoon,
-          start:     monthStart.start,
-          reason:    monthStart.reason,
-          metrics:   monthStart.metrics,
-          dayOffset: monthStart.dayOffset
-        });
-
-        anchor = addDays(newMoon, 25);
-      }
-
-      return starts;
-    }
-
-    /* ─── Shabbat dentro de Jag HaMatzot ─────────────────────────────── */
-
-    function sabbathStartWithinFeast(date) {
-      const zone = timezoneInput.value.trim() || 'UTC';
-      const d    = new Date(date.getTime());
-      const hour   = DateTime.fromJSDate(date, { zone }).hour;
-      const minute = DateTime.fromJSDate(date, { zone }).minute;
-
-      // Si ya es viernes (weekday 5) usar directo; si no, avanzar hasta el próximo sábado
-      if (DateTime.fromJSDate(d, { zone }).weekday === 5) return d;
-      while (DateTime.fromJSDate(d, { zone }).weekday !== 6) {
-        d.setUTCDate(d.getUTCDate() + 1);
-      }
-      const fixed = DateTime.fromJSDate(d, { zone }).set({ hour, minute, second: 0, millisecond: 0 });
-      return fixed.toUTC().toJSDate();
-    }
-
-    /* ─── validación de librerías ─────────────────────────────────────── */
-
-    function validateLibraries() {
-      if (typeof Astronomy === 'undefined') throw new Error('Astronomy Engine no cargó. Verifica tu conexión a internet.');
-      if (typeof SunCalc   === 'undefined') throw new Error('SunCalc no cargó. Verifica tu conexión a internet.');
-      if (typeof luxon     === 'undefined') throw new Error('Luxon no cargó. Verifica tu conexión a internet.');
-    }
-
-    function getErrorMessage(error) {
-      if (error instanceof Error && error.message) return error.message;
-      if (typeof error === 'string' && error.trim()) return error;
-      if (error && typeof error === 'object') {
-        try { return JSON.stringify(error); } catch (_) { return String(error); }
-      }
-      return 'Error desconocido en el cálculo.';
-    }
-
-    /* ─── construcción del calendario ────────────────────────────────── */
-
-    function buildCalendar() {
-      try {
-        validateLibraries();
-
-        const yearLabel     = yearNameInput.value.trim() || 'sin etiqueta';
-        const searchStart   = parseLocalDateTime(searchStartInput.value);
-        const observer      = buildObserver();
-        const mode          = crescentModeInput.value;
-        const fallbackMonth7 = parseLocalDateTime(fallbackMonth7Input.value);
-        const monthCount    = Number(monthCountInput.value);
-
-        mainTitle.textContent = `Calendario caraíta astronómico reforzado ${yearLabel}`;
-
-        const lunations = findLunationStarts(searchStart, observer, mode, monthCount);
-
-        const months = lunations.map((item, index) => ({
-          n:    `${index + 1}°`,
-          name: monthNames[index] || `Mes ${index + 1}`,
-          start: item.start,
-          days:  index < lunations.length - 1
-                   ? diffDays(item.start, lunations[index + 1].start)
-                   : 29,
-          source:    `${item.reason}. Luna nueva: ${fmt(item.newMoon)}`,
-          metrics:   item.metrics,
-          dayOffset: item.dayOffset
-        }));
-        months[months.length - 1].days = 29;   // último mes sin siguiente referencia
-
-        // Forzado opcional del mes 7
-        if (useFallbackMonth7Input.value === 'force' && months[6]) {
-          months[6].start  = fallbackMonth7;
-          months[6].source = 'Mes 7 forzado manualmente por ancla opcional';
-          for (let i = 7; i < months.length; i++) {
-            months[i].start = addDays(months[i - 1].start, months[i - 1].days);
-          }
-        }
-
-        const avivStart    = months[0].start;
-        const month7Start  = months[6]?.start;
-        const month7Delta  = month7Start ? diffDays(month7Start, fallbackMonth7) : null;
-
-        // Fiestas de Aviv
-        const day14  = getInclusiveRange(avivStart, 14);
-        const day15  = getInclusiveRange(avivStart, 15);
-        const day21  = getInclusiveRange(avivStart, 21);
-        const weeklySabbathStart = sabbathStartWithinFeast(day15.start);
-        const weeklySabbath = { start: weeklySabbathStart, end: addDays(weeklySabbathStart, 1) };
-        const omerReshit    = { start: weeklySabbath.end,  end: addDays(weeklySabbath.end, 1) };
-        const shavuot       = { start: addDays(omerReshit.start, 49), end: addDays(omerReshit.start, 50) };
-
-        // Fiestas del mes 7
-        const yomTeruah = month7Start ? getDayWindow(month7Start)                     : null;
-        const yomKippur = month7Start ? getInclusiveRange(month7Start, 10)            : null;
-        const sukkot    = month7Start ? getInclusiveRange(month7Start, 15)            : null;
-        const shemini   = month7Start ? getInclusiveRange(month7Start, 22)            : null;
-
-        renderSummary([
-          { title: '1 de Aviv',           start: avivStart,                                     end: addDays(avivStart, 1) },
-          { title: '15 de Aviv / Pesaj',  start: day15.start,                                   end: day15.end },
-          { title: 'Shavuot',             start: shavuot.start,                                 end: shavuot.end },
-          { title: 'Yom Teruah',          start: yomTeruah ? yomTeruah.start : avivStart,       end: yomTeruah ? yomTeruah.end : addDays(avivStart, 1) }
-        ]);
-
-        const m1 = months[0].metrics;
-        renderMetrics([
-          { title: 'Puesta usada',      value: fmt(m1.sunsetUsed),                      note: `Fuente activa: ${sunsetSourceInput.options[sunsetSourceInput.selectedIndex].text}` },
-          { title: 'Puesta Astronomy',  value: fmt(m1.sunsetAstronomy),                 note: 'Referencia astronómica principal.' },
-          { title: 'Puesta SunCalc',    value: fmt(m1.sunsetSunCalc),                   note: 'Contraste con librería secundaria.' },
-          { title: 'Altura lunar',      value: `${formatNumber(m1.altitudeDeg)}°`,      note: 'Altura topocéntrica de la Luna al atardecer.' },
-          { title: 'Elongación',        value: `${formatNumber(m1.elongationDeg)}°`,    note: 'Separación angular Sol-Luna.' },
-          { title: 'Retraso lunar',     value: `${formatNumber(m1.lagMinutes, 0)} min`, note: 'Tiempo entre puesta del Sol y puesta de la Luna.' },
-          { title: 'Iluminación',       value: `${formatNumber(m1.illuminationPct)}%`,  note: 'Iluminación fraccional de la Luna.' },
-          { title: 'Moonset SunCalc',   value: m1.moonTimesSunCalc?.set ? fmt(m1.moonTimesSunCalc.set) : 'Sin dato', note: 'Contraste adicional de salida lunar.' }
-        ]);
-
-        renderMonths(months);
-        renderFeasts([
-          { name: '14 de Aviv · Preparación de Pesaj',         start: day14.start,                                     end: day14.end,                                   note: 'Día 14 completo.' },
-          { name: '15 de Aviv · Pesaj / Jag HaMatzot',         start: day15.start,                                     end: day15.end,                                   note: 'Primer día de la fiesta.' },
-          { name: '21 de Aviv · Cierre de Jag HaMatzot',       start: day21.start,                                     end: day21.end,                                   note: 'Séptimo día.' },
-          { name: 'Shabbat semanal dentro de Jag HaMatzot',    start: weeklySabbath.start,                             end: weeklySabbath.end,                           note: 'Se muestra con inicio y fin visibles.' },
-          { name: 'Omer Reshit',                                start: omerReshit.start,                                end: omerReshit.end,                              note: 'Comienza al terminar el shabbat semanal.' },
-          { name: 'Shavuot',                                    start: shavuot.start,                                   end: shavuot.end,                                 note: 'Día 50 contado desde Omer Reshit.' },
-          { name: '1 del mes séptimo · Yom Teruah',            start: yomTeruah ? yomTeruah.start : avivStart,         end: yomTeruah ? yomTeruah.end : addDays(avivStart,1), note: month7Start ? 'Inicio astronómico estimado del mes 7.' : 'No disponible.' },
-          { name: '10 del mes séptimo · Yom Kippur',           start: yomKippur ? yomKippur.start : avivStart,         end: yomKippur ? yomKippur.end : addDays(avivStart,1), note: month7Start ? 'Décimo día del mes séptimo.' : 'No disponible.' },
-          { name: '15 del mes séptimo · Sucot',                start: sukkot   ? sukkot.start   : avivStart,           end: sukkot   ? sukkot.end   : addDays(avivStart,1), note: month7Start ? 'Inicio de Sucot.' : 'No disponible.' },
-          { name: '22 del mes séptimo · Sheminí',              start: shemini  ? shemini.start  : avivStart,           end: shemini  ? shemini.end  : addDays(avivStart,1), note: month7Start ? 'Octavo día desde Sucot.' : 'No disponible.' }
-        ]);
-
-        let compareText = 'No se pudo comparar el mes 7.';
-        if (month7Delta !== null) {
-          compareText = month7Delta === 0
-            ? 'El mes 7 coincide exactamente con la ancla opcional de Yom Teruah.'
-            : `La comparación con la ancla opcional de Yom Teruah arroja una diferencia de ${month7Delta} días.`;
-        }
-
-        setStatus(
-          month7Delta === null || Math.abs(month7Delta) <= 1 ? 'ok' : 'warn',
-          `<b>Cálculo reforzado generado.</b><br>` +
-          `Se usaron Astronomy Engine, SunCalc y Luxon en conjunto. ${compareText}`
-        );
-
-        noteBox.innerHTML = `
-          <b>Configuración usada:</b><br>
-          - Zona horaria: <b>${timezoneInput.value}</b><br>
-          - Latitud: <b>${latitudeInput.value}</b><br>
-          - Longitud: <b>${longitudeInput.value}</b><br>
-          - Elevación: <b>${elevationInput.value} m</b><br>
-          - Búsqueda inicial: <b>${fmt(searchStart)}</b><br>
-          - Criterio de visibilidad: <b>${crescentModeInput.options[crescentModeInput.selectedIndex].text}</b><br>
-          - Fuente de puesta del sol usada en el cálculo: <b>${sunsetSourceInput.options[sunsetSourceInput.selectedIndex].text}</b><br><br>
-          <b>Correcciones aplicadas en esta versión:</b><br>
-          1. CDN de Astronomy Engine estabilizado a versión npm@2 (antes usaba @master inestable).<br>
-          2. <b>Altitud lunar</b> ahora se lee directamente en grados desde <code>Horizon()</code>; antes se aplicaba <code>toDegrees()</code> de más, multiplicando el valor por ~57.<br>
-          3. <b>Elongación</b> calculada con trigonometría esférica directa, sin depender del campo <code>.vec</code> que puede ser undefined en algunas versiones.<br><br>
-          <b>Cómo trabaja esta versión:</b><br>
-          1. <b>Luxon</b> interpreta las fechas en la zona horaria exacta del lugar.<br>
-          2. <b>Astronomy Engine</b> localiza luna nueva, coordenadas topocéntricas y eventos de salida/puesta.<br>
-          3. <b>SunCalc</b> contrasta puestas del sol y tiempos lunares.<br>
-          4. El sistema elige el inicio del mes cuando el creciente estimado supera el umbral definido.<br><br>
-          <b>Límite honesto:</b> sigue siendo una <b>estimación astronómica de visibilidad</b>, no una observación humana confirmada. La ancla opcional del mes 7 se mantiene como control o corrección oficial cuando ya tienes un dato confirmado.
-        `;
-
-      } catch (error) {
-        setStatus('error', `<b>Error de cálculo.</b><br>${getErrorMessage(error)}`);
-        summaryGrid.innerHTML = '';
-        metricGrid.innerHTML  = '';
-        monthsBody.innerHTML  = '';
-        feastsBody.innerHTML  = '';
-        noteBox.innerHTML     = 'Verifica la conexión a las librerías, la zona horaria y los datos ingresados.';
-      }
-    }
-
-    recalcBtn.addEventListener('click', buildCalendar);
-    buildCalendar();
-  </script>
+recalcBtn.addEventListener('click', buildCalendar);
+/* Sin buildCalendar() automatico al cargar */
+</script>
 </body>
 </html>
