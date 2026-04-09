@@ -69,25 +69,23 @@
       background:var(--head);color:#fff;padding:8px 12px;
       font-weight:700;font-size:.92rem;letter-spacing:.03em;
     }
-    .cal-dow-row{
-      display:grid;grid-template-columns:repeat(7,1fr);
-      background:#f7f3ea;border-bottom:1px solid var(--border);
+    /* ── tabla del calendario mensual ── */
+    .cal-table{width:100%;border-collapse:collapse;table-layout:fixed;}
+    .cal-table th{
+      text-align:center;padding:5px 2px;font-size:.7rem;font-weight:700;
+      color:var(--muted);background:#f7f3ea;border-bottom:1px solid var(--border);
     }
-    .cal-dow{text-align:center;padding:5px 2px;font-size:.7rem;font-weight:700;color:var(--muted);}
-    .cal-dow.sat{color:#2563eb;} .cal-dow.sun{color:#c53030;}
-
-    .cal-cells{display:grid;grid-template-columns:repeat(7,1fr);}
-    .cal-cell{
-      border-right:1px solid #ece8df;border-bottom:1px solid #ece8df;
-      min-height:64px;padding:4px 4px 4px 5px;
+    .cal-table th.sat{color:#2563eb;} .cal-table th.sun{color:#c53030;}
+    .cal-table td{
+      width:14.285%;border:1px solid #ece8df;
+      height:72px;vertical-align:top;padding:4px 4px 4px 5px;
     }
-    .cal-cell:nth-child(7n){border-right:0;}
-    .cal-cell.empty{background:#faf8f4;}
-    .cal-cell.wsat .dn{color:#2563eb;} .cal-cell.wsun .dn{color:#c53030;}
-
+    .cal-table td.empty{background:#faf8f4;}
+    .cal-table td.sat-c .dn{color:#2563eb;}
+    .cal-table td.sun-c .dn{color:#c53030;}
     .dn{font-size:.78rem;font-weight:700;color:#444;margin-bottom:3px;}
     .ev{
-      font-size:.63rem;font-weight:600;color:#fff;
+      display:block;font-size:.63rem;font-weight:600;color:#fff;
       border-radius:3px;padding:1px 4px;margin-bottom:2px;
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.55;
     }
@@ -356,36 +354,47 @@ function buildEventMap(months, avivStart, m7Start) {
   }
 
   function renderMonth(year, month, eventMap) {
-  const z = tz();
-  const total  = daysInMonth(year, month);
-  const offset = isoWeekday(year, month, 1) - 1; // 0=Lun...6=Dom
+    // Construir lista plana de celdas: null=vacía, número=día
+    const total  = daysInMonth(year, month);
+    const offset = isoWeekday(year, month, 1) - 1; // 0=Lun … 6=Dom
 
-  let html = `<div class="cal-month">
-    <div class="cal-month-title">${MESES_ES[month-1]} ${year}</div>
-    <div class="cal-dow-row">
-      <div class="cal-dow">L</div><div class="cal-dow">M</div>
-      <div class="cal-dow">M</div><div class="cal-dow">J</div>
-      <div class="cal-dow">V</div>
-      <div class="cal-dow sat">S</div><div class="cal-dow sun">D</div>
-    </div>
-    <div class="cal-cells">`;
+    const cells = [];
+    for (let i = 0; i < offset; i++) cells.push(null);
+    for (let d = 1; d <= total; d++) cells.push(d);
+    while (cells.length % 7 !== 0) cells.push(null); // relleno final
 
-  for (let i=0; i<offset; i++) html += `<div class="cal-cell empty"></div>`;
+    let html = `<div class="cal-month">
+      <div class="cal-month-title">${MESES_ES[month-1]} ${year}</div>
+      <table class="cal-table">
+        <thead><tr>
+          <th>L</th><th>M</th><th>M</th><th>J</th><th>V</th>
+          <th class="sat">S</th><th class="sun">D</th>
+        </tr></thead>
+        <tbody>`;
 
-  for (let day=1; day<=total; day++) {
-    const k = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    const evs = eventMap[k] || [];
-    const dow = isoWeekday(year, month, day);
-    const wk  = dow===6 ? ' wsat' : dow===7 ? ' wsun' : '';
-    const evHtml = evs.map(e =>
-      `<div class="ev" style="background:${e.color}" title="${e.label}">${e.label}</div>`
-    ).join('');
-    html += `<div class="cal-cell${wk}"><div class="dn">${day}</div>${evHtml}</div>`;
+    for (let i = 0; i < cells.length; i++) {
+      if (i % 7 === 0) html += '<tr>';
+
+      const day = cells[i];
+      if (day === null) {
+        html += '<td class="empty"></td>';
+      } else {
+        const k   = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const evs = eventMap[k] || [];
+        const dow = isoWeekday(year, month, day);
+        const tc  = dow === 6 ? ' sat-c' : dow === 7 ? ' sun-c' : '';
+        const evH = evs.map(e =>
+          `<span class="ev" style="background:${e.color}" title="${e.label}">${e.label}</span>`
+        ).join('');
+        html += `<td class="${tc}"><div class="dn">${day}</div>${evH}</td>`;
+      }
+
+      if (i % 7 === 6) html += '</tr>';
+    }
+
+    html += '</tbody></table></div>';
+    return html;
   }
-
-  html += `</div></div>`;
-  return html;
-}
 
 /* Rango de meses gregorianos a mostrar */
 function gregRange(eventMap) {
