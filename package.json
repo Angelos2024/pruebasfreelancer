@@ -1,9 +1,0 @@
-{
-  "name": "pruebasfreelancer-openfood-scanner",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Servidor estático con proxy backend para OpenFoodFacts.",
-  "scripts": {
-    "start": "node server.js"
-  }
-}
