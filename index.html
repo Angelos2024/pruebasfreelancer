@@ -197,8 +197,8 @@
       button { min-width: 100%; }
     }
   </style>
-  <!-- FIX: Astronomy Engine pinned to npm@2 (estable) en lugar de @master inestable -->
-  <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
+  <!-- Astronomy Engine: tag fijo v2.1.18 con ruta comprobada del browser build -->
+  <script src="https://cdn.jsdelivr.net/gh/cosinekitty/astronomy@v2.1.18/demo/browser/astronomy.browser.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
 </head>
@@ -527,23 +527,15 @@
       return Astronomy.Horizon(date, observer, equ.ra, equ.dec, 'normal');
     }
 
-    // FIX: elongación calculada con trigonometría esférica directa sobre coordenadas
-    // ecuatoriales. Se pasa el observer real porque la versión npm de Astronomy Engine
-    // rechaza null ("Not an instance of the Observer class: null").
-    function calcElongation(date, observer) {
-      const sunEq  = Astronomy.Equator(Astronomy.Body.Sun,  date, observer, true, true);
-      const moonEq = Astronomy.Equator(Astronomy.Body.Moon, date, observer, true, true);
-
-      // RA está en horas → convertir a radianes; Dec en grados → convertir a radianes
-      const ra1  = sunEq.ra   * (Math.PI / 12);
-      const dec1 = sunEq.dec  * (Math.PI / 180);
-      const ra2  = moonEq.ra  * (Math.PI / 12);
-      const dec2 = moonEq.dec * (Math.PI / 180);
-
-      // Ley de cosenos esférica para la separación angular
-      const cosA = Math.sin(dec1) * Math.sin(dec2)
-                 + Math.cos(dec1) * Math.cos(dec2) * Math.cos(ra1 - ra2);
-      return Math.acos(Math.max(-1, Math.min(1, cosA))) * (180 / Math.PI); // grados
+    // Elongación: vectores geocéntricos cartesianos, sin Equator, sin observer.
+    // GeoMoon y GeoVector no llaman a VerifyObserver → elimina el error null.
+    function calcElongation(date) {
+      const moonVec = Astronomy.GeoMoon(date);
+      const sunVec  = Astronomy.GeoVector(Astronomy.Body.Sun, date, true);
+      const dot  = moonVec.x*sunVec.x + moonVec.y*sunVec.y + moonVec.z*sunVec.z;
+      const mLen = Math.sqrt(moonVec.x**2 + moonVec.y**2 + moonVec.z**2);
+      const sLen = Math.sqrt(sunVec.x**2  + sunVec.y**2  + sunVec.z**2);
+      return Math.acos(Math.max(-1, Math.min(1, dot / (mLen * sLen)))) * (180 / Math.PI);
     }
 
     function visibilityThresholds(mode) {
@@ -560,7 +552,7 @@
       const moonTimesSunCalc  = getMoonTimesSunCalc(sunsetUsed);
 
       const moonHor    = calcHorizontal(Astronomy.Body.Moon, sunsetUsed, observer);
-      const elongDeg   = calcElongation(sunsetUsed, observer);
+      const elongDeg   = calcElongation(sunsetUsed);
       const lagMinutes = moonsetAstronomy ? (moonsetAstronomy - sunsetUsed) / 60000 : -999;
       const illum      = Astronomy.Illumination(Astronomy.Body.Moon, sunsetUsed).phase_fraction * 100;
       const thresholds = visibilityThresholds(mode);
