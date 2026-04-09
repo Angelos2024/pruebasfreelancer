@@ -477,8 +477,8 @@
     function getSunsetAstronomy(date, observer) {
       const zone = timezoneInput.value.trim() || 'UTC';
       const localNoon = DateTime.fromJSDate(date, { zone }).set({ hour: 12, minute: 0, second: 0, millisecond: 0 }).toUTC().toJSDate();
-      const event = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, +1, localNoon, 1, 0.0);
-      if (!event) throw new Error('No se pudo calcular la puesta del sol con Astronomy Engine.');
+       const event = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, -1, localNoon, 1, 0.0);
+            if (!event) throw new Error('No se pudo calcular la puesta del sol con Astronomy Engine.');
       return new Date(event.date);
     }
 
