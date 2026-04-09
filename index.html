@@ -200,7 +200,7 @@
 
 <div class="ctrl-wrap">
   <div class="ctrl-grid">
-    <div class="field"><label>Ano</label>
+    <div class="field"><label>Año</label>
       <input id="yearName" type="text" value="2026"/></div>
     <div class="field"><label>Zona horaria</label>
       <input id="timezone" type="text" value="Asia/Jerusalem"/></div>
@@ -208,14 +208,14 @@
       <input id="latitude" type="number" step="0.000001" value="31.768300"/></div>
     <div class="field"><label>Longitud</label>
       <input id="longitude" type="number" step="0.000001" value="35.213700"/></div>
-    <div class="field"><label>Elevacion (m)</label>
+    <div class="field"><label>Elevación (m)</label>
       <input id="elevation" type="number" value="800"/></div>
     <div class="field"><label>Buscar desde</label>
       <input id="searchStart" type="datetime-local" value="2026-03-01T12:00"/></div>
     <div class="field"><label>Visibilidad</label>
       <select id="crescentMode">
         <option value="strict">Estricto</option>
-        <option value="standard" selected>Estandar</option>
+        <option value="standard" selected>Estándar</option>
         <option value="lenient">Flexible</option>
       </select></div>
     <div class="field"><label>Ancla Yom Teruah</label>
@@ -241,7 +241,7 @@
 
 <div id="placeholder">
   <div class="ico">&#127769;</div>
-  <p>Configura los parametros y presiona <b>Calcular calendario</b>.</p>
+  <p>Configura los parámetros y presiona <b>Calcular calendario</b>.</p>
 </div>
 
 <div id="calOutput">
@@ -300,7 +300,7 @@ const tz = () => timezoneInput.value.trim() || 'UTC';
 
 function parseDT(v) {
   const dt = DateTime.fromISO(v, { zone: tz() });
-  if (!dt.isValid) throw new Error('Fecha invalida.');
+  if (!dt.isValid) throw new Error('Fecha inválida.');
   return dt.toJSDate();
 }
 function addDays(d, n) {
@@ -319,9 +319,9 @@ function buildObserver() {
   const lat = Number(latitudeInput.value),
         lon = Number(longitudeInput.value),
         el  = Number(elevationInput.value);
-  if (!Number.isFinite(lat)||lat<-90||lat>90)  throw new Error('Latitud invalida.');
-  if (!Number.isFinite(lon)||lon<-180||lon>180) throw new Error('Longitud invalida.');
-  if (!Number.isFinite(el))                     throw new Error('Elevacion invalida.');
+  if (!Number.isFinite(lat)||lat<-90||lat>90)  throw new Error('Latitud inválida.');
+  if (!Number.isFinite(lon)||lon<-180||lon>180) throw new Error('Longitud inválida.');
+  if (!Number.isFinite(el))                     throw new Error('Elevación inválida.');
   return new Astronomy.Observer(lat, lon, el);
 }
 
@@ -430,7 +430,7 @@ function findLunations(start, obs, mode, n) {
   let anchor = new Date(start);
   for (let i=0; i<n; i++) {
     const ph = Astronomy.SearchMoonPhase(0, anchor, 35);
-    if (!ph) throw new Error('No se encontro luna nueva.');
+  if (!ph) throw new Error('No se encontró luna nueva.');
     const nm = new Date(ph.date);
     list.push({ newMoon:nm, start:findMonthStart(nm, obs, mode) });
     anchor = addDays(nm, 25);
@@ -558,7 +558,7 @@ function gregRange(eventMap) {
 
 /* Validar librerias */
 function validateLibs() {
-  if (typeof Astronomy==='undefined') throw new Error('Astronomy Engine no cargo. Verifica conexion.');
+  if (typeof Astronomy==='undefined') throw new Error('Astronomy Engine no cargó. Verifica conexión.');
   if (typeof SunCalc==='undefined')   throw new Error('SunCalc no cargo.');
   if (typeof luxon==='undefined')     throw new Error('Luxon no cargo.');
 }
@@ -623,7 +623,7 @@ function buildCalendar() {
 
       const cmp = delta===null ? '' : delta===0
         ? ' \u00b7 Mes 7 coincide con ancla.'
-        : ` \u00b7 Mes 7 difiere ${delta} dia(s) del ancla.`;
+        : ` \u00b7 Mes 7 difiere ${delta} día(s) del ancla.`;
       statusBox.className = (delta===null||Math.abs(delta)<=1) ? 'ok' : 'warn';
       statusBox.innerHTML = `<b>\u2713 Calendario ${year} generado.</b>${cmp}`;
 
