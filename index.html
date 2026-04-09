@@ -61,38 +61,40 @@
     .lg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 
     /* MESES GRID */
-    .months-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(295px,1fr));gap:16px;}
+    .months-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
 
     /* CALENDARIO MENSUAL */
     .cal-month{background:#fff;border:1px solid var(--border);border-radius:5px;overflow:hidden;}
     .cal-month-title{
-      background:var(--head);color:#fff;padding:8px 12px;
-      font-weight:700;font-size:.92rem;letter-spacing:.03em;
+      background:var(--head);color:#fff;padding:11px 16px;
+      font-weight:700;font-size:1.05rem;letter-spacing:.03em;
     }
     /* ── tabla del calendario mensual ── */
     .cal-table{width:100%;border-collapse:collapse;table-layout:fixed;}
     .cal-table th{
-      text-align:center;padding:5px 2px;font-size:.7rem;font-weight:700;
+      text-align:center;padding:7px 2px;font-size:.78rem;font-weight:700;
       color:var(--muted);background:#f7f3ea;border-bottom:1px solid var(--border);
     }
     .cal-table th.sat{color:#2563eb;} .cal-table th.sun{color:#c53030;}
     .cal-table td{
       width:14.285%;border:1px solid #ece8df;
-      height:72px;vertical-align:top;padding:4px 4px 4px 5px;
+      height:90px;vertical-align:top;padding:6px 5px 5px 7px;
     }
     .cal-table td.empty{background:#faf8f4;}
     .cal-table td.sat-c .dn{color:#2563eb;}
     .cal-table td.sun-c .dn{color:#c53030;}
-    .dn{font-size:.78rem;font-weight:700;color:#444;margin-bottom:3px;}
+    .dn{font-size:.9rem;font-weight:700;color:#444;margin-bottom:4px;}
     .ev{
-      display:block;font-size:.63rem;font-weight:600;color:#fff;
-      border-radius:3px;padding:1px 4px;margin-bottom:2px;
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.55;
+      display:block;font-size:.72rem;font-weight:600;color:#fff;
+      border-radius:3px;padding:2px 6px;margin-bottom:3px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.6;
     }
 
+    @media(max-width:900px){
+      .months-grid{grid-template-columns:1fr;}
+    }
     @media(max-width:600px){
       .ctrl-grid{grid-template-columns:1fr 1fr;}
-      .months-grid{grid-template-columns:1fr;}
       #calOutput,#placeholder,.ctrl-wrap{padding-left:12px;padding-right:12px;}
     }
   </style>
@@ -257,29 +259,80 @@ function elongation(date) {
   const sl  = Math.sqrt(sv.x**2 + sv.y**2 + sv.z**2);
   return Math.acos(Math.max(-1, Math.min(1, dot/(ml*sl)))) * (180/Math.PI);
 }
-function thresholds(mode) {
-  if (mode==='strict')  return {alt:10,  el:12,   lag:50, illum:1.0};
-  if (mode==='lenient') return {alt:7,   el:9,    lag:35, illum:0.6};
-  return                       {alt:8.5, el:10.5, lag:45, illum:0.8};
+// ── Altitud del Sol en un momento dado ───────────────────────────────────────
+function getSunAlt(date, obs) {
+  const equ = Astronomy.Equator(Astronomy.Body.Sun, date, obs, true, true);
+  return Astronomy.Horizon(date, obs, equ.ra, equ.dec, 'normal').altitude;
 }
+
+// ── Ancho del creciente W en arcominutos (Odeh 2006) ──────────────────────
+function crescentWidth(date) {
+  const mv    = Astronomy.GeoMoon(date);
+  const distAU = Math.sqrt(mv.x**2 + mv.y**2 + mv.z**2);
+  const distKm = distAU * 149597870.7;
+  // Semidiámetro angular de la Luna en arcominutos
+  const SD    = (1737.4 / distKm) * (180 / Math.PI) * 60;
+  const illum = Astronomy.Illumination(Astronomy.Body.Moon, date).phase_fraction;
+  // W = 2 × SD × fracción iluminada (ancho máximo del creciente)
+  return 2 * SD * illum;
+}
+
+// ── Límite ARCV del criterio Odeh (2006) para visibilidad a ojo desnudo ───
+// W en arcominutos; retorna la altitud mínima necesaria del creciente (grados)
+function odehLimit(W, mode) {
+  const base = -0.1018*W**3 + 0.7319*W**2 - 6.3226*W;
+  if (mode === 'strict')  return base + 7.1651; // fácilmente visible
+  if (mode === 'lenient') return base + 4.1872; // requiere ayuda óptica
+  return                         base + 5.6579; // visible a ojo desnudo
+}
+
+// ── Evaluación del creciente (Yallop best-time + Odeh criterion) ──────────
+// En vez de evaluar justo al atardecer, usamos el "mejor momento":
+//   T = t_puesta + 4/9 × (t_luna_puesta − t_puesta)
+// En T el cielo está bastante oscuro pero la luna todavía tiene altitud útil.
 function evalCrescent(date, obs, mode) {
-  const su   = getSunset(date, obs);
-  const ms   = getMoonset(su, obs);
-  const alt  = horizAlt(su, obs);
-  const elo  = elongation(su);
-  const lag  = ms ? (ms - su) / 60000 : -999;
-  const illu = Astronomy.Illumination(Astronomy.Body.Moon, su).phase_fraction * 100;
-  const thr  = thresholds(mode);
-  return {
-    visible: alt>=thr.alt && elo>=thr.el && lag>=thr.lag && illu>=thr.illum,
-    sunset: su
+  const su = getSunset(date, obs);
+  const ms = getMoonset(su, obs);
+
+  // Sin luna poniente ese día → no visible
+  if (!ms || ms <= su) return { visible: false, sunset: su };
+
+  const lagMs = ms - su;
+  const lagMin = lagMs / 60000;
+
+  // Mínimo físico: la luna debe ponerse al menos 20 min después del sol
+  if (lagMin < 20) return { visible: false, sunset: su };
+
+  // Tiempo óptimo de observación (regla 4/9 de Yallop)
+  const T = new Date(su.getTime() + (4 / 9) * lagMs);
+
+  const moonAlt = horizAlt(T, obs);      // altitud de la Luna en T
+  const sunAlt  = getSunAlt(T, obs);     // altitud del Sol en T (negativa)
+  const ARCL    = elongation(T);         // elongación Sol-Luna (°)
+  const ARCV    = moonAlt - sunAlt;      // arco de visión (°) — siempre > moonAlt
+  const W       = crescentWidth(T);      // ancho del creciente (arcominutos)
+
+  // La luna debe estar sobre el horizonte y la elongación ser físicamente posible
+  if (moonAlt <= 0 || ARCL < 6.5) return { visible: false, sunset: su };
+
+  // Criterio Odeh: ARCV >= límite calculado según W y modo
+  const visible = ARCV >= odehLimit(W, mode);
+
+  return { visible, sunset: su,
+    debug: { ARCL: ARCL.toFixed(2), ARCV: ARCV.toFixed(2), W: W.toFixed(2),
+             moonAlt: moonAlt.toFixed(2), sunAlt: sunAlt.toFixed(2), lagMin: lagMin.toFixed(0) }
   };
 }
+
+// ── Primer día del mes tras la luna nueva ────────────────────────────────
+// Revisa hasta 4 días después de la luna nueva (normalmente 1-2 días bastan)
 function findMonthStart(nm, obs, mode) {
-  for (let d=1; d<=3; d++) {
+  for (let d = 1; d <= 4; d++) {
     const r = evalCrescent(addDays(nm, d), obs, mode);
     if (r.visible) return r.sunset;
   }
+  // Fallback: si no se detecta visibilidad en 4 días, usar día +2
+  // (el mes anterior dura 30 días según la regla caraíta)
   return evalCrescent(addDays(nm, 2), obs, mode).sunset;
 }
 function findLunations(start, obs, mode, n) {
