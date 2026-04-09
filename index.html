@@ -499,8 +499,7 @@
     }
 
     function getMoonsetAstronomy(afterDate, observer) {
-      const event = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, afterDate, 1, 0.0);
-      return event ? new Date(event.date) : null;
+      const event = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, afterDate, 1, 0.0);      return event ? new Date(event.date) : null;
     }
 
     function getMoonTimesSunCalc(date) {
