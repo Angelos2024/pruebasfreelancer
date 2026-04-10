@@ -218,19 +218,14 @@
     }
     .btn-adv-toggle:hover{border-color:var(--accent);color:var(--accent);}
     .adv-panel{
-      display:none;align-items:flex-end;gap:12px;flex-wrap:wrap;
+      display:none;align-items:center;gap:8px;flex-wrap:wrap;flex:1;
       background:#fff8f0;border:1px solid var(--border);
-      border-radius:0 0 5px 5px;border-top:none;padding:8px 12px;
+      border-radius:6px;padding:7px 12px;
     }
     .adv-panel.open{display:flex;}
-    .adv-group{display:flex;flex-direction:column;gap:4px;}
-    .adv-panel label{font-size:.7rem;font-weight:700;color:var(--accent);white-space:nowrap;}
-    .adv-panel select,.adv-panel input[type=number]{
-      padding:6px 8px;font:inherit;font-size:.82rem;
-      border:1px solid var(--border);border-radius:5px;background:#fffdf8;
-    }
+    .adv-panel label{font-size:.72rem;font-weight:700;color:var(--accent);white-space:nowrap;}
     .adv-panel input[type=datetime-local]{
-      flex:1;padding:6px 8px;font:inherit;font-size:.82rem;
+      flex:1;min-width:160px;padding:6px 8px;font:inherit;font-size:.8rem;
       border:1px solid var(--border);border-radius:5px;background:#fffdf8;
     }
     .btn-adv-clear{
@@ -319,45 +314,34 @@
         <option value="3" selected>Marzo</option>
         <option value="4">Abril</option>
       </select></div>
-
+    <div class="field"><label>Visibilidad creciente</label>
+      <select id="crescentMode">
+        <option value="strict">Estricto</option>
+        <option value="standard" selected>Estándar</option>
+        <option value="lenient">Flexible</option>
+      </select></div>
     <div class="field"><label>Meses a generar</label>
       <select id="monthCount">
         <option value="12" selected>12 meses</option>
         <option value="13">13 meses</option>
       </select></div>
-    <div class="field" style="align-self:end">
-      <button class="btn-calc" id="recalcBtn">Calcular calendario</button>
-    </div>
-    <div class="field" style="align-self:end">
-      <button class="btn-adv-toggle" onclick="toggleAdv()">
-        ⚙ Opciones avanzadas<span class="yom-pill" id="yomPill"> 📅</span>
-      </button>
+  </div>
+
+  <!-- ══ FILA INFERIOR: Calcular + Opciones avanzadas al lado ══ -->
+  <div class="ctrl-bottom-row">
+    <button class="btn-calc" id="recalcBtn">Calcular calendario</button>
+    <button class="btn-adv-toggle" onclick="toggleAdv()">
+      ⚙ Opciones avanzadas
+      <span class="yom-pill" id="yomPill">📅 Yom Tru'ah diferido</span>
+    </button>
+    <div class="adv-panel" id="advPanel">
+      <label>📅 Diferir Yom Tru'ah:</label>
+      <input type="datetime-local" id="fallbackMonth7"/>
+      <button class="btn-adv-clear" onclick="clearYomOverride()" title="Quitar">✕ Quitar</button>
     </div>
   </div>
 
-  <div class="adv-panel" id="advPanel">
-    <div class="adv-group">
-      <label>👁 Visibilidad creciente</label>
-      <select id="crescentMode">
-        <option value="strict">Estricto</option>
-        <option value="standard" selected>Estándar</option>
-        <option value="lenient">Flexible</option>
-      </select>
-    </div>
-    <div class="adv-group">
-      <label>🌙 Ilum. mínima del día (%)</label>
-      <input type="number" id="minDayIllum" value="1.80" min="0" max="10" step="0.1" style="width:85px;"/>
-    </div>
-    <div style="width:1px;background:var(--border);margin:0 4px;align-self:stretch;"></div>
-    <div class="adv-group" style="flex:1;min-width:220px;">
-      <label>📅 Diferir Yom Tru'ah</label>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <input type="datetime-local" id="fallbackMonth7" style="flex:1;"/>
-        <button class="btn-adv-clear" onclick="clearYomOverride()">✕</button>
-      </div>
-    </div>
-  </div>
-
+  <!-- Compatibilidad JS -->
   <input type="hidden" id="useFallbackMonth7" value="compare"/>
 </div>
 
@@ -439,41 +423,19 @@ function odehLimit(W,mode){
   if(mode==='lenient')return base+4.1872;
   return base+5.6579;
 }
-function evalCrescent(date, obs, mode) {
-  const su = getSunset(date, obs);
-  const ms = getMoonset(su, obs);
-  if (!ms || ms <= su) return { visible: false, sunset: su };
-  const lagMs = ms - su, lagMin = lagMs / 60000;
-  if (lagMin < 12) return { visible: false, sunset: su };
-
-  // Filtro 1: iluminación máxima del día hebreo (muestras c/2 h, 24 h)
-  // Si el máximo es menor al umbral → Difícil visibilidad → pasar al día siguiente
-  const minIllum = parseFloat($('minDayIllum')?.value) || 1.8;
-  let illumMax = 0;
-  for (let h = 0; h <= 24; h += 2) {
-    const pct = Astronomy.Illumination(Astronomy.Body.Moon,
-      new Date(su.getTime() + h * 3600000)).phase_fraction * 100;
-    if (pct > illumMax) illumMax = pct;
-  }
-  if (illumMax < minIllum) return { visible: false, sunset: su };
-
-  // Filtro 2: criterio Odeh en el tiempo óptimo de Yallop (4/9 del lag)
-  const T = new Date(su.getTime() + (4 / 9) * lagMs);
-  const moonAlt = horizAlt(T, obs);
-  if (moonAlt <= 0) return { visible: false, sunset: su };
-  const sunAlt = getSunAlt(T, obs);
-  const ARCL   = elongation(T);
-  if (ARCL < 6.5) return { visible: false, sunset: su };
-  const ARCV = moonAlt - sunAlt;
-  const W    = crescentWidth(T);
-  return { visible: ARCV >= odehLimit(W, mode), sunset: su };
+function evalCrescent(date,obs,mode){
+  const su=getSunset(date,obs),ms=getMoonset(su,obs);
+  if(!ms||ms<=su)return{visible:false,sunset:su};
+  const lagMs=ms-su,lagMin=lagMs/60000;
+  if(lagMin<20)return{visible:false,sunset:su};
+  const T=new Date(su.getTime()+(4/9)*lagMs);
+  const moonAlt=horizAlt(T,obs),sunAlt=getSunAlt(T,obs),ARCL=elongation(T),ARCV=moonAlt-sunAlt,W=crescentWidth(T);
+  if(moonAlt<=0||ARCL<6.5)return{visible:false,sunset:su};
+  return{visible:ARCV>=odehLimit(W,mode),sunset:su};
 }
-function findMonthStart(nm, obs, mode) {
-  for (let d = 1; d <= 5; d++) {
-    const r = evalCrescent(addDays(nm, d), obs, mode);
-    if (r.visible) return r.sunset;
-  }
-  return evalCrescent(addDays(nm, 2), obs, mode).sunset;
+function findMonthStart(nm,obs,mode){
+  for(let d=1;d<=4;d++){const r=evalCrescent(addDays(nm,d),obs,mode);if(r.visible)return r.sunset;}
+  return evalCrescent(addDays(nm,2),obs,mode).sunset;
 }
 function findLunations(start,obs,mode,n){
   const list=[];let anchor=new Date(start);
@@ -931,6 +893,25 @@ function showDayModal(dateStr){
       const ss=getSunset(pU,currentObs),se=getSunset(tU,currentObs);
       const dMs=se-ss,dH=Math.floor(dMs/3600000),dM=Math.floor((dMs%3600000)/60000);
       const phase=moonPhaseData(ss),illum=moonIllumProfile(ss,se);
+
+      // Altitud del sol en las 3 etapas del día hebreo
+      function sunAltDeg(date) {
+        const equ = Astronomy.Equator(Astronomy.Body.Sun, date, currentObs, true, true);
+        return Astronomy.Horizon(date, currentObs, equ.ra, equ.dec, 'normal').altitude;
+      }
+      const tMeridiano = new Date(ss.getTime() + dMs / 2); // punto medio del día hebreo
+      const solInicio    = sunAltDeg(ss).toFixed(1);
+      const solMeridiano = sunAltDeg(tMeridiano).toFixed(1);
+      const solCierre    = sunAltDeg(se).toFixed(1);
+
+      function sunBadge(deg) {
+        const v = parseFloat(deg);
+        const color = v > 20 ? '#d97706' : v > 0 ? '#f59e0b' : v > -6 ? '#7c3aed' : '#1e3a5f';
+        const label = v > 0 ? `☀️ Sol ${deg}°` : `🌙 Sol ${deg}°`;
+        return `<span style="margin-left:8px;display:inline-block;background:${color};color:#fff;
+          border-radius:8px;padding:1px 8px;font-size:.7rem;font-weight:700;vertical-align:middle;">${label}</span>`;
+      }
+
       const ic=p=>{const v=parseFloat(p);if(v<2)return'low';if(v<50)return'mid';if(v<95)return'high';return'full';};
       const fw=p=>Math.min(100,parseFloat(p)).toFixed(1);
       const mx=parseFloat(illum.maximo);
@@ -945,11 +926,15 @@ function showDayModal(dateStr){
       body.innerHTML=`
         <div class="modal-time-row"><div class="modal-icon">🌅</div><div>
           <div class="modal-lbl">Inicio del día hebreo</div>
-          <div class="modal-time">${fmtFull(ss)}</div>
+          <div class="modal-time">${fmtFull(ss)}${sunBadge(solInicio)}</div>
+        </div></div>
+        <div class="modal-time-row"><div class="modal-icon">🌙</div><div>
+          <div class="modal-lbl">Meridiano del día hebreo</div>
+          <div class="modal-time">${fmtFull(tMeridiano)}${sunBadge(solMeridiano)}</div>
         </div></div>
         <div class="modal-time-row"><div class="modal-icon">🌇</div><div>
-          <div class="modal-lbl">Fin del día hebreo</div>
-          <div class="modal-time">${fmtFull(se)}</div>
+          <div class="modal-lbl">Cierre del día hebreo</div>
+          <div class="modal-time">${fmtFull(se)}${sunBadge(solCierre)}</div>
         </div></div>
         <div class="modal-phase-bar">
           <div class="phase-emoji">${phase.emoji}</div>
