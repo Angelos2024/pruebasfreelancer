@@ -538,10 +538,10 @@ function renderMonth(year,month,eventMap,shabbatMap){
       let shabH='';
       if(shabbatMap){
         if(dow===5&&shabbatMap[k]){
-          shabH=`<span class="shab-start" title="Inicio Shabbat"> ${shabbatMap[k].inicio}</span>`;
+          shabH=`<span class="shab-start" title="Inicio Shabbat">🕯 ${shabbatMap[k].inicio}</span>`;
         }
         if(dow===6&&shabbatMap[k]){
-          shabH=`<span class="shab-end" title="Fin Shabbat"> ${shabbatMap[k].fin}</span>`;
+          shabH=`<span class="shab-end" title="Fin Shabbat">✡ ${shabbatMap[k].fin}</span>`;
         }
       }
       html+=`<td class="${tc}" onclick="showDayModal('${k}')" title="Ver detalle"><div class="dn">${day}</div>${evH}${shabH}</td>`;
@@ -994,7 +994,7 @@ function fmtSunAlt(alt){
   else if(a<30){cls='sun-alt-mid';tip='Sol moderado';}
   else if(a<50){cls='sun-alt-high';tip='Sol alto — dificulta visibilidad';}
   else{cls='sun-alt-vhigh';tip='Sol muy alto — cielo muy brillante';}
-  return \`<div class="sun-alt-badge \${cls}" title="\${tip}">☀ \${a>=0?'+':''}\${a.toFixed(1)}°</div>\`;
+  return `<div class="sun-alt-badge ${cls}" title="${tip}">☀ ${a>=0?'+':''}${a.toFixed(1)}°</div>`;
 }
 function closeModal(){$('dayModal').style.display='none';}
 function showDayModal(dateStr){
