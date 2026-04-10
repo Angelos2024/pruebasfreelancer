@@ -208,6 +208,38 @@
     .illum-naked-eye.yes{background:#14532d;color:#86efac;}
     .illum-naked-eye.no{background:#7f1d1d;color:#fca5a5;}
 
+    /* ── Fila inferior: botón + opciones avanzadas ── */
+    .ctrl-bottom-row{display:flex;align-items:stretch;gap:10px;margin-top:10px;flex-wrap:wrap;}
+    .btn-adv-toggle{
+      background:none;border:1px dashed var(--border);border-radius:5px;
+      padding:7px 13px;font:inherit;font-size:.78rem;color:var(--muted);
+      cursor:pointer;white-space:nowrap;transition:all .15s;
+      display:flex;align-items:center;gap:6px;
+    }
+    .btn-adv-toggle:hover{border-color:var(--accent);color:var(--accent);}
+    .adv-panel{
+      display:none;align-items:center;gap:8px;flex-wrap:wrap;flex:1;
+      background:#fff8f0;border:1px solid var(--border);
+      border-radius:6px;padding:7px 12px;
+    }
+    .adv-panel.open{display:flex;}
+    .adv-panel label{font-size:.72rem;font-weight:700;color:var(--accent);white-space:nowrap;}
+    .adv-panel input[type=datetime-local]{
+      flex:1;min-width:160px;padding:6px 8px;font:inherit;font-size:.8rem;
+      border:1px solid var(--border);border-radius:5px;background:#fffdf8;
+    }
+    .btn-adv-clear{
+      background:none;border:1px solid #fc8181;color:#c53030;
+      border-radius:5px;padding:5px 9px;font:inherit;font-size:.75rem;cursor:pointer;white-space:nowrap;
+    }
+    .btn-adv-clear:hover{background:#fff5f5;}
+    .yom-pill{
+      display:none;align-items:center;gap:4px;
+      background:#feebc8;border:1px solid #f6ad55;border-radius:12px;
+      padding:2px 8px;font-size:.7rem;color:#7b341e;font-weight:700;
+    }
+    .yom-pill.show{display:inline-flex;}
+
     @media(max-width:900px){.months-grid{grid-template-columns:1fr;}}
     @media(max-width:600px){
       .ctrl-grid{grid-template-columns:1fr 1fr;}
@@ -261,56 +293,51 @@
     <div class="coords-pills" id="coordsPills"></div>
   </div>
 
-  <!-- ══ GRID DE CONTROLES ══ -->
+  <!-- ══ GRID DE CAMPOS ══ -->
   <div class="ctrl-grid">
     <div class="field"><label>Año</label>
       <input id="yearName" type="text" value="2026"/></div>
-
-    <div class="field">
-      <label>Zona horaria</label>
+    <div class="field"><label>Zona horaria</label>
       <input id="timezone" type="text" value="Asia/Jerusalem"/>
-      <div class="auto-lbl" id="lbl_tz">✓ Auto-detectada</div>
-    </div>
-    <div class="field">
-      <label>Latitud</label>
+      <div class="auto-lbl" id="lbl_tz">✓ Auto</div></div>
+    <div class="field"><label>Latitud</label>
       <input id="latitude" type="number" step="0.000001" value="31.768300"/>
-      <div class="auto-lbl" id="lbl_lat">✓ Auto-detectada</div>
-    </div>
-    <div class="field">
-      <label>Longitud</label>
+      <div class="auto-lbl" id="lbl_lat">✓ Auto</div></div>
+    <div class="field"><label>Longitud</label>
       <input id="longitude" type="number" step="0.000001" value="35.213700"/>
-      <div class="auto-lbl" id="lbl_lon">✓ Auto-detectada</div>
-    </div>
-    <div class="field">
-      <label>Elevación (m)</label>
+      <div class="auto-lbl" id="lbl_lon">✓ Auto</div></div>
+    <div class="field"><label>Elevación (m)</label>
       <input id="elevation" type="number" value="800"/>
-      <div class="auto-lbl" id="lbl_el">✓ Auto-detectada</div>
-    </div>
-
-
-    <div class="field"><label>Visibilidad</label>
+      <div class="auto-lbl" id="lbl_el">✓ Auto</div></div>
+    <div class="field"><label>Visibilidad creciente</label>
       <select id="crescentMode">
         <option value="strict">Estricto</option>
         <option value="standard" selected>Estándar</option>
         <option value="lenient">Flexible</option>
       </select></div>
-    <div class="field"><label>Ancla Yom Tru'ah</label>
-      <input id="fallbackMonth7" type="datetime-local" value="2026-09-12T19:00"/></div>
-    <div class="field"><label>Uso ancla mes 7</label>
-      <select id="useFallbackMonth7">
-        <option value="compare" selected>Solo comparar</option>
-        <option value="force">Forzar mes 7</option>
-      </select></div>
-    <div class="field"><label>Meses</label>
+    <div class="field"><label>Meses a generar</label>
       <select id="monthCount">
         <option value="12" selected>12 meses</option>
         <option value="13">13 meses</option>
       </select></div>
-    <div class="field" style="align-self:end">
-      <label>&nbsp;</label>
-      <button class="btn-calc" id="recalcBtn">Calcular calendario</button>
+  </div>
+
+  <!-- ══ FILA INFERIOR: Calcular + Opciones avanzadas al lado ══ -->
+  <div class="ctrl-bottom-row">
+    <button class="btn-calc" id="recalcBtn">Calcular calendario</button>
+    <button class="btn-adv-toggle" onclick="toggleAdv()">
+      ⚙ Opciones avanzadas
+      <span class="yom-pill" id="yomPill">📅 Yom Tru'ah diferido</span>
+    </button>
+    <div class="adv-panel" id="advPanel">
+      <label>📅 Diferir Yom Tru'ah:</label>
+      <input type="datetime-local" id="fallbackMonth7"/>
+      <button class="btn-adv-clear" onclick="clearYomOverride()" title="Quitar">✕ Quitar</button>
     </div>
   </div>
+
+  <!-- Compatibilidad JS -->
+  <input type="hidden" id="useFallbackMonth7" value="compare"/>
 </div>
 
 <div id="statusBox"></div>
@@ -545,6 +572,20 @@ function buildCalendar(){
   },30);
 }
 $('recalcBtn').addEventListener('click',buildCalendar);
+
+function toggleAdv(){
+  $('advPanel').classList.toggle('open');
+}
+function clearYomOverride(){
+  $('fallbackMonth7').value='';
+  $('yomPill').className='yom-pill';
+  $('advPanel').classList.remove('open');
+}
+if($('fallbackMonth7')){
+  $('fallbackMonth7').addEventListener('change',function(){
+    $('yomPill').className='yom-pill'+(this.value?' show':'');
+  });
+}
 
 
 /* ══════════════════════════════════════════════════════════════════
