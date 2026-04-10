@@ -208,38 +208,6 @@
     .illum-naked-eye.yes{background:#14532d;color:#86efac;}
     .illum-naked-eye.no{background:#7f1d1d;color:#fca5a5;}
 
-    /* ── Sección avanzada ── */
-    .adv-wrap{border-top:1px dashed var(--border);margin-top:10px;padding-top:10px;}
-    .btn-adv{
-      background:none;border:1px solid var(--border);border-radius:5px;
-      padding:5px 12px;font:inherit;font-size:.78rem;color:var(--muted);
-      cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;
-    }
-    .btn-adv:hover{border-color:var(--accent);color:var(--accent);}
-    .adv-content{display:none;margin-top:10px;}
-    .adv-content.open{display:block;}
-    .yom-override-bar{
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-      background:#fff8f0;border:1px solid var(--border);border-radius:6px;
-      padding:10px 14px;
-    }
-    .yom-override-bar label{font-size:.8rem;font-weight:700;color:var(--accent);white-space:nowrap;margin:0;}
-    .yom-override-bar input[type=datetime-local]{
-      padding:6px 8px;font:inherit;font-size:.82rem;
-      border:1px solid var(--border);border-radius:5px;background:#fffdf8;flex:1;min-width:180px;
-    }
-    .btn-yom-clear{
-      background:none;border:1px solid #fc8181;color:#c53030;border-radius:5px;
-      padding:5px 10px;font:inherit;font-size:.78rem;cursor:pointer;white-space:nowrap;
-    }
-    .btn-yom-clear:hover{background:#fff5f5;}
-    .yom-active-pill{
-      display:none;align-items:center;gap:6px;
-      background:#feebc8;border:1px solid #f6ad55;border-radius:20px;
-      padding:3px 10px;font-size:.75rem;color:#7b341e;font-weight:700;margin-left:4px;
-    }
-    .yom-active-pill.show{display:inline-flex;}
-
     @media(max-width:900px){.months-grid{grid-template-columns:1fr;}}
     @media(max-width:600px){
       .ctrl-grid{grid-template-columns:1fr 1fr;}
@@ -293,58 +261,57 @@
     <div class="coords-pills" id="coordsPills"></div>
   </div>
 
-  <!-- ══ GRID DE CONTROLES PRINCIPALES ══ -->
+  <!-- ══ GRID DE CONTROLES ══ -->
   <div class="ctrl-grid">
     <div class="field"><label>Año</label>
       <input id="yearName" type="text" value="2026"/></div>
-    <div class="field"><label>Zona horaria</label>
+
+    <div class="field">
+      <label>Zona horaria</label>
       <input id="timezone" type="text" value="Asia/Jerusalem"/>
-      <div class="auto-lbl" id="lbl_tz">✓ Auto</div></div>
-    <div class="field"><label>Latitud</label>
+      <div class="auto-lbl" id="lbl_tz">✓ Auto-detectada</div>
+    </div>
+    <div class="field">
+      <label>Latitud</label>
       <input id="latitude" type="number" step="0.000001" value="31.768300"/>
-      <div class="auto-lbl" id="lbl_lat">✓ Auto</div></div>
-    <div class="field"><label>Longitud</label>
+      <div class="auto-lbl" id="lbl_lat">✓ Auto-detectada</div>
+    </div>
+    <div class="field">
+      <label>Longitud</label>
       <input id="longitude" type="number" step="0.000001" value="35.213700"/>
-      <div class="auto-lbl" id="lbl_lon">✓ Auto</div></div>
-    <div class="field"><label>Elevación (m)</label>
+      <div class="auto-lbl" id="lbl_lon">✓ Auto-detectada</div>
+    </div>
+    <div class="field">
+      <label>Elevación (m)</label>
       <input id="elevation" type="number" value="800"/>
-      <div class="auto-lbl" id="lbl_el">✓ Auto</div></div>
-    <div class="field"><label>Visibilidad del creciente</label>
+      <div class="auto-lbl" id="lbl_el">✓ Auto-detectada</div>
+    </div>
+
+    <div class="field"><label>Buscar desde</label>
+      <input id="searchStart" type="datetime-local" value="2026-03-01T12:00"/></div>
+    <div class="field"><label>Visibilidad</label>
       <select id="crescentMode">
         <option value="strict">Estricto</option>
         <option value="standard" selected>Estándar</option>
         <option value="lenient">Flexible</option>
       </select></div>
-    <div class="field"><label>Meses a generar</label>
+    <div class="field"><label>Ancla Yom Tru'ah</label>
+      <input id="fallbackMonth7" type="datetime-local" value="2026-09-12T19:00"/></div>
+    <div class="field"><label>Uso ancla mes 7</label>
+      <select id="useFallbackMonth7">
+        <option value="compare" selected>Solo comparar</option>
+        <option value="force">Forzar mes 7</option>
+      </select></div>
+    <div class="field"><label>Meses</label>
       <select id="monthCount">
         <option value="12" selected>12 meses</option>
         <option value="13">13 meses</option>
       </select></div>
     <div class="field" style="align-self:end">
+      <label>&nbsp;</label>
       <button class="btn-calc" id="recalcBtn">Calcular calendario</button>
     </div>
   </div>
-
-  <!-- ══ OPCIONES AVANZADAS ══ -->
-  <div class="adv-wrap">
-    <button class="btn-adv" onclick="toggleAdv()">
-      <span id="advArrow">▸</span> Opciones avanzadas
-      <span class="yom-active-pill" id="yomPill">📅 Yom Tru'ah diferido</span>
-    </button>
-    <div class="adv-content" id="advContent">
-      <div class="yom-override-bar">
-        <label>📅 Diferir inicio de Yom Tru'ah:</label>
-        <input type="datetime-local" id="fallbackMonth7" value=""/>
-        <button class="btn-yom-clear" onclick="clearYomOverride()">✕ Quitar</button>
-      </div>
-      <div style="font-size:.72rem;color:var(--muted);margin-top:6px;padding-left:2px;">
-        Si estableces una fecha, el mes 7 y todas las fiestas de otoño se recalcularán a partir de ese atardecer.
-      </div>
-    </div>
-  </div>
-
-  <!-- Elementos dummy para compatibilidad JS -->
-  <input type="hidden" id="useFallbackMonth7" value="compare"/>
 </div>
 
 <div id="statusBox"></div>
@@ -364,19 +331,20 @@ const { DateTime } = luxon;
 
 const C = {
   mes:'#6b46c1', prep:'#c05621', fiesta:'#276749', fiestaFin:'#22543d',
-  shabbat:'#718096', omer:'#553c9a', shavuot:'#1a56db',
+  shabbat:'#718096', shabWeekly:'#3730a3', omer:'#553c9a', shavuot:'#1a56db',
   teruah:'#0694a2', kippur:'#c53030', shemini:'#805ad5'
 };
 const LEGEND = [
-  {color:C.mes,    label:'Inicio mes hebreo'},
-  {color:C.prep,   label:'14 Aviv - Preparacion'},
-  {color:C.fiesta, label:'Jag HaMatzot / Sukot'},
-  {color:C.shabbat,label:'Shabbat en la fiesta'},
-  {color:C.omer,   label:'Omer Reshit'},
-  {color:C.shavuot,label:'Shavuot'},
-  {color:C.teruah, label:"Yom Tru'ah"},
-  {color:C.kippur, label:'Yom HaKipurim'},
-  {color:C.shemini,label:'Shminí Atzéret'},
+  {color:C.mes,       label:'Inicio mes hebreo'},
+  {color:C.shabWeekly,label:'Shabbat semanal'},
+  {color:C.prep,      label:'14 Aviv - Preparacion'},
+  {color:C.fiesta,    label:'Jag HaMatzot / Sukot'},
+  {color:C.shabbat,   label:'Shabbat en la fiesta'},
+  {color:C.omer,      label:'Omer Reshit'},
+  {color:C.shavuot,   label:'Shavuot'},
+  {color:C.teruah,    label:"Yom Tru'ah"},
+  {color:C.kippur,    label:'Yom HaKipurim'},
+  {color:C.shemini,   label:'Shminí Atzéret'},
 ];
 const MESES_ES  = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const MESES_HEB = ['Aviv','Ziv','Sivan','Tamuz','Av','Elul','Etanim','Bul','Mes 9','Mes 10','Mes 11','Mes 12','Mes 13'];
@@ -475,6 +443,18 @@ function buildEventMap(months,avivStart,m7Start){
     markRange(incRange(m7Start,15),7,'\u{1F33F} Sukot',C.fiesta,'\u{1F33F} 15 Sukot');
     mark(incRange(m7Start,22),'\u{1F389} Shminí Atzéret',C.shemini);
   }
+
+  // ── Shabbat semanal: marcar todos los viernes (inicio) y sábados (cierre)
+  // Rango: desde el inicio del mes 1 hasta 5 semanas después del último mes
+  const rangeEnd = months[months.length-1].start.getTime() + 35*86400000;
+  for(let t=new Date(months[0].start.getTime()); t.getTime()<rangeEnd; t=new Date(t.getTime()+86400000)){
+    const k=dateKey(t);
+    const [ky,km,kd]=k.split('-').map(Number);
+    const dow=isoWeekday(ky,km,kd);
+    if(dow===5) mark(t,'\uD83D\uDD6F Inicio Shabbat',C.shabWeekly);   // viernes → abre
+    else if(dow===6) mark(t,'\u2721 Cierre Shabbat',C.shabWeekly);      // sábado  → cierra
+  }
+
   return map;
 }
 function isoWeekday(y,m,d){const w=new Date(Date.UTC(y,m-1,d)).getUTCDay();return w===0?7:w;}
@@ -524,38 +504,26 @@ function buildCalendar(){
     try{
       validateLibs();
       const start=parseDT($('searchStart').value),obs=buildObserver();
-      const mode=$('crescentMode').value;
+      const mode=$('crescentMode').value,fb7=parseDT($('fallbackMonth7').value);
       const count=Number($('monthCount').value),year=$('yearName').value.trim();
       const luns=findLunations(start,obs,mode,count);
       const months=luns.map((item,i)=>({start:item.start,days:i<luns.length-1?diffDays(item.start,luns[i+1].start):29}));
       months[months.length-1].days=29;
-
-      // Yom Tru'ah diferido: si el usuario puso fecha en opciones avanzadas, forzar mes 7
-      const fb7val = $('fallbackMonth7').value;
-      let yomDifVal = null;
-      if (fb7val) {
-        try {
-          yomDifVal = parseDT(fb7val);
-          if (months[6]) {
-            months[6].start = yomDifVal;
-            for(let i=7;i<months.length;i++)
-              months[i].start=addDays(months[i-1].start,months[i-1].days);
-          }
-        } catch(e) { /* fecha inválida, ignorar */ }
+      if($('useFallbackMonth7').value==='force'&&months[6]){
+        months[6].start=fb7;
+        for(let i=7;i<months.length;i++)months[i].start=addDays(months[i-1].start,months[i-1].days);
       }
-
       const avivStart=months[0].start,m7Start=months[6]?.start;
+      const delta=m7Start?diffDays(m7Start,fb7):null;
       const evMap=buildEventMap(months,avivStart,m7Start);
       currentObs=obs;currentEventMap=evMap;
       $('legend').innerHTML=LEGEND.map(l=>`<div class="lg-item"><div class="lg-dot" style="background:${l.color}"></div><span>${l.label}</span></div>`).join('');
       $('monthsGrid').innerHTML=gregRange(evMap).map(({year:y,month:m})=>renderMonth(y,m,evMap)).join('');
       $('placeholder').style.display='none';$('calOutput').style.display='block';
       setTimeout(markDaysWithNotes,200);
-      const statusMsg = yomDifVal
-        ? ` · Yom Tru'ah diferido al ${DateTime.fromJSDate(yomDifVal,{zone:'utc'}).setZone(tz()).toFormat("d 'de' LLLL")}.`
-        : '';
-      $('statusBox').className='ok';
-      $('statusBox').innerHTML=`<b>✓ Calendario ${year} generado.</b>${statusMsg}`;
+      const cmp=delta===null?'':delta===0?' · Mes 7 coincide con ancla.':` · Mes 7 difiere ${delta} día(s) del ancla.`;
+      $('statusBox').className=(delta===null||Math.abs(delta)<=1)?'ok':'warn';
+      $('statusBox').innerHTML=`<b>✓ Calendario ${year} generado.</b>${cmp}`;
     }catch(err){
       $('placeholder').style.display='block';$('calOutput').style.display='none';
       $('statusBox').className='error';$('statusBox').innerHTML=`<b>Error:</b> ${errMsg(err)}`;
@@ -563,20 +531,6 @@ function buildCalendar(){
   },30);
 }
 $('recalcBtn').addEventListener('click',buildCalendar);
-
-function toggleAdv(){
-  const c=$('advContent'),a=$('advArrow');
-  const open=c.classList.toggle('open');
-  a.textContent=open?'▾':'▸';
-}
-function clearYomOverride(){
-  $('fallbackMonth7').value='';
-  $('yomPill').className='yom-active-pill';
-}
-// Mostrar pill cuando se elige fecha
-$('fallbackMonth7').addEventListener('change',function(){
-  $('yomPill').className='yom-active-pill'+(this.value?' show':'');
-});
 
 
 /* ══════════════════════════════════════════════════════════════════
@@ -897,14 +851,20 @@ function showDayModal(dateStr){
       else if(mx<95)vn=`<b>${illum.maximo}%</b> — luna muy brillante.`;
       else vn=`<b>${illum.maximo}%</b> — luna llena.`;
       const ec=illum.visible?'yes':'no',et=illum.visible?'👁 Potencialmente visible':'🚫 Difícil visibilidad';
+      // Detectar Shabbat: dow=5 viernes (shabbat abre al fin), dow=6 sábado (abre al inicio, cierra al fin)
+      const dow=isoWeekday(year,month,day);
+      const shabBadge=(txt)=>`<span style="display:inline-block;margin-left:8px;background:#3730a3;color:#fff;border-radius:10px;padding:1px 10px;font-size:.72rem;font-weight:700;vertical-align:middle;">${txt}</span>`;
+      const ssShab = dow===6 ? shabBadge('✡ Shabbat') : '';          // sábado: inicio = cuando abrió shabbat
+      const seShab = dow===5 ? shabBadge('🕯 Inicia Shabbat')        // viernes: cierre = shabbat abre
+                   : dow===6 ? shabBadge('✡ Cierra Shabbat') : '';   // sábado: cierre = shabbat termina
       body.innerHTML=`
         <div class="modal-time-row"><div class="modal-icon">🌅</div><div>
           <div class="modal-lbl">Inicio del día hebreo</div>
-          <div class="modal-time">${fmtFull(ss)}</div>
+          <div class="modal-time">${fmtFull(ss)}${ssShab}</div>
         </div></div>
         <div class="modal-time-row"><div class="modal-icon">🌇</div><div>
           <div class="modal-lbl">Fin del día hebreo</div>
-          <div class="modal-time">${fmtFull(se)}</div>
+          <div class="modal-time">${fmtFull(se)}${seShab}</div>
         </div></div>
         <div class="modal-phase-bar">
           <div class="phase-emoji">${phase.emoji}</div>
