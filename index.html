@@ -17,12 +17,10 @@
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);}
 
-    /* HEADER */
     .app-header{background:var(--head);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:12px;}
     .app-header h1{font-size:1.2rem;font-weight:700;}
     .app-header small{font-size:.78rem;opacity:.75;}
 
-    /* CONTROLES */
     .ctrl-wrap{background:#fff;border-bottom:2px solid var(--strong);padding:14px 22px;}
     .ctrl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;align-items:end;}
     .field label{display:block;font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:4px;}
@@ -38,182 +36,184 @@
     .btn-calc:hover{opacity:.88;}
     .btn-calc:disabled{opacity:.55;cursor:default;}
 
-    /* STATUS */
+    /* ══ SECCIÓN UBICACIÓN ══ */
+    .loc-section{
+      background:linear-gradient(135deg,#fdf6ec,#fff8f0);
+      border:2px solid var(--border);border-radius:10px;
+      padding:14px 16px;margin-bottom:14px;
+    }
+    .loc-title{
+      font-size:.8rem;font-weight:800;color:var(--head);
+      text-transform:uppercase;letter-spacing:.06em;
+      margin-bottom:10px;display:flex;align-items:center;gap:7px;
+    }
+    .loc-row{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;}
+
+    .btn-geolocate{
+      display:flex;align-items:center;gap:10px;
+      background:var(--head);color:#fff;border:none;border-radius:8px;
+      padding:12px 20px;font:inherit;font-size:.95rem;font-weight:700;
+      cursor:pointer;transition:opacity .15s, transform .1s;
+      box-shadow:0 2px 8px rgba(122,58,10,.25);white-space:nowrap;
+    }
+    .btn-geolocate:hover{opacity:.9;transform:translateY(-1px);}
+    .btn-geolocate:disabled{opacity:.5;cursor:default;transform:none;}
+
+    .city-search-wrap{flex:1;min-width:200px;position:relative;}
+    .city-search-wrap input{
+      width:100%;padding:12px 14px 12px 38px;
+      font:inherit;font-size:.88rem;
+      border:1px solid var(--border);border-radius:8px;
+      background:#fffdf8;
+      transition:border-color .2s,box-shadow .2s;
+    }
+    .city-search-wrap input:focus{
+      outline:none;border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(122,92,30,.12);
+    }
+    .city-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none;}
+
+    .city-suggestions{
+      position:absolute;top:100%;left:0;right:0;z-index:999;
+      background:#fff;border:1px solid var(--border);border-radius:0 0 8px 8px;
+      box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:220px;overflow-y:auto;display:none;
+    }
+    .city-suggestions.open{display:block;}
+    .city-sugg-item{
+      padding:10px 14px;cursor:pointer;font-size:.85rem;
+      border-bottom:1px solid #f0ede4;transition:background .1s;
+    }
+    .city-sugg-item:last-child{border-bottom:none;}
+    .city-sugg-item:hover{background:#fdf6ec;}
+    .city-sugg-name{font-weight:700;color:var(--text);}
+    .city-sugg-sub{font-size:.74rem;color:var(--muted);margin-top:2px;}
+
+    .loc-status{
+      margin-top:10px;padding:8px 12px;border-radius:6px;
+      font-size:.82rem;display:none;align-items:center;gap:8px;
+    }
+    .loc-status.show{display:flex;}
+    .loc-status.loading{background:#fffbeb;border:1px solid #f6ad55;color:#7b341e;}
+    .loc-status.ok{background:#f0faf3;border:1px solid #68d391;color:#276749;}
+    .loc-status.error{background:#fff5f5;border:1px solid #fc8181;color:#9b2c2c;}
+    .loc-status.info{background:#ebf4ff;border:1px solid #76b5ff;color:#1a56db;}
+
+    .load-steps{
+      display:none;flex-direction:column;gap:4px;
+      margin-top:8px;padding:8px 12px;
+      background:#fdf6ec;border:1px solid var(--border);border-radius:6px;font-size:.78rem;
+    }
+    .load-steps.show{display:flex;}
+    .ls{display:flex;align-items:center;gap:6px;color:var(--muted);}
+    .ls.done{color:#276749;font-weight:600;}
+    .ls.active{color:var(--accent);font-weight:700;}
+    .ls.error{color:#c53030;}
+    .ls-icon{width:16px;text-align:center;flex-shrink:0;}
+
+    .coords-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+    .cpill{
+      display:inline-flex;align-items:center;gap:4px;
+      background:#e8f5e9;border:1px solid #68d391;border-radius:20px;
+      padding:3px 10px;font-size:.74rem;color:#276749;font-weight:700;
+    }
+
+    .field input.autofilled{
+      background:#f0faf3 !important;border-color:#68d391 !important;
+      color:#276749;font-weight:600;
+    }
+    .auto-lbl{display:none;font-size:.64rem;color:#276749;font-weight:700;margin-top:2px;}
+    .auto-lbl.show{display:block;}
+
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .spin{
+      display:inline-block;width:16px;height:16px;
+      border:2px solid rgba(255,255,255,.35);border-top-color:#fff;
+      border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;
+    }
+
     #statusBox{margin:10px 22px 0;padding:9px 14px;border-radius:5px;font-size:.86rem;display:none;}
-    #statusBox.ok   {display:block;background:#f0faf3;border:1px solid #68d391;color:#276749;}
-    #statusBox.warn {display:block;background:#fffbeb;border:1px solid #f6ad55;color:#7b341e;}
+    #statusBox.ok{display:block;background:#f0faf3;border:1px solid #68d391;color:#276749;}
+    #statusBox.warn{display:block;background:#fffbeb;border:1px solid #f6ad55;color:#7b341e;}
     #statusBox.error{display:block;background:#fff5f5;border:1px solid #fc8181;color:#9b2c2c;}
 
-    /* PLACEHOLDER */
     #placeholder{text-align:center;padding:70px 20px;color:var(--muted);}
     #placeholder .ico{font-size:3rem;margin-bottom:14px;}
-
-    /* OUTPUT */
     #calOutput{padding:18px 22px;display:none;}
 
-    /* LEYENDA */
-    .legend{
-      display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;
-      padding:11px 14px;background:#fff;
-      border:1px solid var(--border);border-radius:5px;
-    }
+    .legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;padding:11px 14px;background:#fff;border:1px solid var(--border);border-radius:5px;}
     .lg-item{display:flex;align-items:center;gap:5px;font-size:.75rem;}
     .lg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 
-    /* MESES GRID */
     .months-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
-
-    /* CALENDARIO MENSUAL */
     .cal-month{background:#fff;border:1px solid var(--border);border-radius:5px;overflow:hidden;}
-    .cal-month-title{
-      background:var(--head);color:#fff;padding:11px 16px;
-      font-weight:700;font-size:1.05rem;letter-spacing:.03em;
-    }
-    /* ── tabla del calendario mensual ── */
+    .cal-month-title{background:var(--head);color:#fff;padding:11px 16px;font-weight:700;font-size:1.05rem;letter-spacing:.03em;}
     .cal-table{width:100%;border-collapse:collapse;table-layout:fixed;}
-    .cal-table th{
-      text-align:center;padding:7px 2px;font-size:.78rem;font-weight:700;
-      color:var(--muted);background:#f7f3ea;border-bottom:1px solid var(--border);
-    }
-    .cal-table th.sat{color:#2563eb;} .cal-table th.sun{color:#c53030;}
-    .cal-table td{
-      width:14.285%;border:1px solid #ece8df;
-      height:90px;vertical-align:top;padding:6px 5px 5px 7px;
-    }
+    .cal-table th{text-align:center;padding:7px 2px;font-size:.78rem;font-weight:700;color:var(--muted);background:#f7f3ea;border-bottom:1px solid var(--border);}
+    .cal-table th.sat{color:#2563eb;}.cal-table th.sun{color:#c53030;}
+    .cal-table td{width:14.285%;border:1px solid #ece8df;height:90px;vertical-align:top;padding:6px 5px 5px 7px;}
     .cal-table td.empty{background:#faf8f4;}
     .cal-table td.sat-c .dn{color:#2563eb;}
     .cal-table td.sun-c .dn{color:#c53030;}
     .dn{font-size:.9rem;font-weight:700;color:#444;margin-bottom:4px;}
-    .ev{
-      display:block;font-size:.72rem;font-weight:600;color:#fff;
-      border-radius:3px;padding:2px 6px;margin-bottom:3px;
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.6;
-    }
-
-    /* Celdas clickeables */
+    .ev{display:block;font-size:.72rem;font-weight:600;color:#fff;border-radius:3px;padding:2px 6px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.6;}
     .cal-table td:not(.empty){cursor:pointer;transition:background .12s;}
     .cal-table td:not(.empty):hover{background:#f0ebff !important;}
 
-    /* Modal overlay */
-    .modal-overlay{
-      display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
-      z-index:9999;align-items:center;justify-content:center;padding:16px;
-    }
-    .modal-box{
-      background:#fff;border-radius:10px;width:100%;max-width:500px;
-      box-shadow:0 24px 64px rgba(0,0,0,.35);overflow:hidden;max-height:92vh;overflow-y:auto;
-    }
-    .modal-header{
-      background:var(--head);color:#fff;padding:14px 18px;
-      display:flex;justify-content:space-between;align-items:center;
-    }
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;padding:16px;}
+    .modal-box{background:#fff;border-radius:10px;width:100%;max-width:500px;box-shadow:0 24px 64px rgba(0,0,0,.35);overflow:hidden;max-height:92vh;overflow-y:auto;}
+    .modal-header{background:var(--head);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;}
     .modal-header-title{font-weight:700;font-size:1rem;line-height:1.3;}
-    .modal-header-sub{font-size:.78rem;opacity:.8;margin-top:2px;}
-    .modal-close{
-      background:rgba(255,255,255,.2);border:none;color:#fff;
-      width:28px;height:28px;border-radius:50%;cursor:pointer;
-      font-size:1rem;display:flex;align-items:center;justify-content:center;
-      flex-shrink:0;transition:background .15s;
-    }
+    .modal-close{background:rgba(255,255,255,.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;}
     .modal-close:hover{background:rgba(255,255,255,.35);}
-    .modal-events{
-      padding:10px 18px;display:flex;flex-wrap:wrap;gap:6px;
-      border-bottom:1px solid #ece8df;min-height:36px;align-items:center;
-    }
-    .modal-ev{
-      display:inline-block;padding:3px 10px;border-radius:12px;
-      color:#fff;font-size:.78rem;font-weight:600;
-    }
+    .modal-events{padding:10px 18px;display:flex;flex-wrap:wrap;gap:6px;border-bottom:1px solid #ece8df;min-height:36px;align-items:center;}
+    .modal-ev{display:inline-block;padding:3px 10px;border-radius:12px;color:#fff;font-size:.78rem;font-weight:600;}
     .modal-body{padding:18px 18px 14px;}
-    .modal-time-row{
-      display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;
-    }
+    .modal-time-row{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;}
     .modal-icon{font-size:1.6rem;flex-shrink:0;line-height:1;}
     .modal-lbl{font-size:.72rem;color:#888;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em;}
     .modal-time{font-size:1.05rem;font-weight:700;color:var(--text);}
-    .modal-phase-bar{
-      background:#f7f3ea;border-radius:8px;padding:12px 14px;margin-top:4px;
-      display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;
-    }
+    .modal-phase-bar{background:#f7f3ea;border-radius:8px;padding:12px 14px;margin-top:4px;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;}
     .phase-emoji{font-size:2rem;text-align:center;}
     .phase-info .phase-name{font-weight:700;font-size:.95rem;color:var(--accent);}
     .phase-info .phase-detail{font-size:.78rem;color:#666;margin-top:3px;}
-    .modal-duration{
-      text-align:center;background:#e8f5e9;border-radius:6px;
-      padding:8px;font-size:.88rem;color:#276749;font-weight:700;margin-top:10px;
-    }
+    .modal-duration{text-align:center;background:#e8f5e9;border-radius:6px;padding:8px;font-size:.88rem;color:#276749;font-weight:700;margin-top:10px;}
     .modal-loading{padding:24px;text-align:center;color:#888;font-size:.9rem;}
 
-
-    /* Notas del día */
     .notes-section{margin-top:12px;border-top:1px solid #ece8df;padding-top:12px;}
     .notes-label{font-size:.72rem;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;}
     .notes-label span{color:var(--accent);font-weight:700;}
-    .notes-textarea{
-      width:100%;min-height:72px;padding:8px 10px;font:inherit;font-size:.84rem;
-      border:1px solid var(--border);border-radius:6px;background:#fffdf8;
-      resize:vertical;color:var(--text);line-height:1.5;
-    }
+    .notes-textarea{width:100%;min-height:72px;padding:8px 10px;font:inherit;font-size:.84rem;border:1px solid var(--border);border-radius:6px;background:#fffdf8;resize:vertical;color:var(--text);line-height:1.5;}
     .notes-textarea:focus{outline:none;border-color:var(--accent);}
     .notes-save-row{display:flex;gap:8px;margin-top:6px;align-items:center;}
-    .btn-save-note{
-      background:var(--head);color:#fff;border:none;border-radius:5px;
-      padding:6px 16px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;transition:opacity .15s;
-    }
+    .btn-save-note{background:var(--head);color:#fff;border:none;border-radius:5px;padding:6px 16px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;transition:opacity .15s;}
     .btn-save-note:hover{opacity:.85;}
-    .btn-del-note{
-      background:none;border:1px solid #fc8181;color:#c53030;border-radius:5px;
-      padding:6px 12px;font:inherit;font-size:.82rem;cursor:pointer;transition:background .15s;
-    }
+    .btn-del-note{background:none;border:1px solid #fc8181;color:#c53030;border-radius:5px;padding:6px 12px;font:inherit;font-size:.82rem;cursor:pointer;transition:background .15s;}
     .btn-del-note:hover{background:#fff5f5;}
     .note-status{font-size:.75rem;color:#276749;margin-left:4px;}
     .day-has-note{position:relative;}
-    .day-has-note::after{
-      content:'📝';font-size:.6rem;position:absolute;top:2px;right:3px;line-height:1;
-    }
+    .day-has-note::after{content:'📝';font-size:.6rem;position:absolute;top:2px;right:3px;line-height:1;}
 
-    /* Panel de iluminación lunar mejorado */
-    .illum-panel{
-      background:#1a1a2e;border-radius:10px;padding:14px 16px;margin-top:10px;
-      color:#e0e0e0;
-    }
-    .illum-panel-title{
-      font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-      color:#a78bfa;margin-bottom:10px;display:flex;align-items:center;gap:6px;
-    }
+    .illum-panel{background:#1a1a2e;border-radius:10px;padding:14px 16px;margin-top:10px;color:#e0e0e0;}
+    .illum-panel-title{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#a78bfa;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
     .illum-bars{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
     .illum-col{text-align:center;}
-    .illum-col-label{font-size:.65rem;color:#9ca3af;text-transform:uppercase;
-      letter-spacing:.06em;margin-bottom:4px;}
+    .illum-col-label{font-size:.65rem;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
     .illum-pct{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;}
-    .illum-pct.low   {color:#f9a825;}
-    .illum-pct.mid   {color:#fb923c;}
-    .illum-pct.high  {color:#f0abfc;}
-    .illum-pct.full  {color:#facc15;}
-    .illum-track{
-      width:100%;height:6px;background:#2d2d4a;border-radius:99px;
-      overflow:hidden;margin-top:4px;
-    }
-    .illum-fill{height:100%;border-radius:99px;
-      background:linear-gradient(90deg,#a78bfa,#f0abfc);}
-    .illum-note{
-      font-size:.72rem;color:#9ca3af;text-align:center;
-      border-top:1px solid #2d2d4a;padding-top:8px;margin-top:2px;line-height:1.5;
-    }
+    .illum-pct.low{color:#f9a825;}.illum-pct.mid{color:#fb923c;}.illum-pct.high{color:#f0abfc;}.illum-pct.full{color:#facc15;}
+    .illum-track{width:100%;height:6px;background:#2d2d4a;border-radius:99px;overflow:hidden;margin-top:4px;}
+    .illum-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#a78bfa,#f0abfc);}
+    .illum-note{font-size:.72rem;color:#9ca3af;text-align:center;border-top:1px solid #2d2d4a;padding-top:8px;margin-top:2px;line-height:1.5;}
     .illum-note b{color:#c4b5fd;}
-    .illum-naked-eye{
-      display:inline-block;padding:3px 10px;border-radius:12px;font-size:.72rem;
-      font-weight:700;margin-top:6px;
-    }
+    .illum-naked-eye{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:700;margin-top:6px;}
     .illum-naked-eye.yes{background:#14532d;color:#86efac;}
-    .illum-naked-eye.no {background:#7f1d1d;color:#fca5a5;}
+    .illum-naked-eye.no{background:#7f1d1d;color:#fca5a5;}
 
-    @media(max-width:900px){
-      .months-grid{grid-template-columns:1fr;}
-    }
+    @media(max-width:900px){.months-grid{grid-template-columns:1fr;}}
     @media(max-width:600px){
       .ctrl-grid{grid-template-columns:1fr 1fr;}
       #calOutput,#placeholder,.ctrl-wrap{padding-left:12px;padding-right:12px;}
+      .loc-row{flex-direction:column;}
+      .btn-geolocate{width:100%;justify-content:center;}
     }
   </style>
 </head>
@@ -227,17 +227,66 @@
 </header>
 
 <div class="ctrl-wrap">
+
+  <!-- ══ SECCIÓN DE UBICACIÓN AUTOMÁTICA ══ -->
+  <div class="loc-section">
+    <div class="loc-title">📍 Ubicación automática — sin registro, sin API Key</div>
+    <div class="loc-row">
+
+      <button class="btn-geolocate" id="btnGeo" onclick="detectarUbicacion()">
+        <span id="geoIco">🎯</span>
+        <span id="geoTxt">Detectar mi ubicación</span>
+      </button>
+
+      <div class="city-search-wrap">
+        <span class="city-icon">🔍</span>
+        <input
+          type="text" id="cityInput"
+          placeholder="O busca una ciudad… ej: Chihuahua, México City, Jerusalem, Buenos Aires"
+          autocomplete="off"
+          oninput="onCityInput(this.value)"
+          onkeydown="onCityKey(event)"
+        />
+        <div class="city-suggestions" id="citySugg"></div>
+      </div>
+    </div>
+
+    <div class="load-steps" id="loadSteps">
+      <div class="ls" id="ls1"><span class="ls-icon">⏳</span> Obteniendo coordenadas GPS…</div>
+      <div class="ls" id="ls2"><span class="ls-icon">⏳</span> Consultando elevación precisa (Open-Meteo)…</div>
+      <div class="ls" id="ls3"><span class="ls-icon">⏳</span> Detectando zona horaria exacta (TimeAPI)…</div>
+    </div>
+
+    <div class="loc-status" id="locStatus"></div>
+    <div class="coords-pills" id="coordsPills"></div>
+  </div>
+
+  <!-- ══ GRID DE CONTROLES ══ -->
   <div class="ctrl-grid">
     <div class="field"><label>Año</label>
       <input id="yearName" type="text" value="2026"/></div>
-    <div class="field"><label>Zona horaria</label>
-      <input id="timezone" type="text" value="Asia/Jerusalem"/></div>
-    <div class="field"><label>Latitud</label>
-      <input id="latitude" type="number" step="0.000001" value="31.768300"/></div>
-    <div class="field"><label>Longitud</label>
-      <input id="longitude" type="number" step="0.000001" value="35.213700"/></div>
-    <div class="field"><label>Elevación (m)</label>
-      <input id="elevation" type="number" value="800"/></div>
+
+    <div class="field">
+      <label>Zona horaria</label>
+      <input id="timezone" type="text" value="Asia/Jerusalem"/>
+      <div class="auto-lbl" id="lbl_tz">✓ Auto-detectada</div>
+    </div>
+    <div class="field">
+      <label>Latitud</label>
+      <input id="latitude" type="number" step="0.000001" value="31.768300"/>
+      <div class="auto-lbl" id="lbl_lat">✓ Auto-detectada</div>
+    </div>
+    <div class="field">
+      <label>Longitud</label>
+      <input id="longitude" type="number" step="0.000001" value="35.213700"/>
+      <div class="auto-lbl" id="lbl_lon">✓ Auto-detectada</div>
+    </div>
+    <div class="field">
+      <label>Elevación (m)</label>
+      <input id="elevation" type="number" value="800"/>
+      <div class="auto-lbl" id="lbl_el">✓ Auto-detectada</div>
+    </div>
+
     <div class="field"><label>Buscar desde</label>
       <input id="searchStart" type="datetime-local" value="2026-03-01T12:00"/></div>
     <div class="field"><label>Visibilidad</label>
@@ -280,13 +329,11 @@
 <script>
 const { DateTime } = luxon;
 
-/* Paleta */
 const C = {
   mes:'#6b46c1', prep:'#c05621', fiesta:'#276749', fiestaFin:'#22543d',
   shabbat:'#718096', omer:'#553c9a', shavuot:'#1a56db',
   teruah:'#0694a2', kippur:'#c53030', shemini:'#805ad5'
 };
-
 const LEGEND = [
   {color:C.mes,    label:'Inicio mes hebreo'},
   {color:C.prep,   label:'14 Aviv - Preparacion'},
@@ -294,712 +341,550 @@ const LEGEND = [
   {color:C.shabbat,label:'Shabbat en la fiesta'},
   {color:C.omer,   label:'Omer Reshit'},
   {color:C.shavuot,label:'Shavuot'},
-  {color:C.teruah, label:'Yom Tru\'ah'},
+  {color:C.teruah, label:"Yom Tru'ah"},
   {color:C.kippur, label:'Yom HaKipurim'},
   {color:C.shemini,label:'Shminí Atzéret'},
 ];
+const MESES_ES  = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MESES_HEB = ['Aviv','Ziv','Sivan','Tamuz','Av','Elul','Etanim','Bul','Mes 9','Mes 10','Mes 11','Mes 12','Mes 13'];
 
-const MESES_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
-                  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-const MESES_HEB = ['Aviv','Ziv','Sivan','Tamuz','Av','Elul',
-                   'Etanim','Bul','Mes 9','Mes 10','Mes 11','Mes 12','Mes 13'];
-
-/* DOM */
 const $ = id => document.getElementById(id);
-const yearNameInput       = $('yearName');
-const timezoneInput       = $('timezone');
-const latitudeInput       = $('latitude');
-const longitudeInput      = $('longitude');
-const elevationInput      = $('elevation');
-const searchStartInput    = $('searchStart');
-const crescentModeInput   = $('crescentMode');
-const fallbackMonth7Input = $('fallbackMonth7');
-const useFallbackMonth7Input = $('useFallbackMonth7');
-const monthCountInput     = $('monthCount');
-const recalcBtn           = $('recalcBtn');
-const statusBox           = $('statusBox');
-const placeholder         = $('placeholder');
-const calOutput           = $('calOutput');
-const legendEl            = $('legend');
-const monthsGrid          = $('monthsGrid');
 
-/* Helpers fecha */
-const tz = () => timezoneInput.value.trim() || 'UTC';
+const tz = () => $('timezone').value.trim() || 'UTC';
 
-function parseDT(v) {
-  const dt = DateTime.fromISO(v, { zone: tz() });
-  if (!dt.isValid) throw new Error('Fecha inválida.');
-  return dt.toJSDate();
-}
-function addDays(d, n) {
-  return DateTime.fromJSDate(d, { zone:'utc' }).plus({ days:n }).toJSDate();
-}
-function diffDays(a, b) { return Math.round((b - a) / 86400000); }
-function dateKey(d) {
-  return DateTime.fromJSDate(d, { zone:'utc' }).setZone(tz()).toFormat('yyyy-MM-dd');
-}
-function incRange(start, n) {
-  return addDays(start, n - 1);
+function parseDT(v){const dt=DateTime.fromISO(v,{zone:tz()});if(!dt.isValid)throw new Error('Fecha inválida.');return dt.toJSDate();}
+function addDays(d,n){return DateTime.fromJSDate(d,{zone:'utc'}).plus({days:n}).toJSDate();}
+function diffDays(a,b){return Math.round((b-a)/86400000);}
+function dateKey(d){return DateTime.fromJSDate(d,{zone:'utc'}).setZone(tz()).toFormat('yyyy-MM-dd');}
+function incRange(s,n){return addDays(s,n-1);}
+
+function buildObserver(){
+  const lat=Number($('latitude').value),lon=Number($('longitude').value),el=Number($('elevation').value);
+  if(!Number.isFinite(lat)||lat<-90||lat>90)  throw new Error('Latitud inválida.');
+  if(!Number.isFinite(lon)||lon<-180||lon>180) throw new Error('Longitud inválida.');
+  if(!Number.isFinite(el))                     throw new Error('Elevación inválida.');
+  return new Astronomy.Observer(lat,lon,el);
 }
 
-/* Observer */
-function buildObserver() {
-  const lat = Number(latitudeInput.value),
-        lon = Number(longitudeInput.value),
-        el  = Number(elevationInput.value);
-  if (!Number.isFinite(lat)||lat<-90||lat>90)  throw new Error('Latitud inválida.');
-  if (!Number.isFinite(lon)||lon<-180||lon>180) throw new Error('Longitud inválida.');
-  if (!Number.isFinite(el))                     throw new Error('Elevación inválida.');
-  return new Astronomy.Observer(lat, lon, el);
-}
-
-/* Astronomia */
-function getSunset(date, obs) {
-  const noon = DateTime.fromJSDate(date, { zone:tz() })
-    .set({ hour:12, minute:0, second:0, millisecond:0 }).toUTC().toJSDate();
-  const ev = Astronomy.SearchRiseSet(Astronomy.Body.Sun, obs, -1, noon, 1);
-  if (!ev) throw new Error('No se pudo calcular puesta del sol.');
+function getSunset(date,obs){
+  const noon=DateTime.fromJSDate(date,{zone:tz()}).set({hour:12,minute:0,second:0,millisecond:0}).toUTC().toJSDate();
+  const ev=Astronomy.SearchRiseSet(Astronomy.Body.Sun,obs,-1,noon,1);
+  if(!ev) throw new Error('No se pudo calcular puesta del sol.');
   return new Date(ev.date);
 }
-function getMoonset(after, obs) {
-  const ev = Astronomy.SearchRiseSet(Astronomy.Body.Moon, obs, -1, after, 1);
-  return ev ? new Date(ev.date) : null;
+function getMoonset(after,obs){const ev=Astronomy.SearchRiseSet(Astronomy.Body.Moon,obs,-1,after,1);return ev?new Date(ev.date):null;}
+function horizAlt(date,obs){const equ=Astronomy.Equator(Astronomy.Body.Moon,date,obs,true,true);return Astronomy.Horizon(date,obs,equ.ra,equ.dec,'normal').altitude;}
+function elongation(date){
+  const mv=Astronomy.GeoMoon(date),sv=Astronomy.GeoVector(Astronomy.Body.Sun,date,true);
+  const dot=mv.x*sv.x+mv.y*sv.y+mv.z*sv.z;
+  const ml=Math.sqrt(mv.x**2+mv.y**2+mv.z**2),sl=Math.sqrt(sv.x**2+sv.y**2+sv.z**2);
+  return Math.acos(Math.max(-1,Math.min(1,dot/(ml*sl))))*(180/Math.PI);
 }
-function horizAlt(date, obs) {
-  const equ = Astronomy.Equator(Astronomy.Body.Moon, date, obs, true, true);
-  return Astronomy.Horizon(date, obs, equ.ra, equ.dec, 'normal').altitude;
+function getSunAlt(date,obs){const equ=Astronomy.Equator(Astronomy.Body.Sun,date,obs,true,true);return Astronomy.Horizon(date,obs,equ.ra,equ.dec,'normal').altitude;}
+function crescentWidth(date){
+  const mv=Astronomy.GeoMoon(date),distKm=Math.sqrt(mv.x**2+mv.y**2+mv.z**2)*149597870.7;
+  const SD=(1737.4/distKm)*(180/Math.PI)*60;
+  return 2*SD*Astronomy.Illumination(Astronomy.Body.Moon,date).phase_fraction;
 }
-function elongation(date) {
-  const mv = Astronomy.GeoMoon(date);
-  const sv = Astronomy.GeoVector(Astronomy.Body.Sun, date, true);
-  const dot = mv.x*sv.x + mv.y*sv.y + mv.z*sv.z;
-  const ml  = Math.sqrt(mv.x**2 + mv.y**2 + mv.z**2);
-  const sl  = Math.sqrt(sv.x**2 + sv.y**2 + sv.z**2);
-  return Math.acos(Math.max(-1, Math.min(1, dot/(ml*sl)))) * (180/Math.PI);
+function odehLimit(W,mode){
+  const base=-0.1018*W**3+0.7319*W**2-6.3226*W;
+  if(mode==='strict')return base+7.1651;
+  if(mode==='lenient')return base+4.1872;
+  return base+5.6579;
 }
-// ── Altitud del Sol en un momento dado ───────────────────────────────────────
-function getSunAlt(date, obs) {
-  const equ = Astronomy.Equator(Astronomy.Body.Sun, date, obs, true, true);
-  return Astronomy.Horizon(date, obs, equ.ra, equ.dec, 'normal').altitude;
+function evalCrescent(date,obs,mode){
+  const su=getSunset(date,obs),ms=getMoonset(su,obs);
+  if(!ms||ms<=su)return{visible:false,sunset:su};
+  const lagMs=ms-su,lagMin=lagMs/60000;
+  if(lagMin<20)return{visible:false,sunset:su};
+  const T=new Date(su.getTime()+(4/9)*lagMs);
+  const moonAlt=horizAlt(T,obs),sunAlt=getSunAlt(T,obs),ARCL=elongation(T),ARCV=moonAlt-sunAlt,W=crescentWidth(T);
+  if(moonAlt<=0||ARCL<6.5)return{visible:false,sunset:su};
+  return{visible:ARCV>=odehLimit(W,mode),sunset:su};
 }
-
-// ── Ancho del creciente W en arcominutos (Odeh 2006) ──────────────────────
-function crescentWidth(date) {
-  const mv    = Astronomy.GeoMoon(date);
-  const distAU = Math.sqrt(mv.x**2 + mv.y**2 + mv.z**2);
-  const distKm = distAU * 149597870.7;
-  // Semidiámetro angular de la Luna en arcominutos
-  const SD    = (1737.4 / distKm) * (180 / Math.PI) * 60;
-  const illum = Astronomy.Illumination(Astronomy.Body.Moon, date).phase_fraction;
-  // W = 2 × SD × fracción iluminada (ancho máximo del creciente)
-  return 2 * SD * illum;
+function findMonthStart(nm,obs,mode){
+  for(let d=1;d<=4;d++){const r=evalCrescent(addDays(nm,d),obs,mode);if(r.visible)return r.sunset;}
+  return evalCrescent(addDays(nm,2),obs,mode).sunset;
 }
-
-// ── Límite ARCV del criterio Odeh (2006) para visibilidad a ojo desnudo ───
-// W en arcominutos; retorna la altitud mínima necesaria del creciente (grados)
-function odehLimit(W, mode) {
-  const base = -0.1018*W**3 + 0.7319*W**2 - 6.3226*W;
-  if (mode === 'strict')  return base + 7.1651; // fácilmente visible
-  if (mode === 'lenient') return base + 4.1872; // requiere ayuda óptica
-  return                         base + 5.6579; // visible a ojo desnudo
-}
-
-// ── Evaluación del creciente (Yallop best-time + Odeh criterion) ──────────
-// En vez de evaluar justo al atardecer, usamos el "mejor momento":
-//   T = t_puesta + 4/9 × (t_luna_puesta − t_puesta)
-// En T el cielo está bastante oscuro pero la luna todavía tiene altitud útil.
-function evalCrescent(date, obs, mode) {
-  const su = getSunset(date, obs);
-  const ms = getMoonset(su, obs);
-
-  // Sin luna poniente ese día → no visible
-  if (!ms || ms <= su) return { visible: false, sunset: su };
-
-  const lagMs = ms - su;
-  const lagMin = lagMs / 60000;
-
-  // Mínimo físico: la luna debe ponerse al menos 20 min después del sol
-  if (lagMin < 20) return { visible: false, sunset: su };
-
-  // Tiempo óptimo de observación (regla 4/9 de Yallop)
-  const T = new Date(su.getTime() + (4 / 9) * lagMs);
-
-  const moonAlt = horizAlt(T, obs);      // altitud de la Luna en T
-  const sunAlt  = getSunAlt(T, obs);     // altitud del Sol en T (negativa)
-  const ARCL    = elongation(T);         // elongación Sol-Luna (°)
-  const ARCV    = moonAlt - sunAlt;      // arco de visión (°) — siempre > moonAlt
-  const W       = crescentWidth(T);      // ancho del creciente (arcominutos)
-
-  // La luna debe estar sobre el horizonte y la elongación ser físicamente posible
-  if (moonAlt <= 0 || ARCL < 6.5) return { visible: false, sunset: su };
-
-  // Criterio Odeh: ARCV >= límite calculado según W y modo
-  const visible = ARCV >= odehLimit(W, mode);
-
-  return { visible, sunset: su,
-    debug: { ARCL: ARCL.toFixed(2), ARCV: ARCV.toFixed(2), W: W.toFixed(2),
-             moonAlt: moonAlt.toFixed(2), sunAlt: sunAlt.toFixed(2), lagMin: lagMin.toFixed(0) }
-  };
-}
-
-// ── Primer día del mes tras la luna nueva ────────────────────────────────
-// Revisa hasta 4 días después de la luna nueva (normalmente 1-2 días bastan)
-function findMonthStart(nm, obs, mode) {
-  for (let d = 1; d <= 4; d++) {
-    const r = evalCrescent(addDays(nm, d), obs, mode);
-    if (r.visible) return r.sunset;
-  }
-  // Fallback: si no se detecta visibilidad en 4 días, usar día +2
-  // (el mes anterior dura 30 días según la regla caraíta)
-  return evalCrescent(addDays(nm, 2), obs, mode).sunset;
-}
-function findLunations(start, obs, mode, n) {
-  const list = [];
-  let anchor = new Date(start);
-  for (let i=0; i<n; i++) {
-    const ph = Astronomy.SearchMoonPhase(0, anchor, 35);
-  if (!ph) throw new Error('No se encontró luna nueva.');
-    const nm = new Date(ph.date);
-    list.push({ newMoon:nm, start:findMonthStart(nm, obs, mode) });
-    anchor = addDays(nm, 25);
+function findLunations(start,obs,mode,n){
+  const list=[];let anchor=new Date(start);
+  for(let i=0;i<n;i++){
+    const ph=Astronomy.SearchMoonPhase(0,anchor,35);
+    if(!ph)throw new Error('No se encontró luna nueva.');
+    const nm=new Date(ph.date);
+    list.push({newMoon:nm,start:findMonthStart(nm,obs,mode)});
+    anchor=addDays(nm,25);
   }
   return list;
 }
-function sabbathInFeast(date) {
-  const z = tz();
-  const d = new Date(date.getTime());
-  const h = DateTime.fromJSDate(date,{zone:z}).hour;
-  const m = DateTime.fromJSDate(date,{zone:z}).minute;
-  if (DateTime.fromJSDate(d,{zone:z}).weekday===5) return d;
-  while (DateTime.fromJSDate(d,{zone:z}).weekday!==6) d.setUTCDate(d.getUTCDate()+1);
+function sabbathInFeast(date){
+  const z=tz(),d=new Date(date.getTime()),h=DateTime.fromJSDate(date,{zone:z}).hour,m=DateTime.fromJSDate(date,{zone:z}).minute;
+  if(DateTime.fromJSDate(d,{zone:z}).weekday===5)return d;
+  while(DateTime.fromJSDate(d,{zone:z}).weekday!==6)d.setUTCDate(d.getUTCDate()+1);
   return DateTime.fromJSDate(d,{zone:z}).set({hour:h,minute:m,second:0,millisecond:0}).toUTC().toJSDate();
 }
-
-/* Mapa de eventos */
-function buildEventMap(months, avivStart, m7Start) {
-  const map = {};
-  function mark(date, label, color) {
-    const k = dateKey(date);
-    if (!map[k]) map[k] = [];
-    map[k].push({label, color});
-  }
-  function markRange(start, days, label, color, firstLabel) {
-    for (let d=0; d<days; d++)
-      mark(addDays(start,d), d===0&&firstLabel ? firstLabel : label, color);
-  }
-
-  // Inicio de cada mes hebreo
-  months.forEach((m, i) => mark(m.start, `\u{1F319} 1 ${MESES_HEB[i]||'Mes '+(i+1)}`, C.mes));
-
-  // Aviv
-  mark(incRange(avivStart,14),   '14 Aviv Prep.',    C.prep);
-  markRange(incRange(avivStart,15), 7, '\u{1F33E} Jag HaMatzot', C.fiesta, '\u{1F33E} 15 Aviv Pésaj');
-  mark(incRange(avivStart,21),   '21 Aviv Cierre',   C.fiestaFin);
-  const shab = sabbathInFeast(incRange(avivStart,15));
-  mark(shab,                      '\u2721 Shabbat',  C.shabbat);
-  const omer = addDays(shab, 1);
-  mark(omer,                      '\u{1F33F} Omer Reshit', C.omer);
-  mark(addDays(omer, 49),         '\u2728 Shavuot',  C.shavuot);
-
-  // Mes 7
-  if (m7Start) {
-    mark(m7Start,                   '\u{1F4EF} Yom Tru\'ah',    C.teruah);
-    mark(incRange(m7Start,10),      '\u{1F56F} Yom HaKipurim',    C.kippur);
-    markRange(incRange(m7Start,15), 7, '\u{1F33F} Sukot', C.fiesta, '\u{1F33F} 15 Sukot');
-    mark(incRange(m7Start,22),      '\u{1F389} Shminí Atzéret',  C.shemini);
+function buildEventMap(months,avivStart,m7Start){
+  const map={};
+  const mark=(date,label,color)=>{const k=dateKey(date);if(!map[k])map[k]=[];map[k].push({label,color});};
+  const markRange=(start,days,label,color,firstLabel)=>{for(let d=0;d<days;d++)mark(addDays(start,d),d===0&&firstLabel?firstLabel:label,color);};
+  months.forEach((m,i)=>mark(m.start,`\u{1F319} 1 ${MESES_HEB[i]||'Mes '+(i+1)}`,C.mes));
+  mark(incRange(avivStart,14),'14 Aviv Prep.',C.prep);
+  markRange(incRange(avivStart,15),7,'\u{1F33E} Jag HaMatzot',C.fiesta,'\u{1F33E} 15 Aviv Pésaj');
+  mark(incRange(avivStart,21),'21 Aviv Cierre',C.fiestaFin);
+  const shab=sabbathInFeast(incRange(avivStart,15));
+  mark(shab,'\u2721 Shabbat',C.shabbat);
+  const omer=addDays(shab,1);
+  mark(omer,'\u{1F33F} Omer Reshit',C.omer);
+  mark(addDays(omer,49),'\u2728 Shavuot',C.shavuot);
+  if(m7Start){
+    mark(m7Start,"\u{1F4EF} Yom Tru'ah",C.teruah);
+    mark(incRange(m7Start,10),'\u{1F56F} Yom HaKipurim',C.kippur);
+    markRange(incRange(m7Start,15),7,'\u{1F33F} Sukot',C.fiesta,'\u{1F33F} 15 Sukot');
+    mark(incRange(m7Start,22),'\u{1F389} Shminí Atzéret',C.shemini);
   }
   return map;
 }
-
-/* Renderizar un mes gregoriano */
-// Día de la semana puramente en UTC (evita bugs de DST/timezone con Luxon)
-  // Retorna 1=Lun, 2=Mar, ..., 6=Sab, 7=Dom (ISO 8601)
-  function isoWeekday(year, month, day) {
-    const d = new Date(Date.UTC(year, month - 1, day));
-    const w = d.getUTCDay(); // 0=Dom,1=Lun,...,6=Sab
-    return w === 0 ? 7 : w;  // Dom pasa a 7
-  }
-  // Días en el mes sin depender del timezone
-  function daysInMonth(year, month) {
-    return new Date(Date.UTC(year, month, 0)).getUTCDate();
-  }
-
-  function renderMonth(year, month, eventMap) {
-    // Construir lista plana de celdas: null=vacía, número=día
-    const total  = daysInMonth(year, month);
-    const offset = isoWeekday(year, month, 1) - 1; // 0=Lun … 6=Dom
-
-    const cells = [];
-    for (let i = 0; i < offset; i++) cells.push(null);
-    for (let d = 1; d <= total; d++) cells.push(d);
-    while (cells.length % 7 !== 0) cells.push(null); // relleno final
-
-    let html = `<div class="cal-month">
-      <div class="cal-month-title">${MESES_ES[month-1]} ${year}</div>
-      <table class="cal-table">
-        <thead><tr>
-          <th>L</th><th>M</th><th>M</th><th>J</th><th>V</th>
-          <th class="sat">S</th><th class="sun">D</th>
-        </tr></thead>
-        <tbody>`;
-
-    for (let i = 0; i < cells.length; i++) {
-      if (i % 7 === 0) html += '<tr>';
-
-      const day = cells[i];
-      if (day === null) {
-        html += '<td class="empty"></td>';
-      } else {
-        const k   = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-        const evs = eventMap[k] || [];
-        const dow = isoWeekday(year, month, day);
-        const tc  = dow === 6 ? ' sat-c' : dow === 7 ? ' sun-c' : '';
-        const evH = evs.map(e =>
-          `<span class="ev" style="background:${e.color}" title="${e.label}">${e.label}</span>`
-        ).join('');
-        html += `<td class="${tc}" onclick="showDayModal('${k}')" title="Ver detalle del día"><div class="dn">${day}</div>${evH}</td>`;
-      }
-
-      if (i % 7 === 6) html += '</tr>';
+function isoWeekday(y,m,d){const w=new Date(Date.UTC(y,m-1,d)).getUTCDay();return w===0?7:w;}
+function daysInMonth(y,m){return new Date(Date.UTC(y,m,0)).getUTCDate();}
+function renderMonth(year,month,eventMap){
+  const total=daysInMonth(year,month),offset=isoWeekday(year,month,1)-1;
+  const cells=[];
+  for(let i=0;i<offset;i++)cells.push(null);
+  for(let d=1;d<=total;d++)cells.push(d);
+  while(cells.length%7!==0)cells.push(null);
+  let html=`<div class="cal-month"><div class="cal-month-title">${MESES_ES[month-1]} ${year}</div>
+    <table class="cal-table"><thead><tr><th>L</th><th>M</th><th>M</th><th>J</th><th>V</th><th class="sat">S</th><th class="sun">D</th></tr></thead><tbody>`;
+  for(let i=0;i<cells.length;i++){
+    if(i%7===0)html+='<tr>';
+    const day=cells[i];
+    if(day===null){html+='<td class="empty"></td>';}
+    else{
+      const k=`${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const evs=eventMap[k]||[],dow=isoWeekday(year,month,day);
+      const tc=dow===6?' sat-c':dow===7?' sun-c':'';
+      const evH=evs.map(e=>`<span class="ev" style="background:${e.color}" title="${e.label}">${e.label}</span>`).join('');
+      html+=`<td class="${tc}" onclick="showDayModal('${k}')" title="Ver detalle"><div class="dn">${day}</div>${evH}</td>`;
     }
-
-    html += '</tbody></table></div>';
-    return html;
+    if(i%7===6)html+='</tr>';
   }
-
-/* Rango de meses gregorianos a mostrar */
-function gregRange(eventMap) {
-  const keys = Object.keys(eventMap).sort();
-  if (!keys.length) return [];
-  // Parsear "yyyy-MM-dd" directamente, sin dependencia de timezone
-  const parseKey = k => ({ year: +k.slice(0,4), month: +k.slice(5,7) });
-  const f = parseKey(keys[0]);
-  const l = parseKey(keys[keys.length-1]);
-  const out = [];
-  let y = f.year, m = f.month;
-  while (y < l.year || (y === l.year && m <= l.month)) {
-    out.push({year:y, month:m});
-    m++; if (m > 12) { m = 1; y++; }
-  }
+  return html+'</tbody></table></div>';
+}
+function gregRange(eventMap){
+  const keys=Object.keys(eventMap).sort();if(!keys.length)return[];
+  const pk=k=>({year:+k.slice(0,4),month:+k.slice(5,7)});
+  const f=pk(keys[0]),l=pk(keys[keys.length-1]);
+  const out=[];let y=f.year,m=f.month;
+  while(y<l.year||(y===l.year&&m<=l.month)){out.push({year:y,month:m});m++;if(m>12){m=1;y++;}}
   return out;
 }
-
-/* Validar librerias */
-function validateLibs() {
-  if (typeof Astronomy==='undefined') throw new Error('Astronomy Engine no cargó. Verifica conexión.');
-  if (typeof SunCalc==='undefined')   throw new Error('SunCalc no cargo.');
-  if (typeof luxon==='undefined')     throw new Error('Luxon no cargo.');
+function validateLibs(){
+  if(typeof Astronomy==='undefined')throw new Error('Astronomy Engine no cargó.');
+  if(typeof SunCalc==='undefined')throw new Error('SunCalc no cargó.');
+  if(typeof luxon==='undefined')throw new Error('Luxon no cargó.');
 }
+function errMsg(e){if(e instanceof Error)return e.message;if(typeof e==='string')return e;try{return JSON.stringify(e);}catch(_){return String(e);}}
 
-function errMsg(e) {
-  if (e instanceof Error) return e.message;
-  if (typeof e==='string') return e;
-  try { return JSON.stringify(e); } catch(_) { return String(e); }
-}
-
-/* ---- MAIN ---- */
-function buildCalendar() {
-  statusBox.className = '';
-  recalcBtn.disabled = true;
-  recalcBtn.textContent = 'Calculando...';
-
-  setTimeout(() => {
-    try {
+function buildCalendar(){
+  $('statusBox').className='';
+  $('recalcBtn').disabled=true;$('recalcBtn').textContent='Calculando...';
+  setTimeout(()=>{
+    try{
       validateLibs();
-
-      const start  = parseDT(searchStartInput.value);
-      const obs    = buildObserver();
-      const mode   = crescentModeInput.value;
-      const fb7    = parseDT(fallbackMonth7Input.value);
-      const count  = Number(monthCountInput.value);
-      const year   = yearNameInput.value.trim();
-
-      const luns = findLunations(start, obs, mode, count);
-
-      const months = luns.map((item, i) => ({
-        start: item.start,
-        days:  i < luns.length-1 ? diffDays(item.start, luns[i+1].start) : 29
-      }));
-      months[months.length-1].days = 29;
-
-      if (useFallbackMonth7Input.value==='force' && months[6]) {
-        months[6].start = fb7;
-        for (let i=7; i<months.length; i++)
-          months[i].start = addDays(months[i-1].start, months[i-1].days);
+      const start=parseDT($('searchStart').value),obs=buildObserver();
+      const mode=$('crescentMode').value,fb7=parseDT($('fallbackMonth7').value);
+      const count=Number($('monthCount').value),year=$('yearName').value.trim();
+      const luns=findLunations(start,obs,mode,count);
+      const months=luns.map((item,i)=>({start:item.start,days:i<luns.length-1?diffDays(item.start,luns[i+1].start):29}));
+      months[months.length-1].days=29;
+      if($('useFallbackMonth7').value==='force'&&months[6]){
+        months[6].start=fb7;
+        for(let i=7;i<months.length;i++)months[i].start=addDays(months[i-1].start,months[i-1].days);
       }
+      const avivStart=months[0].start,m7Start=months[6]?.start;
+      const delta=m7Start?diffDays(m7Start,fb7):null;
+      const evMap=buildEventMap(months,avivStart,m7Start);
+      currentObs=obs;currentEventMap=evMap;
+      $('legend').innerHTML=LEGEND.map(l=>`<div class="lg-item"><div class="lg-dot" style="background:${l.color}"></div><span>${l.label}</span></div>`).join('');
+      $('monthsGrid').innerHTML=gregRange(evMap).map(({year:y,month:m})=>renderMonth(y,m,evMap)).join('');
+      $('placeholder').style.display='none';$('calOutput').style.display='block';
+      setTimeout(markDaysWithNotes,200);
+      const cmp=delta===null?'':delta===0?' · Mes 7 coincide con ancla.':` · Mes 7 difiere ${delta} día(s) del ancla.`;
+      $('statusBox').className=(delta===null||Math.abs(delta)<=1)?'ok':'warn';
+      $('statusBox').innerHTML=`<b>✓ Calendario ${year} generado.</b>${cmp}`;
+    }catch(err){
+      $('placeholder').style.display='block';$('calOutput').style.display='none';
+      $('statusBox').className='error';$('statusBox').innerHTML=`<b>Error:</b> ${errMsg(err)}`;
+    }finally{$('recalcBtn').disabled=false;$('recalcBtn').textContent='Calcular calendario';}
+  },30);
+}
+$('recalcBtn').addEventListener('click',buildCalendar);
 
-      const avivStart = months[0].start;
-      const m7Start   = months[6]?.start;
-      const delta     = m7Start ? diffDays(m7Start, fb7) : null;
 
-      const evMap = buildEventMap(months, avivStart, m7Start);
-      currentObs      = obs;      // guardado para uso en el modal
-      currentEventMap = evMap;
+/* ══════════════════════════════════════════════════════════════════
+   SISTEMA DE UBICACIÓN AUTOMÁTICA
+   ✓ GPS: navigator.geolocation (nativo, sin key)
+   ✓ Elevación: api.open-meteo.com (gratis, sin key, ±1 m precisión)
+   ✓ Zona horaria: timeapi.io (gratis, sin key, IANA exacta)
+   ✓ Búsqueda / Geocodificación: nominatim.openstreetmap.org (gratis, sin key)
+   ══════════════════════════════════════════════════════════════════ */
 
-      // Leyenda
-      legendEl.innerHTML = LEGEND.map(l =>
-        `<div class="lg-item"><div class="lg-dot" style="background:${l.color}"></div><span>${l.label}</span></div>`
-      ).join('');
+function setLocStatus(msg,type){const el=$('locStatus');el.innerHTML=msg;el.className='loc-status show '+type;}
+function setStep(id,state){
+  const el=$(id);if(!el)return;
+  const icons={done:'✅',active:'⏳',error:'❌',wait:'⏳'};
+  el.className='ls '+state;
+  el.querySelector('.ls-icon').textContent=icons[state]||'⏳';
+}
+function showSteps(v){$('loadSteps').className='load-steps'+(v?' show':'');}
 
-      // Meses
-      monthsGrid.innerHTML = gregRange(evMap)
-        .map(({year:y, month:m}) => renderMonth(y, m, evMap))
-        .join('');
-
-      placeholder.style.display = 'none';
-      calOutput.style.display   = 'block';
-      setTimeout(markDaysWithNotes, 200);
-
-      const cmp = delta===null ? '' : delta===0
-        ? ' \u00b7 Mes 7 coincide con ancla.'
-        : ` \u00b7 Mes 7 difiere ${delta} día(s) del ancla.`;
-      statusBox.className = (delta===null||Math.abs(delta)<=1) ? 'ok' : 'warn';
-      statusBox.innerHTML = `<b>\u2713 Calendario ${year} generado.</b>${cmp}`;
-
-    } catch(err) {
-      placeholder.style.display = 'block';
-      calOutput.style.display   = 'none';
-      statusBox.className = 'error';
-      statusBox.innerHTML = `<b>Error:</b> ${errMsg(err)}`;
-    } finally {
-      recalcBtn.disabled    = false;
-      recalcBtn.textContent = 'Calcular calendario';
-    }
-  }, 30);
+function autoFill(fieldId,value,labelId){
+  const input=$(fieldId);
+  input.value=value;
+  input.classList.add('autofilled');
+  const lbl=$(labelId);
+  if(lbl){lbl.className='auto-lbl show';}
 }
 
-recalcBtn.addEventListener('click', buildCalendar);
-/* Sin buildCalendar() automatico al cargar */
+// Quitar marca si el usuario edita manualmente
+['latitude','longitude','elevation','timezone'].forEach(id=>{
+  $(id).addEventListener('input',function(){
+    this.classList.remove('autofilled');
+    const m={latitude:'lbl_lat',longitude:'lbl_lon',elevation:'lbl_el',timezone:'lbl_tz'};
+    const l=$(m[id]);if(l)l.className='auto-lbl';
+  });
+});
+
+// ── Elevación via Open-Meteo (gratis, ~1 m precisión, modelo SRTM/ASTER) ──
+async function fetchElevation(lat,lon){
+  const r=await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`);
+  if(!r.ok)throw new Error('open-meteo '+r.status);
+  const d=await r.json();
+  if(!Array.isArray(d.elevation)||d.elevation.length===0)throw new Error('sin datos');
+  return Math.round(d.elevation[0]);
+}
+
+// ── Zona horaria via TimeAPI.io (gratis, devuelve IANA tz completa) ──────
+async function fetchTimezone(lat,lon){
+  const r=await fetch(`https://timeapi.io/api/timezone/coordinate?latitude=${lat}&longitude=${lon}`);
+  if(!r.ok)throw new Error('timeapi '+r.status);
+  const d=await r.json();
+  if(!d.timeZone)throw new Error('sin tz');
+  return d.timeZone;  // ej: "America/Chihuahua", "Asia/Jerusalem"
+}
+
+// ── Fallback TZ: calcular por longitud (último recurso) ──────────────────
+function tzByLongitude(lon){
+  const h=Math.round(lon/15);
+  return h>=0?`Etc/GMT-${h}`:`Etc/GMT+${Math.abs(h)}`;
+}
+
+// ── Nombre de lugar: Nominatim reverse geocoding (OSM, gratis) ──────────
+async function fetchPlaceName(lat,lon){
+  try{
+    const r=await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+      {headers:{'Accept-Language':'es'}}
+    );
+    if(!r.ok)return null;
+    const d=await r.json();
+    const a=d.address||{};
+    const city=a.city||a.town||a.village||a.municipality||a.county||'';
+    const country=a.country||'';
+    return [city,country].filter(Boolean).join(', ')||null;
+  }catch(e){return null;}
+}
+
+// ── Búsqueda de ciudades: Nominatim (OSM, gratis, sin key) ──────────────
+let _cityTmr=null;
+async function onCityInput(val){
+  clearTimeout(_cityTmr);
+  const sugg=$('citySugg');
+  if(val.length<3){sugg.className='city-suggestions';return;}
+  _cityTmr=setTimeout(async()=>{
+    try{
+      const r=await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&limit=7&addressdetails=1`,
+        {headers:{'Accept-Language':'es'}}
+      );
+      const results=await r.json();
+      if(!results.length){sugg.className='city-suggestions';return;}
+      sugg.innerHTML=results.map(item=>{
+        const a=item.address||{};
+        const name=a.city||a.town||a.village||a.county||item.display_name.split(',')[0];
+        const sub=[a.state,a.country].filter(Boolean).join(', ');
+        const lat=parseFloat(item.lat).toFixed(4),lon=parseFloat(item.lon).toFixed(4);
+        const safeName=(name+', '+sub).replace(/'/g,"\\'");
+        return `<div class="city-sugg-item" onclick="selectCity(${item.lat},${item.lon},'${safeName}')">
+          <div class="city-sugg-name">📍 ${name}</div>
+          <div class="city-sugg-sub">${sub} · ${lat}, ${lon}</div>
+        </div>`;
+      }).join('');
+      sugg.className='city-suggestions open';
+    }catch(e){sugg.className='city-suggestions';}
+  },350);
+}
+function onCityKey(e){if(e.key==='Escape')$('citySugg').className='city-suggestions';}
+document.addEventListener('click',e=>{if(!e.target.closest('.city-search-wrap'))$('citySugg').className='city-suggestions';});
+
+async function selectCity(lat,lon,name){
+  $('citySugg').className='city-suggestions';
+  $('cityInput').value=name;
+  await applyCoords(parseFloat(lat),parseFloat(lon),name);
+}
+
+// ── Aplica coordenadas + consulta elevación y TZ ─────────────────────────
+async function applyCoords(lat,lon,placeName){
+  showSteps(true);
+  setStep('ls1','done');
+  setStep('ls2','active');
+  setStep('ls3','wait');
+  autoFill('latitude', lat.toFixed(6),'lbl_lat');
+  autoFill('longitude',lon.toFixed(6),'lbl_lon');
+
+  let elev=null,tzId=null,elevErr=false,tzErr=false;
+
+  // Elevación
+  try{
+    elev=await fetchElevation(lat,lon);
+    autoFill('elevation',String(elev),'lbl_el');
+    setStep('ls2','done');
+  }catch(e){
+    elevErr=true;
+    $('ls2').querySelector('.ls-icon').textContent='⚠️';
+    $('ls2').className='ls error';
+  }
+
+  // Zona horaria
+  setStep('ls3','active');
+  try{
+    tzId=await fetchTimezone(lat,lon);
+    autoFill('timezone',tzId,'lbl_tz');
+    setStep('ls3','done');
+  }catch(e){
+    tzErr=true;
+    tzId=tzByLongitude(lon);
+    autoFill('timezone',tzId,'lbl_tz');
+    $('ls3').querySelector('.ls-icon').textContent='⚠️';
+    $('ls3').className='ls error';
+    const txt=$('ls3');
+    txt.innerHTML=`<span class="ls-icon">⚠️</span> Zona horaria aproximada por longitud: <b>${tzId}</b>`;
+  }
+
+  // Pills de resumen
+  const pills=[];
+  if(placeName)pills.push(`📍 ${placeName}`);
+  pills.push(`🌐 ${lat.toFixed(5)}, ${lon.toFixed(5)}`);
+  if(elev!==null)pills.push(`⛰️ ${elev} m s.n.m.`);
+  if(tzId)pills.push(`🕐 ${tzId}`);
+  $('coordsPills').innerHTML=pills.map(p=>`<span class="cpill">${p}</span>`).join('');
+
+  const allOk=!elevErr&&!tzErr;
+  setLocStatus(
+    allOk
+      ? `✅ Listo: <b>${placeName||`${lat.toFixed(4)}, ${lon.toFixed(4)}`}</b> — Lat/Lon, elevación y zona horaria aplicadas.`
+      : `⚠️ Coordenadas aplicadas. Algunos datos usaron valores aproximados.`,
+    allOk?'ok':'info'
+  );
+}
+
+// ── GPS del navegador ────────────────────────────────────────────────────
+async function detectarUbicacion(){
+  if(!navigator.geolocation){
+    setLocStatus('❌ Tu navegador no soporta geolocalización.','error');
+    return;
+  }
+  const btn=$('btnGeo');
+  btn.disabled=true;
+  $('geoIco').outerHTML='<span class="spin" id="geoIco"></span>';
+  $('geoTxt').textContent='Detectando…';
+  showSteps(true);
+  setStep('ls1','active');setStep('ls2','wait');setStep('ls3','wait');
+  setLocStatus('⏳ Solicitando permiso de ubicación al navegador…','loading');
+
+  navigator.geolocation.getCurrentPosition(
+    async pos=>{
+      const lat=pos.coords.latitude,lon=pos.coords.longitude;
+      const acc=pos.coords.accuracy;
+
+      // Restaurar botón
+      $('geoIco').outerHTML='<span id="geoIco">🎯</span>';
+      $('geoTxt').textContent='Detectar mi ubicación';
+      btn.disabled=false;
+      setStep('ls1','done');
+      $('ls1').innerHTML='<span class="ls-icon">✅</span> GPS obtenido — precisión ~'+Math.round(acc)+' m';
+
+      // Nombre del lugar (no bloquea el resto)
+      let placeName=`${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+      const nameP=fetchPlaceName(lat,lon).then(p=>{if(p){placeName=p;$('cityInput').value=p;}});
+
+      await nameP; // esperar nombre antes de mostrar pills
+      await applyCoords(lat,lon,placeName);
+    },
+    err=>{
+      $('geoIco').outerHTML='<span id="geoIco">🎯</span>';
+      $('geoTxt').textContent='Detectar mi ubicación';
+      btn.disabled=false;
+      showSteps(false);
+      const msgs={1:'Permiso denegado. Activa la ubicación en tu navegador.',2:'No se pudo obtener posición.',3:'Tiempo agotado. Intenta de nuevo.'};
+      setLocStatus('❌ '+(msgs[err.code]||err.message),'error');
+    },
+    {enableHighAccuracy:true,timeout:15000,maximumAge:0}
+  );
+}
 
 
-/* ═══ NOTAS POR DÍA — IndexedDB ════════════════════════════════════════════ */
-let _db = null;
-
-function openDB() {
-  if (_db) return Promise.resolve(_db);
-  return new Promise((res, rej) => {
-    const req = indexedDB.open('CalCaraita', 1);
-    req.onupgradeneeded = e => {
-      e.target.result.createObjectStore('notas', { keyPath: 'id' });
-    };
-    req.onsuccess = e => { _db = e.target.result; res(_db); };
-    req.onerror   = e => rej(e.target.error);
+/* ═══ NOTAS — IndexedDB ════════════════════════════════════════════════════ */
+let _db=null;
+function openDB(){
+  if(_db)return Promise.resolve(_db);
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open('CalCaraita',1);
+    req.onupgradeneeded=e=>e.target.result.createObjectStore('notas',{keyPath:'id'});
+    req.onsuccess=e=>{_db=e.target.result;res(_db);};
+    req.onerror=e=>rej(e.target.error);
   });
 }
-
-function dbGet(key) {
-  return openDB().then(db => new Promise((res, rej) => {
-    const tx = db.transaction('notas', 'readonly');
-    const req = tx.objectStore('notas').get(key);
-    req.onsuccess = e => res(e.target.result?.texto || '');
-    req.onerror   = e => rej(e.target.error);
-  }));
-}
-
-function dbPut(key, texto) {
-  return openDB().then(db => new Promise((res, rej) => {
-    const tx = db.transaction('notas', 'readwrite');
-    if (texto.trim()) {
-      tx.objectStore('notas').put({ id: key, texto });
-    } else {
-      tx.objectStore('notas').delete(key);
-    }
-    tx.oncomplete = () => res();
-    tx.onerror    = e => rej(e.target.error);
-  }));
-}
-
-/* Carga qué días tienen notas y marca sus celdas con 📝 */
-async function markDaysWithNotes() {
-  const db = await openDB();
-  return new Promise(res => {
-    const tx  = db.transaction('notas', 'readonly');
-    const req = tx.objectStore('notas').getAllKeys();
-    req.onsuccess = e => {
-      const keys = e.target.result;
-      // quitar marcas previas
-      document.querySelectorAll('.day-has-note').forEach(el => el.classList.remove('day-has-note'));
-      keys.forEach(k => {
-        const td = document.querySelector(`td[onclick*="'${k}'"]`);
-        if (td) td.classList.add('day-has-note');
-      });
+function dbGet(key){return openDB().then(db=>new Promise((res,rej)=>{const req=db.transaction('notas','readonly').objectStore('notas').get(key);req.onsuccess=e=>res(e.target.result?.texto||'');req.onerror=e=>rej(e.target.error);}));}
+function dbPut(key,texto){return openDB().then(db=>new Promise((res,rej)=>{const tx=db.transaction('notas','readwrite');if(texto.trim())tx.objectStore('notas').put({id:key,texto});else tx.objectStore('notas').delete(key);tx.oncomplete=()=>res();tx.onerror=e=>rej(e.target.error);}));}
+async function markDaysWithNotes(){
+  const db=await openDB();
+  return new Promise(res=>{
+    const req=db.transaction('notas','readonly').objectStore('notas').getAllKeys();
+    req.onsuccess=e=>{
+      document.querySelectorAll('.day-has-note').forEach(el=>el.classList.remove('day-has-note'));
+      e.target.result.forEach(k=>{const td=document.querySelector(`td[onclick*="'${k}'"]`);if(td)td.classList.add('day-has-note');});
       res();
     };
   });
 }
-
-/* Inserta sección de notas al final del modalBody */
-async function renderNotesSection(dateStr) {
-  const nota = await dbGet(dateStr);
-  const sec = document.createElement('div');
-  sec.className = 'notes-section';
-  sec.id = 'notesSection';
-  sec.innerHTML = `
-    <div class="notes-label">
-      <span>📝 Nota personal</span>
-      <span id="noteCharCount" style="font-weight:400">${nota.length}/500</span>
-    </div>
+async function renderNotesSection(dateStr){
+  const nota=await dbGet(dateStr);
+  const sec=document.createElement('div');sec.className='notes-section';sec.id='notesSection';
+  sec.innerHTML=`<div class="notes-label"><span>📝 Nota personal</span><span id="noteCharCount" style="font-weight:400">${nota.length}/500</span></div>
     <textarea class="notes-textarea" id="noteText" maxlength="500" placeholder="Escribe una nota para este día hebreo…">${nota}</textarea>
     <div class="notes-save-row">
       <button class="btn-save-note" onclick="saveNote('${dateStr}')">Guardar</button>
       <button class="btn-del-note" onclick="deleteNote('${dateStr}')">Borrar</button>
       <span class="note-status" id="noteStatus"></span>
     </div>`;
-  document.getElementById('modalBody').appendChild(sec);
-
-  const ta = document.getElementById('noteText');
-  const cc = document.getElementById('noteCharCount');
-  ta.addEventListener('input', () => { cc.textContent = ta.value.length + '/500'; });
+  $('modalBody').appendChild(sec);
+  const ta=$('noteText'),cc=$('noteCharCount');
+  ta.addEventListener('input',()=>{cc.textContent=ta.value.length+'/500';});
+}
+async function saveNote(dateStr){
+  const texto=$('noteText').value;await dbPut(dateStr,texto);
+  const st=$('noteStatus');st.textContent=texto.trim()?'✓ Guardada':'✓ Borrada';
+  setTimeout(()=>{if(st)st.textContent='';},2000);markDaysWithNotes();
+}
+async function deleteNote(dateStr){
+  await dbPut(dateStr,'');$('noteText').value='';$('noteCharCount').textContent='0/500';
+  const st=$('noteStatus');st.textContent='✓ Borrada';
+  setTimeout(()=>{if(st)st.textContent='';},2000);markDaysWithNotes();
 }
 
-async function saveNote(dateStr) {
-  const texto = document.getElementById('noteText').value;
-  await dbPut(dateStr, texto);
-  const st = document.getElementById('noteStatus');
-  st.textContent = texto.trim() ? '✓ Guardada' : '✓ Borrada';
-  setTimeout(() => { if (st) st.textContent = ''; }, 2000);
-  markDaysWithNotes();
+/* ═══ MODAL ════════════════════════════════════════════════════════════════ */
+let currentObs=null,currentEventMap={};
+
+function moonPhaseData(date){
+  const iN=Astronomy.Illumination(Astronomy.Body.Moon,date).phase_fraction;
+  const iX=Astronomy.Illumination(Astronomy.Body.Moon,new Date(date.getTime()+3600000)).phase_fraction;
+  const waxing=iX>=iN,pct=(iN*100).toFixed(1);
+  const ph=Astronomy.Illumination(Astronomy.Body.Moon,date).phase_angle,angle=waxing?ph:360-ph;
+  let emoji,name;
+  if(angle<15||angle>=345){emoji='🌑';name='Luna nueva';}
+  else if(angle<75){emoji='🌒';name='Creciente joven';}
+  else if(angle<105){emoji='🌓';name='Cuarto creciente';}
+  else if(angle<165){emoji='🌔';name='Gibosa creciente';}
+  else if(angle<195){emoji='🌕';name='Luna llena';}
+  else if(angle<255){emoji='🌖';name='Gibosa menguante';}
+  else if(angle<285){emoji='🌗';name='Cuarto menguante';}
+  else{emoji='🌘';name='Creciente menguante';}
+  return{emoji,name,pct,waxing,angle};
 }
-
-async function deleteNote(dateStr) {
-  await dbPut(dateStr, '');
-  document.getElementById('noteText').value = '';
-  document.getElementById('noteCharCount').textContent = '0/500';
-  const st = document.getElementById('noteStatus');
-  st.textContent = '✓ Borrada';
-  setTimeout(() => { if (st) st.textContent = ''; }, 2000);
-  markDaysWithNotes();
+function moonIllumProfile(s0,s1){
+  const samples=[],step=30*60*1000,dur=s1-s0,steps=Math.ceil(dur/step);
+  for(let i=0;i<=steps;i++){const t=new Date(s0.getTime()+i*step);if(t>s1)break;samples.push({t,pct:Astronomy.Illumination(Astronomy.Body.Moon,t).phase_fraction*100});}
+  if(!samples.length)return null;
+  const maxS=samples.reduce((a,b)=>a.pct>=b.pct?a:b);
+  const mid=new Date(s0.getTime()+dur/2);
+  const midS=samples.reduce((best,s)=>Math.abs(s.t-mid)<Math.abs(best.t-mid)?s:best);
+  return{inicio:samples[0].pct.toFixed(2),meridiano:midS.pct.toFixed(2),maximo:maxS.pct.toFixed(2),visible:maxS.pct>=1.5};
 }
-
-/* ═══ MODAL: info del día ═══════════════════════════════════════════════════ */
-let currentObs       = null;   // observer activo tras el último cálculo
-let currentEventMap  = {};     // mapa de eventos activo
-
-/* Fase lunar: retorna emoji, nombre y % iluminación para una fecha */
-function moonPhaseData(date) {
-  const illumNow  = Astronomy.Illumination(Astronomy.Body.Moon, date).phase_fraction;
-  const illumNext = Astronomy.Illumination(Astronomy.Body.Moon,
-                      new Date(date.getTime() + 3600000)).phase_fraction;
-  const waxing    = illumNext >= illumNow;
-  const pct       = (illumNow * 100).toFixed(1);
-  const ph        = Astronomy.Illumination(Astronomy.Body.Moon, date).phase_angle;
-  const angle     = waxing ? ph : 360 - ph;
-
-  let emoji, name;
-  if      (angle <  15 || angle >= 345) { emoji='🌑'; name='Luna nueva';          }
-  else if (angle <  75)                  { emoji='🌒'; name='Creciente joven';     }
-  else if (angle < 105)                  { emoji='🌓'; name='Cuarto creciente';    }
-  else if (angle < 165)                  { emoji='🌔'; name='Gibosa creciente';    }
-  else if (angle < 195)                  { emoji='🌕'; name='Luna llena';          }
-  else if (angle < 255)                  { emoji='🌖'; name='Gibosa menguante';    }
-  else if (angle < 285)                  { emoji='🌗'; name='Cuarto menguante';    }
-  else                                   { emoji='🌘'; name='Creciente menguante'; }
-
-  return { emoji, name, pct, waxing, angle };
-}
-
-/* Calcula muestras de iluminación lunar durante el día hebreo
-   (de sunsetStart a sunsetEnd) usando solo horas ANTES del atardecer final,
-   ya que el % después del ocaso ya pertenece al día siguiente. */
-function moonIllumProfile(sunsetStart, sunsetEnd) {
-  // Muestreamos cada 30 minutos dentro del día hebreo
-  const samples = [];
-  const step = 30 * 60 * 1000; // 30 min en ms
-  const duration = sunsetEnd - sunsetStart;
-  const steps = Math.ceil(duration / step);
-
-  for (let i = 0; i <= steps; i++) {
-    const t = new Date(sunsetStart.getTime() + i * step);
-    if (t > sunsetEnd) break;
-    const frac = Astronomy.Illumination(Astronomy.Body.Moon, t).phase_fraction;
-    samples.push({ t, pct: frac * 100 });
-  }
-
-  if (!samples.length) return null;
-
-  // Inicio = primera muestra (al atardecer que abre el día hebreo)
-  const inicio = samples[0].pct;
-  // Fin = última muestra (justo antes del atardecer que cierra el día)
-  const fin = samples[samples.length - 1].pct;
-  // Máximo = mayor valor en todo el rango
-  const maxSample = samples.reduce((a, b) => a.pct >= b.pct ? a : b);
-  // Meridiano = muestra más cercana al punto medio temporal del día
-  const midTime = new Date(sunsetStart.getTime() + duration / 2);
-  const midSample = samples.reduce((best, s) =>
-    Math.abs(s.t - midTime) < Math.abs(best.t - midTime) ? s : best
-  );
-
-  return {
-    inicio: inicio.toFixed(2),
-    meridiano: midSample.pct.toFixed(2),
-    maximo: maxSample.pct.toFixed(2),
-    maxTime: maxSample.t,
-    // ¿Es visible a ojo desnudo? Referencia práctica: > ~1.5-2% aprox
-    visible: maxSample.pct >= 1.5
-  };
-}
-
-/* Formatea un Date en la zona horaria configurada */
-function fmtFull(date) {
-  const z = tz();
-  return DateTime.fromJSDate(date, {zone:'utc'}).setZone(z)
-    .setLocale('es').toFormat("cccc d 'de' LLLL, HH:mm 'h'");
-}
-
-function closeModal() {
-  document.getElementById('dayModal').style.display = 'none';
-}
-
-function showDayModal(dateStr) {
-  if (!currentObs) return;
-
-  const modal = document.getElementById('dayModal');
-  const body  = document.getElementById('modalBody');
-
-  // Mostrar modal con loading
-  modal.style.display = 'flex';
-  body.innerHTML = '<div class="modal-loading">Calculando atardeceres…</div>';
-
-  const [year, month, day] = dateStr.split('-').map(Number);
-
-  // Título gregoriano
-  const z = tz();
-  const dtLabel = DateTime.fromObject({year, month, day}, {zone: z})
-    .setLocale('es').toFormat("cccc, d 'de' LLLL yyyy");
-  document.getElementById('modalTitleText').textContent = dtLabel;
-
-  // Eventos del día
-  const evs = currentEventMap[dateStr] || [];
-  document.getElementById('modalEvents').innerHTML = evs.length
-    ? evs.map(e => `<span class="modal-ev" style="background:${e.color}">${e.label}</span>`).join('')
-    : '<span style="color:#aaa;font-size:.8rem">Sin eventos especiales</span>';
-
-  // Cálculo asíncrono (setTimeout para no bloquear UI)
-  setTimeout(() => {
-    try {
-      // Fechas UTC para getSunset: día anterior (= inicio del día hebreo) y este día (= fin)
-      const prevUTC = new Date(Date.UTC(year, month - 1, day - 1, 12, 0, 0));
-      const thisUTC = new Date(Date.UTC(year, month - 1, day,     12, 0, 0));
-
-      const sunsetStart = getSunset(prevUTC, currentObs); // inicia el día hebreo
-      const sunsetEnd   = getSunset(thisUTC, currentObs); // termina el día hebreo
-
-      // Duración del día hebreo
-      const durMs  = sunsetEnd - sunsetStart;
-      const durH   = Math.floor(durMs / 3600000);
-      const durMin = Math.floor((durMs % 3600000) / 60000);
-
-      // Fase lunar al inicio del día hebreo
-      const phase = moonPhaseData(sunsetStart);
-
-      // Perfil de iluminación durante el día hebreo
-      const illum = moonIllumProfile(sunsetStart, sunsetEnd);
-
-      // Helper: clase de color según porcentaje
-      function illumClass(pct) {
-        const v = parseFloat(pct);
-        if (v < 2)   return 'low';
-        if (v < 50)  return 'mid';
-        if (v < 95)  return 'high';
-        return 'full';
-      }
-      function fillWidth(pct) {
-        return Math.min(100, parseFloat(pct)).toFixed(1);
-      }
-
-      // Nota de visibilidad
-      const maxPct = parseFloat(illum.maximo);
-      let visNote = '';
-      if (maxPct < 1) {
-        visNote = `<b>${illum.maximo}%</b> máx — prácticamente invisible a ojo desnudo (luna nueva).`;
-      } else if (maxPct < 2) {
-        visNote = `<b>${illum.maximo}%</b> máx — requiere condiciones perfectas y horizonte despejado.`;
-      } else if (maxPct < 10) {
-        visNote = `<b>${illum.maximo}%</b> máx — creciente joven, visible con cielo oscuro.`;
-      } else if (maxPct < 50) {
-        visNote = `<b>${illum.maximo}%</b> máx — visible a simple vista.`;
-      } else if (maxPct < 95) {
-        visNote = `<b>${illum.maximo}%</b> máx — luna muy brillante.`;
-      } else {
-        visNote = `<b>${illum.maximo}%</b> máx — luna llena o casi llena.`;
-      }
-
-      const eyeClass = illum.visible ? 'yes' : 'no';
-      const eyeText  = illum.visible ? '👁 Potencialmente visible' : '🚫 Difícil visibilidad a ojo desnudo';
-
-      body.innerHTML = `
-        <div class="modal-time-row">
-          <div class="modal-icon">🌅</div>
-          <div>
-            <div class="modal-lbl">Inicio del día hebreo</div>
-            <div class="modal-time">${fmtFull(sunsetStart)}</div>
-          </div>
-        </div>
-        <div class="modal-time-row">
-          <div class="modal-icon">🌇</div>
-          <div>
-            <div class="modal-lbl">Fin del día hebreo</div>
-            <div class="modal-time">${fmtFull(sunsetEnd)}</div>
-          </div>
-        </div>
-
+function fmtFull(date){return DateTime.fromJSDate(date,{zone:'utc'}).setZone(tz()).setLocale('es').toFormat("cccc d 'de' LLLL, HH:mm 'h'");}
+function closeModal(){$('dayModal').style.display='none';}
+function showDayModal(dateStr){
+  if(!currentObs)return;
+  const modal=$('dayModal'),body=$('modalBody');
+  modal.style.display='flex';
+  body.innerHTML='<div class="modal-loading">Calculando atardeceres…</div>';
+  const[year,month,day]=dateStr.split('-').map(Number);
+  $('modalTitleText').textContent=DateTime.fromObject({year,month,day},{zone:tz()}).setLocale('es').toFormat("cccc, d 'de' LLLL yyyy");
+  const evs=currentEventMap[dateStr]||[];
+  $('modalEvents').innerHTML=evs.length?evs.map(e=>`<span class="modal-ev" style="background:${e.color}">${e.label}</span>`).join(''):'<span style="color:#aaa;font-size:.8rem">Sin eventos especiales</span>';
+  setTimeout(()=>{
+    try{
+      const pU=new Date(Date.UTC(year,month-1,day-1,12,0,0)),tU=new Date(Date.UTC(year,month-1,day,12,0,0));
+      const ss=getSunset(pU,currentObs),se=getSunset(tU,currentObs);
+      const dMs=se-ss,dH=Math.floor(dMs/3600000),dM=Math.floor((dMs%3600000)/60000);
+      const phase=moonPhaseData(ss),illum=moonIllumProfile(ss,se);
+      const ic=p=>{const v=parseFloat(p);if(v<2)return'low';if(v<50)return'mid';if(v<95)return'high';return'full';};
+      const fw=p=>Math.min(100,parseFloat(p)).toFixed(1);
+      const mx=parseFloat(illum.maximo);
+      let vn='';
+      if(mx<1)vn=`<b>${illum.maximo}%</b> — prácticamente invisible (luna nueva).`;
+      else if(mx<2)vn=`<b>${illum.maximo}%</b> — requiere condiciones perfectas.`;
+      else if(mx<10)vn=`<b>${illum.maximo}%</b> — creciente joven, cielo oscuro.`;
+      else if(mx<50)vn=`<b>${illum.maximo}%</b> — visible a simple vista.`;
+      else if(mx<95)vn=`<b>${illum.maximo}%</b> — luna muy brillante.`;
+      else vn=`<b>${illum.maximo}%</b> — luna llena.`;
+      const ec=illum.visible?'yes':'no',et=illum.visible?'👁 Potencialmente visible':'🚫 Difícil visibilidad';
+      body.innerHTML=`
+        <div class="modal-time-row"><div class="modal-icon">🌅</div><div>
+          <div class="modal-lbl">Inicio del día hebreo</div>
+          <div class="modal-time">${fmtFull(ss)}</div>
+        </div></div>
+        <div class="modal-time-row"><div class="modal-icon">🌇</div><div>
+          <div class="modal-lbl">Fin del día hebreo</div>
+          <div class="modal-time">${fmtFull(se)}</div>
+        </div></div>
         <div class="modal-phase-bar">
           <div class="phase-emoji">${phase.emoji}</div>
           <div class="phase-info">
             <div class="phase-name">${phase.name}</div>
-            <div class="phase-detail">${phase.waxing ? 'Creciente ↑' : 'Menguante ↓'}</div>
+            <div class="phase-detail">${phase.waxing?'Creciente ↑':'Menguante ↓'}</div>
           </div>
         </div>
-
         <div class="illum-panel">
           <div class="illum-panel-title">🌙 Iluminación lunar · día hebreo completo</div>
           <div class="illum-bars">
-            <div class="illum-col">
-              <div class="illum-col-label">🌅 Inicio<br>(atardecer)</div>
-              <div class="illum-pct ${illumClass(illum.inicio)}">${illum.inicio}%</div>
-              <div class="illum-track"><div class="illum-fill" style="width:${fillWidth(illum.inicio)}%"></div></div>
-            </div>
-            <div class="illum-col">
-              <div class="illum-col-label">🌙 Meridiano<br>(punto medio)</div>
-              <div class="illum-pct ${illumClass(illum.meridiano)}">${illum.meridiano}%</div>
-              <div class="illum-track"><div class="illum-fill" style="width:${fillWidth(illum.meridiano)}%"></div></div>
-            </div>
-            <div class="illum-col">
-              <div class="illum-col-label">⬆ Máximo<br>(del día)</div>
-              <div class="illum-pct ${illumClass(illum.maximo)}">${illum.maximo}%</div>
-              <div class="illum-track"><div class="illum-fill" style="width:${fillWidth(illum.maximo)}%"></div></div>
-            </div>
+            <div class="illum-col"><div class="illum-col-label">🌅 Inicio<br>(atardecer)</div>
+              <div class="illum-pct ${ic(illum.inicio)}">${illum.inicio}%</div>
+              <div class="illum-track"><div class="illum-fill" style="width:${fw(illum.inicio)}%"></div></div></div>
+            <div class="illum-col"><div class="illum-col-label">🌙 Meridiano<br>(punto medio)</div>
+              <div class="illum-pct ${ic(illum.meridiano)}">${illum.meridiano}%</div>
+              <div class="illum-track"><div class="illum-fill" style="width:${fw(illum.meridiano)}%"></div></div></div>
+            <div class="illum-col"><div class="illum-col-label">⬆ Máximo<br>(del día)</div>
+              <div class="illum-pct ${ic(illum.maximo)}">${illum.maximo}%</div>
+              <div class="illum-track"><div class="illum-fill" style="width:${fw(illum.maximo)}%"></div></div></div>
           </div>
-          <div class="illum-note">
-            ${visNote}<br>
-            <span class="illum-naked-eye ${eyeClass}">${eyeText}</span>
-          </div>
+          <div class="illum-note">${vn}<br><span class="illum-naked-eye ${ec}">${et}</span></div>
         </div>
-
-        <div class="modal-duration">⏱ Duración del día hebreo: ${durH}h ${durMin}min</div>
-      `;
-      // Cargar notas guardadas
+        <div class="modal-duration">⏱ Duración del día hebreo: ${dH}h ${dM}min</div>`;
       renderNotesSection(dateStr);
-    } catch(e) {
-      body.innerHTML = `<div class="modal-loading" style="color:#c53030">Error: ${e.message||e}</div>`;
-    }
-  }, 20);
+    }catch(e){body.innerHTML=`<div class="modal-loading" style="color:#c53030">Error: ${e.message||e}</div>`;}
+  },20);
 }
 </script>
 
-<!-- Modal días ─────────────────────────────────────────────────────────── -->
+<!-- Modal días -->
 <div class="modal-overlay" id="dayModal" onclick="if(event.target===this)closeModal()">
   <div class="modal-box">
     <div class="modal-header">
-      <div>
-        <div class="modal-header-title" id="modalTitleText"></div>
-      </div>
+      <div><div class="modal-header-title" id="modalTitleText"></div></div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-events" id="modalEvents"></div>
-    <div class="modal-body" id="modalBody">
-      <div class="modal-loading">Cargando…</div>
-    </div>
+    <div class="modal-body" id="modalBody"><div class="modal-loading">Cargando…</div></div>
   </div>
 </div>
 
