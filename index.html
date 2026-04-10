@@ -320,11 +320,7 @@
         <option value="standard" selected>Estándar</option>
         <option value="lenient">Flexible</option>
       </select></div>
-    <div class="field"><label>Meses a generar</label>
-      <select id="monthCount">
-        <option value="12" selected>12 meses</option>
-        <option value="13">13 meses</option>
-      </select></div>
+<input type="hidden" id="monthCount" value="12"/>
   </div>
 
   <!-- ══ FILA INFERIOR: Calcular + Opciones avanzadas al lado ══ -->
@@ -524,13 +520,23 @@ function buildCalendar(){
 
       const year  = $('yearName').value.trim();
       const mode  = $('crescentMode').value;
-      const count = Number($('monthCount').value);
       const obs   = buildObserver();
       const startMonth = Number($('startMonth').value);
       const yearNum = parseInt(year) || new Date().getFullYear();
       const start = new Date(Date.UTC(yearNum, startMonth - 1, 1, 12, 0, 0));
 
-      const luns  = findLunations(start, obs, mode, count);
+      // ── Auto-detección de año bisiesto (13 meses) ────────────────────────
+      // Regla caraíta: si el mes 13 comienza ANTES del equinoccio de primavera
+      // del año siguiente, se necesitan 13 meses para que Aviv caiga en primavera.
+      const nextEquinox  = new Date(Astronomy.Seasons(yearNum + 1).mar_equinox.date);
+      const luns13 = findLunations(start, obs, mode, 13);
+      const month13start = luns13[12].start; // inicio del posible mes 13
+
+      // Si el mes 13 empieza antes del equinoccio siguiente → año bisiesto de 13 meses
+      const isLeapYear = month13start < nextEquinox;
+      const count = isLeapYear ? 13 : 12;
+
+      const luns  = isLeapYear ? luns13 : luns13.slice(0, 12);
       const months = luns.map((item,i) => ({
         start: item.start,
         days:  i < luns.length-1 ? diffDays(item.start, luns[i+1].start) : 29
@@ -561,8 +567,11 @@ function buildCalendar(){
       const yomMsg = yomDifVal
         ? ` · Yom Tru'ah diferido al ${DateTime.fromJSDate(yomDifVal,{zone:'utc'}).setZone(tz()).toFormat("d 'de' LLLL")}.`
         : '';
+      const leapMsg = isLeapYear
+        ? ' · <b>Año bisiesto</b> (13 meses) — el mes 13 cae antes del siguiente equinoccio.'
+        : ' · Año regular (12 meses).';
       $('statusBox').className='ok';
-      $('statusBox').innerHTML=`<b>✓ Calendario ${year} generado.</b>${yomMsg}`;
+      $('statusBox').innerHTML=`<b>✓ Calendario ${year} generado.</b>${leapMsg}${yomMsg}`;
     }catch(err){
       $('placeholder').style.display='block';$('calOutput').style.display='none';
       $('statusBox').className='error';$('statusBox').innerHTML=`<b>Error:</b> ${errMsg(err)}`;
@@ -893,25 +902,6 @@ function showDayModal(dateStr){
       const ss=getSunset(pU,currentObs),se=getSunset(tU,currentObs);
       const dMs=se-ss,dH=Math.floor(dMs/3600000),dM=Math.floor((dMs%3600000)/60000);
       const phase=moonPhaseData(ss),illum=moonIllumProfile(ss,se);
-
-      // Altitud del sol en las 3 etapas del día hebreo
-      function sunAltDeg(date) {
-        const equ = Astronomy.Equator(Astronomy.Body.Sun, date, currentObs, true, true);
-        return Astronomy.Horizon(date, currentObs, equ.ra, equ.dec, 'normal').altitude;
-      }
-      const tMeridiano = new Date(ss.getTime() + dMs / 2); // punto medio del día hebreo
-      const solInicio    = sunAltDeg(ss).toFixed(1);
-      const solMeridiano = sunAltDeg(tMeridiano).toFixed(1);
-      const solCierre    = sunAltDeg(se).toFixed(1);
-
-      function sunBadge(deg) {
-        const v = parseFloat(deg);
-        const color = v > 20 ? '#d97706' : v > 0 ? '#f59e0b' : v > -6 ? '#7c3aed' : '#1e3a5f';
-        const label = v > 0 ? `☀️ Sol ${deg}°` : `🌙 Sol ${deg}°`;
-        return `<span style="margin-left:8px;display:inline-block;background:${color};color:#fff;
-          border-radius:8px;padding:1px 8px;font-size:.7rem;font-weight:700;vertical-align:middle;">${label}</span>`;
-      }
-
       const ic=p=>{const v=parseFloat(p);if(v<2)return'low';if(v<50)return'mid';if(v<95)return'high';return'full';};
       const fw=p=>Math.min(100,parseFloat(p)).toFixed(1);
       const mx=parseFloat(illum.maximo);
@@ -926,15 +916,11 @@ function showDayModal(dateStr){
       body.innerHTML=`
         <div class="modal-time-row"><div class="modal-icon">🌅</div><div>
           <div class="modal-lbl">Inicio del día hebreo</div>
-          <div class="modal-time">${fmtFull(ss)}${sunBadge(solInicio)}</div>
-        </div></div>
-        <div class="modal-time-row"><div class="modal-icon">🌙</div><div>
-          <div class="modal-lbl">Meridiano del día hebreo</div>
-          <div class="modal-time">${fmtFull(tMeridiano)}${sunBadge(solMeridiano)}</div>
+          <div class="modal-time">${fmtFull(ss)}</div>
         </div></div>
         <div class="modal-time-row"><div class="modal-icon">🌇</div><div>
-          <div class="modal-lbl">Cierre del día hebreo</div>
-          <div class="modal-time">${fmtFull(se)}${sunBadge(solCierre)}</div>
+          <div class="modal-lbl">Fin del día hebreo</div>
+          <div class="modal-time">${fmtFull(se)}</div>
         </div></div>
         <div class="modal-phase-bar">
           <div class="phase-emoji">${phase.emoji}</div>
