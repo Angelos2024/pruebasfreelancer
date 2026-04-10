@@ -214,6 +214,13 @@
     .sun-alt-mid{background:#713f12;color:#fde68a;}
     .sun-alt-high{background:#7c2d12;color:#fdba74;}
     .sun-alt-vhigh{background:#7f1d1d;color:#fca5a5;}
+    /* ── Shabbat markers ── */
+    .shab-start,.shab-end{
+      display:block;font-size:.62rem;font-weight:700;border-radius:3px;
+      padding:1px 5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5;
+    }
+    .shab-start{background:#1e3a5f;color:#bfdbfe;}
+    .shab-end{background:#2d1b4e;color:#c4b5fd;}
 
     /* ── Fila inferior: botón + opciones avanzadas ── */
     .ctrl-bottom-row{display:flex;align-items:stretch;gap:10px;margin-top:10px;flex-wrap:wrap;}
@@ -510,7 +517,7 @@ function buildEventMap(months,avivStart,m7Start){
 }
 function isoWeekday(y,m,d){const w=new Date(Date.UTC(y,m-1,d)).getUTCDay();return w===0?7:w;}
 function daysInMonth(y,m){return new Date(Date.UTC(y,m,0)).getUTCDate();}
-function renderMonth(year,month,eventMap){
+function renderMonth(year,month,eventMap,shabbatMap){
   const total=daysInMonth(year,month),offset=isoWeekday(year,month,1)-1;
   const cells=[];
   for(let i=0;i<offset;i++)cells.push(null);
@@ -527,7 +534,17 @@ function renderMonth(year,month,eventMap){
       const evs=eventMap[k]||[],dow=isoWeekday(year,month,day);
       const tc=dow===6?' sat-c':dow===7?' sun-c':'';
       const evH=evs.map(e=>`<span class="ev" style="background:${e.color}" title="${e.label}">${e.label}</span>`).join('');
-      html+=`<td class="${tc}" onclick="showDayModal('${k}')" title="Ver detalle"><div class="dn">${day}</div>${evH}</td>`;
+      // Shabbat markers
+      let shabH='';
+      if(shabbatMap){
+        if(dow===5&&shabbatMap[k]){
+          shabH=`<span class="shab-start" title="Inicio Shabbat"> ${shabbatMap[k].inicio}</span>`;
+        }
+        if(dow===6&&shabbatMap[k]){
+          shabH=`<span class="shab-end" title="Fin Shabbat"> ${shabbatMap[k].fin}</span>`;
+        }
+      }
+      html+=`<td class="${tc}" onclick="showDayModal('${k}')" title="Ver detalle"><div class="dn">${day}</div>${evH}${shabH}</td>`;
     }
     if(i%7===6)html+='</tr>';
   }
@@ -601,9 +618,37 @@ function buildCalendar(){
 
       const avivStart = months[0].start, m7Start = months[6]?.start;
       const evMap=buildEventMap(months,avivStart,m7Start);
+      // Build shabbat times map: key=date string, value={inicio,fin} HH:MM
+      const shabbatMap={};
+      const fmtTime=d=>DateTime.fromJSDate(d,{zone:'utc'}).setZone(tz()).toFormat('HH:mm');
+      const gregRangeArr=gregRange(evMap);
+      gregRangeArr.forEach(({year:ry,month:rm})=>{
+        const tot=daysInMonth(ry,rm);
+        for(let rd=1;rd<=tot;rd++){
+          const dow=isoWeekday(ry,rm,rd);
+          if(dow===5){
+            // Friday: sunset = inicio shabbat
+            try{
+              const fri=new Date(Date.UTC(ry,rm-1,rd,12,0,0));
+              const ssFri=getSunset(fri,obs);
+              const kFri=`${ry}-${String(rm).padStart(2,'0')}-${String(rd).padStart(2,'0')}`;
+              shabbatMap[kFri]={inicio:fmtTime(ssFri)};
+            }catch(e){}
+          }
+          if(dow===6){
+            // Saturday: sunset = fin shabbat
+            try{
+              const sat=new Date(Date.UTC(ry,rm-1,rd,12,0,0));
+              const ssSat=getSunset(sat,obs);
+              const kSat=`${ry}-${String(rm).padStart(2,'0')}-${String(rd).padStart(2,'0')}`;
+              shabbatMap[kSat]={fin:fmtTime(ssSat)};
+            }catch(e){}
+          }
+        }
+      });
       currentObs=obs;currentEventMap=evMap;
       $('legend').innerHTML=LEGEND.map(l=>`<div class="lg-item"><div class="lg-dot" style="background:${l.color}"></div><span>${l.label}</span></div>`).join('');
-      $('monthsGrid').innerHTML=gregRange(evMap).map(({year:y,month:m})=>renderMonth(y,m,evMap)).join('');
+      $('monthsGrid').innerHTML=gregRangeArr.map(({year:y,month:m})=>renderMonth(y,m,evMap,shabbatMap)).join('');
       $('placeholder').style.display='none';$('calOutput').style.display='block';
       setTimeout(markDaysWithNotes,200);
       const yomMsg = yomDifVal
