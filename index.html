@@ -207,6 +207,13 @@
     .illum-naked-eye{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:700;margin-top:6px;}
     .illum-naked-eye.yes{background:#14532d;color:#86efac;}
     .illum-naked-eye.no{background:#7f1d1d;color:#fca5a5;}
+    .sun-alt-badge{display:inline-block;margin-top:5px;padding:2px 7px;border-radius:10px;font-size:.66rem;font-weight:700;letter-spacing:.03em;}
+    .sun-alt-night{background:#1e3a5f;color:#93c5fd;}
+    .sun-alt-civil{background:#1e3a5f;color:#bfdbfe;}
+    .sun-alt-low{background:#14532d;color:#86efac;}
+    .sun-alt-mid{background:#713f12;color:#fde68a;}
+    .sun-alt-high{background:#7c2d12;color:#fdba74;}
+    .sun-alt-vhigh{background:#7f1d1d;color:#fca5a5;}
 
     /* ── Fila inferior: botón + opciones avanzadas ── */
     .ctrl-bottom-row{display:flex;align-items:stretch;gap:10px;margin-top:10px;flex-wrap:wrap;}
@@ -914,7 +921,7 @@ function moonPhaseData(date){
   else{emoji='🌘';name='Creciente menguante';}
   return{emoji,name,pct,waxing,angle};
 }
-function moonIllumProfile(s0,s1){
+function moonIllumProfile(s0,s1,obs){
   const samples=[],step=30*60*1000,dur=s1-s0,steps=Math.ceil(dur/step);
   for(let i=0;i<=steps;i++){const t=new Date(s0.getTime()+i*step);if(t>s1)break;samples.push({t,pct:Astronomy.Illumination(Astronomy.Body.Moon,t).phase_fraction*100});}
   if(!samples.length)return null;
@@ -922,9 +929,28 @@ function moonIllumProfile(s0,s1){
   const mid=new Date(s0.getTime()+dur/2);
   const midS=samples.reduce((best,s)=>Math.abs(s.t-mid)<Math.abs(best.t-mid)?s:best);
   const illumThresh=getIllumThreshold();
-  return{inicio:samples[0].pct.toFixed(2),meridiano:midS.pct.toFixed(2),maximo:maxS.pct.toFixed(2),visible:maxS.pct>=illumThresh,umbral:illumThresh};
+  const sa=t=>obs?getSunAlt(t,obs):null;
+  return{
+    inicio:samples[0].pct.toFixed(2),    sunInicio:sa(samples[0].t),
+    meridiano:midS.pct.toFixed(2),       sunMerid:sa(midS.t),
+    maximo:maxS.pct.toFixed(2),          sunMaximo:sa(maxS.t),
+    visible:maxS.pct>=illumThresh,umbral:illumThresh
+  };
 }
 function fmtFull(date){return DateTime.fromJSDate(date,{zone:'utc'}).setZone(tz()).setLocale('es').toFormat("cccc d 'de' LLLL, HH:mm 'h'");}
+function fmtSunAlt(alt){
+  if(alt===null||alt===undefined)return'';
+  const a=parseFloat(alt);
+  // Color: bajo horizonte=azul oscuro, cerca horizonte=verde, alto=naranja/rojo
+  let cls,tip;
+  if(a<=-6){cls='sun-alt-night';tip='Noche astronómica';}
+  else if(a<0){cls='sun-alt-civil';tip='Crepúsculo';}
+  else if(a<10){cls='sun-alt-low';tip='Sol bajo — favorable';}
+  else if(a<30){cls='sun-alt-mid';tip='Sol moderado';}
+  else if(a<50){cls='sun-alt-high';tip='Sol alto — dificulta visibilidad';}
+  else{cls='sun-alt-vhigh';tip='Sol muy alto — cielo muy brillante';}
+  return \`<div class="sun-alt-badge \${cls}" title="\${tip}">☀ \${a>=0?'+':''}\${a.toFixed(1)}°</div>\`;
+}
 function closeModal(){$('dayModal').style.display='none';}
 function showDayModal(dateStr){
   if(!currentObs)return;
@@ -940,7 +966,7 @@ function showDayModal(dateStr){
       const pU=new Date(Date.UTC(year,month-1,day-1,12,0,0)),tU=new Date(Date.UTC(year,month-1,day,12,0,0));
       const ss=getSunset(pU,currentObs),se=getSunset(tU,currentObs);
       const dMs=se-ss,dH=Math.floor(dMs/3600000),dM=Math.floor((dMs%3600000)/60000);
-      const phase=moonPhaseData(ss),illum=moonIllumProfile(ss,se);
+      const phase=moonPhaseData(ss),illum=moonIllumProfile(ss,se,currentObs);
       const ic=p=>{const v=parseFloat(p);if(v<2)return'low';if(v<50)return'mid';if(v<95)return'high';return'full';};
       const fw=p=>Math.min(100,parseFloat(p)).toFixed(1);
       const mx=parseFloat(illum.maximo);
@@ -973,13 +999,16 @@ function showDayModal(dateStr){
           <div class="illum-bars">
             <div class="illum-col"><div class="illum-col-label">🌅 Inicio<br>(atardecer)</div>
               <div class="illum-pct ${ic(illum.inicio)}">${illum.inicio}%</div>
-              <div class="illum-track"><div class="illum-fill" style="width:${fw(illum.inicio)}%"></div></div></div>
+              <div class="illum-track"><div class="illum-fill" style="width:${fw(illum.inicio)}%"></div></div>
+              ${fmtSunAlt(illum.sunInicio)}</div>
             <div class="illum-col"><div class="illum-col-label">🌙 Meridiano<br>(punto medio)</div>
               <div class="illum-pct ${ic(illum.meridiano)}">${illum.meridiano}%</div>
-              <div class="illum-track"><div class="illum-fill" style="width:${fw(illum.meridiano)}%"></div></div></div>
+              <div class="illum-track"><div class="illum-fill" style="width:${fw(illum.meridiano)}%"></div></div>
+              ${fmtSunAlt(illum.sunMerid)}</div>
             <div class="illum-col"><div class="illum-col-label">⬆ Máximo<br>(del día)</div>
               <div class="illum-pct ${ic(illum.maximo)}">${illum.maximo}%</div>
-              <div class="illum-track"><div class="illum-fill" style="width:${fw(illum.maximo)}%"></div></div></div>
+              <div class="illum-track"><div class="illum-fill" style="width:${fw(illum.maximo)}%"></div></div>
+              ${fmtSunAlt(illum.sunMaximo)}</div>
           </div>
           <div class="illum-note">${vn}<br><span class="illum-naked-eye ${ec}">${et}</span></div>
         </div>
