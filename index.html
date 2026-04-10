@@ -208,136 +208,12 @@
     .illum-naked-eye.yes{background:#14532d;color:#86efac;}
     .illum-naked-eye.no{background:#7f1d1d;color:#fca5a5;}
 
-    /* ── Opciones avanzadas inline (junto al botón calcular) ── */
-    .ctrl-bottom-row{
-      display:flex;align-items:flex-end;gap:10px;margin-top:10px;
-    }
-    .adv-inline{
-      flex:1;display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;
-    }
-    .btn-adv-toggle{
-      background:none;border:1px dashed var(--border);border-radius:5px;
-      padding:7px 12px;font:inherit;font-size:.78rem;color:var(--muted);
-      cursor:pointer;white-space:nowrap;transition:all .15s;height:36px;
-      display:flex;align-items:center;gap:5px;
-    }
-    .btn-adv-toggle:hover{border-color:var(--accent);color:var(--accent);}
-    .adv-panel{
-      display:none;flex:1;min-width:220px;
-      background:#fff8f0;border:1px solid var(--border);
-      border-radius:6px;padding:8px 12px;
-    }
-    .adv-panel.open{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-    .adv-panel label{font-size:.72rem;font-weight:700;color:var(--accent);white-space:nowrap;}
-    .adv-panel input[type=datetime-local]{
-      flex:1;min-width:160px;padding:6px 8px;font:inherit;font-size:.8rem;
-      border:1px solid var(--border);border-radius:5px;background:#fffdf8;
-    }
-    .btn-adv-clear{
-      background:none;border:1px solid #fc8181;color:#c53030;
-      border-radius:5px;padding:5px 9px;font:inherit;font-size:.75rem;cursor:pointer;
-      white-space:nowrap;
-    }
-    .btn-adv-clear:hover{background:#fff5f5;}
-    .yom-pill{
-      display:none;align-items:center;gap:4px;
-      background:#feebc8;border:1px solid #f6ad55;border-radius:12px;
-      padding:2px 8px;font-size:.7rem;color:#7b341e;font-weight:700;
-    }
-    .yom-pill.show{display:inline-flex;}
-
-    /* ══ RESPONSIVE — MÓVIL ══════════════════════════════════════ */
-    @media(max-width:900px){
-      .months-grid{grid-template-columns:1fr;}
-    }
-
-    @media(max-width:700px){
-      /* Header más compacto */
-      .app-header{padding:10px 14px;}
-      .app-header h1{font-size:1rem;}
-      .app-header small{display:none;}
-
-      /* Panel controles móvil */
-      .ctrl-wrap{padding:10px 12px;}
-
-      /* Ubicación: botón GPS grande + buscador full width */
-      .loc-row{flex-direction:column;gap:8px;}
-      .btn-geolocate{
-        width:100%;justify-content:center;
-        padding:14px;font-size:1rem;border-radius:8px;
-      }
-      .city-search-wrap{width:100%;}
-      .city-search-wrap input{
-        padding:12px 12px 12px 36px;font-size:.95rem;
-      }
-
-      /* Grid de campos: 2 columnas en móvil */
-      .ctrl-grid{
-        grid-template-columns:1fr 1fr;
-        gap:8px;
-      }
-      .field label{font-size:.7rem;}
-      .field input,.field select{
-        padding:10px 8px;font-size:.88rem;
-        border-radius:6px;
-      }
-
-      /* Fila inferior: botón calcular arriba, avanzadas abajo */
-      .ctrl-bottom-row{
-        flex-direction:column;
-        gap:8px;
-        margin-top:10px;
-      }
-      .btn-calc{
-        width:100%;
-      }
-      .adv-inline{width:100%;}
-      .btn-adv-toggle{
-        width:100%;justify-content:center;
-        padding:10px;font-size:.88rem;
-        border-radius:7px;
-      }
-      .adv-panel{width:100%;}
-      .adv-panel input[type=datetime-local]{
-        width:100%;font-size:.88rem;padding:10px 8px;
-      }
-
-      /* Calendario móvil: celdas más altas, texto más grande */
-      .cal-month-title{font-size:.9rem;padding:9px 12px;}
-      .cal-table th{font-size:.7rem;padding:5px 1px;}
-      .cal-table td{height:72px;padding:4px 3px 3px 4px;}
-      .dn{font-size:.8rem;}
-      .ev{font-size:.6rem;padding:1px 3px;}
-
-      /* Modal más cómodo en móvil */
-      .modal-box{border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;right:0;
-        max-width:100%;max-height:85vh;}
-      .modal-overlay{align-items:flex-end;padding:0;}
-      .modal-header{padding:16px 18px;}
-      .modal-header-title{font-size:1.05rem;}
-      .modal-close{width:34px;height:34px;font-size:1.1rem;}
-      .modal-body{padding:16px;}
-      .modal-time{font-size:1rem;}
-      .modal-icon{font-size:1.4rem;}
-
-      /* Status */
-      #statusBox{margin:8px 12px 0;}
-
-      /* Output */
-      #calOutput{padding:12px;}
-      .legend{gap:6px;padding:8px 10px;}
-      .lg-item{font-size:.7rem;}
-      .lg-dot{width:8px;height:8px;}
-    }
-
-    @media(max-width:380px){
-      .ctrl-grid{grid-template-columns:1fr;}
-      .field input,.field select{padding:11px 8px;font-size:.9rem;}
-      .cal-table td{height:60px;}
-      .ev{display:none;} /* en pantallas muy chicas ocultar etiquetas, solo colores */
-      .cal-table td[onclick]{
-        position:relative;
-      }
+    @media(max-width:900px){.months-grid{grid-template-columns:1fr;}}
+    @media(max-width:600px){
+      .ctrl-grid{grid-template-columns:1fr 1fr;}
+      #calOutput,#placeholder,.ctrl-wrap{padding-left:12px;padding-right:12px;}
+      .loc-row{flex-direction:column;}
+      .btn-geolocate{width:100%;justify-content:center;}
     }
   </style>
 </head>
@@ -385,53 +261,56 @@
     <div class="coords-pills" id="coordsPills"></div>
   </div>
 
-  <!-- ══ GRID DE CAMPOS ══ -->
+  <!-- ══ GRID DE CONTROLES ══ -->
   <div class="ctrl-grid">
     <div class="field"><label>Año</label>
       <input id="yearName" type="text" value="2026"/></div>
-    <div class="field"><label>Zona horaria</label>
+
+    <div class="field">
+      <label>Zona horaria</label>
       <input id="timezone" type="text" value="Asia/Jerusalem"/>
-      <div class="auto-lbl" id="lbl_tz">✓ Auto</div></div>
-    <div class="field"><label>Latitud</label>
+      <div class="auto-lbl" id="lbl_tz">✓ Auto-detectada</div>
+    </div>
+    <div class="field">
+      <label>Latitud</label>
       <input id="latitude" type="number" step="0.000001" value="31.768300"/>
-      <div class="auto-lbl" id="lbl_lat">✓ Auto</div></div>
-    <div class="field"><label>Longitud</label>
+      <div class="auto-lbl" id="lbl_lat">✓ Auto-detectada</div>
+    </div>
+    <div class="field">
+      <label>Longitud</label>
       <input id="longitude" type="number" step="0.000001" value="35.213700"/>
-      <div class="auto-lbl" id="lbl_lon">✓ Auto</div></div>
-    <div class="field"><label>Elevación (m)</label>
+      <div class="auto-lbl" id="lbl_lon">✓ Auto-detectada</div>
+    </div>
+    <div class="field">
+      <label>Elevación (m)</label>
       <input id="elevation" type="number" value="800"/>
-      <div class="auto-lbl" id="lbl_el">✓ Auto</div></div>
-    <div class="field"><label>Visibilidad creciente</label>
+      <div class="auto-lbl" id="lbl_el">✓ Auto-detectada</div>
+    </div>
+
+
+    <div class="field"><label>Visibilidad</label>
       <select id="crescentMode">
         <option value="strict">Estricto</option>
         <option value="standard" selected>Estándar</option>
         <option value="lenient">Flexible</option>
       </select></div>
-    <div class="field"><label>Meses a generar</label>
+    <div class="field"><label>Ancla Yom Tru'ah</label>
+      <input id="fallbackMonth7" type="datetime-local" value="2026-09-12T19:00"/></div>
+    <div class="field"><label>Uso ancla mes 7</label>
+      <select id="useFallbackMonth7">
+        <option value="compare" selected>Solo comparar</option>
+        <option value="force">Forzar mes 7</option>
+      </select></div>
+    <div class="field"><label>Meses</label>
       <select id="monthCount">
         <option value="12" selected>12 meses</option>
         <option value="13">13 meses</option>
       </select></div>
-  </div>
-
-  <!-- ══ FILA INFERIOR: Calcular + Opciones avanzadas ══ -->
-  <div class="ctrl-bottom-row">
-    <button class="btn-calc" id="recalcBtn">&#128197; Calcular calendario</button>
-    <div class="adv-inline">
-      <button class="btn-adv-toggle" onclick="toggleAdv()">
-        &#9881; Opciones avanzadas
-        <span class="yom-pill" id="yomPill">📅 Yom Tru'ah diferido</span>
-      </button>
-      <div class="adv-panel" id="advPanel">
-        <label>📅 Diferir Yom Tru'ah:</label>
-        <input type="datetime-local" id="fallbackMonth7"/>
-        <button class="btn-adv-clear" onclick="clearYomOverride()" title="Quitar fecha diferida">✕</button>
-      </div>
+    <div class="field" style="align-self:end">
+      <label>&nbsp;</label>
+      <button class="btn-calc" id="recalcBtn">Calcular calendario</button>
     </div>
   </div>
-
-  <!-- Compatibilidad JS -->
-  <input type="hidden" id="useFallbackMonth7" value="compare"/>
 </div>
 
 <div id="statusBox"></div>
@@ -610,29 +489,55 @@ function buildCalendar(){
   setTimeout(()=>{
     try{
       validateLibs();
-      // Fecha de búsqueda derivada del año (1 feb) — Aviv siempre cae en mar-abr
-      const yearNum=parseInt($('yearName').value)||new Date().getFullYear();
-      const start=new Date(Date.UTC(yearNum,1,1,12,0,0));
-      const obs=buildObserver();
-      const mode=$('crescentMode').value;
-      const count=Number($('monthCount').value),year=$('yearName').value.trim();
-      const luns=findLunations(start,obs,mode,count);
-      const months=luns.map((item,i)=>({start:item.start,days:i<luns.length-1?diffDays(item.start,luns[i+1].start):29}));
-      months[months.length-1].days=29;
-      // Yom Tru'ah diferido
-      const fb7val=$('fallbackMonth7').value;
-      let yomDifVal=null;
-      if(fb7val){try{yomDifVal=parseDT(fb7val);if(months[6]){months[6].start=yomDifVal;for(let i=7;i<months.length;i++)months[i].start=addDays(months[i-1].start,months[i-1].days);}}catch(e){}}
-      const avivStart=months[0].start,m7Start=months[6]?.start;
+
+      const yearNum = parseInt($('yearName').value) || new Date().getFullYear();
+      const mode    = $('crescentMode').value;
+      const count   = Number($('monthCount').value);
+      const year    = String(yearNum);
+      const obs     = buildObserver();
+
+      // Ancla astronómica: equinoccio de primavera del año pedido.
+      // Aviv = primer mes que inicia CON O DESPUÉS del equinoccio (regla caraíta).
+      // Buscamos desde el equinoccio - 1 día para no perder una luna nueva
+      // que caiga exactamente en el equinoccio.
+      const seasons  = Astronomy.Seasons(yearNum);
+      const equinox  = new Date(seasons.mar_equinox.date);
+      const start    = new Date(equinox.getTime() - 86400000); // equinoccio - 1 día
+
+      const luns  = findLunations(start, obs, mode, count);
+      const months = luns.map((item,i) => ({
+        start: item.start,
+        days:  i < luns.length-1 ? diffDays(item.start, luns[i+1].start) : 29
+      }));
+      months[months.length-1].days = 29;
+
+      // Yom Tru'ah diferido (opciones avanzadas)
+      const fb7val = $('fallbackMonth7').value;
+      let yomDifVal = null;
+      if (fb7val) {
+        try {
+          yomDifVal = parseDT(fb7val);
+          if (months[6]) {
+            months[6].start = yomDifVal;
+            for (let i=7; i<months.length; i++)
+              months[i].start = addDays(months[i-1].start, months[i-1].days);
+          }
+        } catch(e) {}
+      }
+
+      const avivStart = months[0].start, m7Start = months[6]?.start;
       const evMap=buildEventMap(months,avivStart,m7Start);
       currentObs=obs;currentEventMap=evMap;
       $('legend').innerHTML=LEGEND.map(l=>`<div class="lg-item"><div class="lg-dot" style="background:${l.color}"></div><span>${l.label}</span></div>`).join('');
       $('monthsGrid').innerHTML=gregRange(evMap).map(({year:y,month:m})=>renderMonth(y,m,evMap)).join('');
       $('placeholder').style.display='none';$('calOutput').style.display='block';
       setTimeout(markDaysWithNotes,200);
-      const yomMsg=yomDifVal?` · Yom Tru'ah diferido al ${DateTime.fromJSDate(yomDifVal,{zone:'utc'}).setZone(tz()).toFormat("d 'de' LLLL")}.`:'';
+      const eqStr = DateTime.fromJSDate(equinox,{zone:'utc'}).setZone(tz()).toFormat("d 'de' LLLL");
+      const yomMsg = yomDifVal
+        ? ` · Yom Tru'ah diferido al ${DateTime.fromJSDate(yomDifVal,{zone:'utc'}).setZone(tz()).toFormat("d 'de' LLLL")}.`
+        : '';
       $('statusBox').className='ok';
-      $('statusBox').innerHTML=`<b>✓ Calendario ${year} generado.</b>${yomMsg}`;
+      $('statusBox').innerHTML=`<b>✓ Calendario ${year} generado.</b> Equinoccio: ${eqStr}.${yomMsg}`;
     }catch(err){
       $('placeholder').style.display='block';$('calOutput').style.display='none';
       $('statusBox').className='error';$('statusBox').innerHTML=`<b>Error:</b> ${errMsg(err)}`;
@@ -640,19 +545,6 @@ function buildCalendar(){
   },30);
 }
 $('recalcBtn').addEventListener('click',buildCalendar);
-
-function toggleAdv(){
-  const p=$('advPanel');
-  p.classList.toggle('open');
-}
-function clearYomOverride(){
-  $('fallbackMonth7').value='';
-  $('yomPill').className='yom-pill';
-  $('advPanel').classList.remove('open');
-}
-$('fallbackMonth7').addEventListener('change',function(){
-  $('yomPill').className='yom-pill'+(this.value?' show':'');
-});
 
 
 /* ══════════════════════════════════════════════════════════════════
