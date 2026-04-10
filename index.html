@@ -929,8 +929,8 @@ async function markDaysWithNotes(){
         const td=document.querySelector(`td[onclick*="'${record.id}'"]`);
         if(!td)return;
         td.classList.add('day-has-note');
-        // Show first 2 words of the note as a small preview
-        const words=(record.texto||'').trim().split(/\s+/).slice(0,2).join(' ');
+        // Show note text truncated to what fits (CSS handles overflow)
+        const words=(record.texto||'').trim();
         if(words){
           const span=document.createElement('span');
           span.className='note-preview';
