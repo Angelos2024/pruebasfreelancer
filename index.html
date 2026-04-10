@@ -326,20 +326,28 @@
         <option value="12">12 meses</option>
         <option value="13">13 meses</option>
       </select></div>
+    <div class="field" style="display:flex;align-items:flex-end;">
+      <button class="btn-calc" id="recalcBtn" style="width:100%;">Calcular calendario</button>
+    </div>
+    <div class="field" style="display:flex;align-items:flex-end;">
+      <button class="btn-adv-toggle" onclick="toggleAdv()" style="width:100%;">
+        ⚙ Opciones avanzadas
+        <span class="yom-pill" id="yomPill">📅 Yom Tru'ah diferido</span>
+      </button>
+    </div>
   </div>
 
-  <!-- ══ FILA INFERIOR: Calcular + Opciones avanzadas al lado ══ -->
-  <div class="ctrl-bottom-row">
-    <button class="btn-calc" id="recalcBtn">Calcular calendario</button>
-    <button class="btn-adv-toggle" onclick="toggleAdv()">
-      ⚙ Opciones avanzadas
-      <span class="yom-pill" id="yomPill">📅 Yom Tru'ah diferido</span>
-    </button>
-    <div class="adv-panel" id="advPanel">
-      <label>📅 Diferir Yom Tru'ah:</label>
-      <input type="datetime-local" id="fallbackMonth7"/>
-      <button class="btn-adv-clear" onclick="clearYomOverride()" title="Quitar">✕ Quitar</button>
-    </div>
+  <!-- Panel avanzado (se expande debajo del grid) -->
+  <div class="adv-panel" id="advPanel" style="margin-top:8px;">
+    <label>📅 Diferir Yom Tru'ah:</label>
+    <input type="datetime-local" id="fallbackMonth7"/>
+    <button class="btn-adv-clear" onclick="clearYomOverride()" title="Quitar">✕ Quitar</button>
+    <div style="width:100%;height:0;border-top:1px dashed var(--border);margin:4px 0;"></div>
+    <label title="Porcentaje mínimo de iluminación lunar para considerar visible el creciente. Por defecto: 1.80%">🌙 Umbral iluminación visible (%):</label>
+    <input type="number" id="illumThreshold" min="0.1" max="10" step="0.01" value="1.80"
+      style="width:80px;flex:none;"
+      title="Porcentaje mínimo de iluminación lunar para considerar el creciente como potencialmente visible"/>
+    <button class="btn-adv-clear" onclick="resetIllumThreshold()" title="Restaurar a 1.80%">↺ 1.80%</button>
   </div>
 
   <!-- Compatibilidad JS -->
@@ -424,6 +432,10 @@ function odehLimit(W,mode){
   if(mode==='lenient')return base+4.1872;
   return base+5.6579;
 }
+function getIllumThreshold(){
+  const v=parseFloat(document.getElementById('illumThreshold')?.value);
+  return Number.isFinite(v)&&v>0?v:1.80;
+}
 function evalCrescent(date,obs,mode){
   const su=getSunset(date,obs),ms=getMoonset(su,obs);
   if(!ms||ms<=su)return{visible:false,sunset:su};
@@ -432,11 +444,24 @@ function evalCrescent(date,obs,mode){
   const T=new Date(su.getTime()+(4/9)*lagMs);
   const moonAlt=horizAlt(T,obs),sunAlt=getSunAlt(T,obs),ARCL=elongation(T),ARCV=moonAlt-sunAlt,W=crescentWidth(T);
   if(moonAlt<=0||ARCL<6.5)return{visible:false,sunset:su};
+  // Filtro de iluminación mínima (umbral configurable, defecto 1.80%)
+  const illumPct=Astronomy.Illumination(Astronomy.Body.Moon,T).phase_fraction*100;
+  if(illumPct<getIllumThreshold())return{visible:false,sunset:su};
   return{visible:ARCV>=odehLimit(W,mode),sunset:su};
 }
 function findMonthStart(nm,obs,mode){
-  for(let d=1;d<=4;d++){const r=evalCrescent(addDays(nm,d),obs,mode);if(r.visible)return r.sunset;}
-  return evalCrescent(addDays(nm,2),obs,mode).sunset;
+  // Buscar hasta 5 días tras la luna nueva; si ninguno pasa, avanzar día a día hasta encontrar el primero visible
+  for(let d=1;d<=5;d++){const r=evalCrescent(addDays(nm,d),obs,mode);if(r.visible)return r.sunset;}
+  // Fallback: devolver el primer día que al menos supere el umbral de iluminación (aunque no pase Odeh completo)
+  for(let d=2;d<=5;d++){
+    const candidate=addDays(nm,d);
+    const su=getSunset(candidate,obs);
+    const T=new Date(su.getTime()+3600000);
+    const illumPct=Astronomy.Illumination(Astronomy.Body.Moon,T).phase_fraction*100;
+    if(illumPct>=getIllumThreshold())return su;
+  }
+  // Último recurso: día +3
+  return getSunset(addDays(nm,3),obs);
 }
 function findLunations(start,obs,mode,n){
   const list=[];let anchor=new Date(start);
@@ -597,6 +622,9 @@ function clearYomOverride(){
   $('fallbackMonth7').value='';
   $('yomPill').className='yom-pill';
   $('advPanel').classList.remove('open');
+}
+function resetIllumThreshold(){
+  $('illumThreshold').value='1.80';
 }
 if($('fallbackMonth7')){
   $('fallbackMonth7').addEventListener('change',function(){
@@ -893,7 +921,8 @@ function moonIllumProfile(s0,s1){
   const maxS=samples.reduce((a,b)=>a.pct>=b.pct?a:b);
   const mid=new Date(s0.getTime()+dur/2);
   const midS=samples.reduce((best,s)=>Math.abs(s.t-mid)<Math.abs(best.t-mid)?s:best);
-  return{inicio:samples[0].pct.toFixed(2),meridiano:midS.pct.toFixed(2),maximo:maxS.pct.toFixed(2),visible:maxS.pct>=1.5};
+  const illumThresh=getIllumThreshold();
+  return{inicio:samples[0].pct.toFixed(2),meridiano:midS.pct.toFixed(2),maximo:maxS.pct.toFixed(2),visible:maxS.pct>=illumThresh,umbral:illumThresh};
 }
 function fmtFull(date){return DateTime.fromJSDate(date,{zone:'utc'}).setZone(tz()).setLocale('es').toFormat("cccc d 'de' LLLL, HH:mm 'h'");}
 function closeModal(){$('dayModal').style.display='none';}
@@ -922,7 +951,7 @@ function showDayModal(dateStr){
       else if(mx<50)vn=`<b>${illum.maximo}%</b> — visible a simple vista.`;
       else if(mx<95)vn=`<b>${illum.maximo}%</b> — luna muy brillante.`;
       else vn=`<b>${illum.maximo}%</b> — luna llena.`;
-      const ec=illum.visible?'yes':'no',et=illum.visible?'👁 Potencialmente visible':'🚫 Difícil visibilidad';
+      const ec=illum.visible?'yes':'no',et=illum.visible?'👁 Potencialmente visible (`≥'+illum.umbral.toFixed(2)+'%`)':'🚫 Difícil visibilidad (<'+illum.umbral.toFixed(2)+'%)';
       body.innerHTML=`
         <div class="modal-time-row"><div class="modal-icon">🌅</div><div>
           <div class="modal-lbl">Inicio del día hebreo</div>
