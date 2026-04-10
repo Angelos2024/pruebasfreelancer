@@ -325,15 +325,14 @@
         <option value="12" selected>12 meses</option>
         <option value="13">13 meses</option>
       </select></div>
-  </div>
-
-  <!-- ══ Botones dentro del grid como últimos 2 campos ══ -->
-  <!-- (ya están en el ctrl-grid más arriba si la versión los tiene) -->
-  <div style="display:flex;gap:10px;margin-top:10px;align-items:stretch;flex-wrap:wrap;">
-    <button class="btn-calc" id="recalcBtn" style="flex:1;min-width:160px;">Calcular calendario</button>
-    <button class="btn-adv-toggle" onclick="toggleAdv()" style="flex:1;min-width:140px;">
-      ⚙ Opciones avanzadas<span class="yom-pill" id="yomPill"> 📅</span>
-    </button>
+    <div class="field" style="align-self:end">
+      <button class="btn-calc" id="recalcBtn">Calcular calendario</button>
+    </div>
+    <div class="field" style="align-self:end">
+      <button class="btn-adv-toggle" onclick="toggleAdv()">
+        ⚙ Opciones avanzadas<span class="yom-pill" id="yomPill"> 📅</span>
+      </button>
+    </div>
   </div>
 
   <div class="adv-panel" id="advPanel">
