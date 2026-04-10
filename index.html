@@ -538,10 +538,10 @@ function renderMonth(year,month,eventMap,shabbatMap){
       let shabH='';
       if(shabbatMap){
         if(dow===5&&shabbatMap[k]){
-          shabH=`<span class="shab-start" title="Inicio Shabbat">🕯 ${shabbatMap[k].inicio}</span>`;
+          shabH=`<span class="shab-start" title="Inicio Shabbat">${shabbatMap[k].inicio}</span>`;
         }
         if(dow===6&&shabbatMap[k]){
-          shabH=`<span class="shab-end" title="Fin Shabbat">✡ ${shabbatMap[k].fin}</span>`;
+          shabH=`<span class="shab-end" title="Fin Shabbat">${shabbatMap[k].fin}</span>`;
         }
       }
       html+=`<td class="${tc}" onclick="showDayModal('${k}')" title="Ver detalle"><div class="dn">${day}</div>${evH}${shabH}</td>`;
