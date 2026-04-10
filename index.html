@@ -225,7 +225,11 @@
         <option value="compare" selected>Solo comparar</option>
         <option value="force">Forzar mes 7</option>
       </select></div>
-
+    <div class="field"><label>Meses (auto / forzar)</label>
+      <select id="monthCount">
+        <option value="12">12 meses</option>
+        <option value="13">13 meses</option>
+      </select></div>
     <div class="field" style="align-self:end">
       <label>&nbsp;</label>
       <button class="btn-calc" id="recalcBtn">Calcular calendario</button>
@@ -283,6 +287,7 @@ const searchStartInput    = $('searchStart');
 const crescentModeInput   = $('crescentMode');
 const fallbackMonth7Input = $('fallbackMonth7');
 const useFallbackMonth7Input = $('useFallbackMonth7');
+const monthCountInput     = $('monthCount');
 const recalcBtn           = $('recalcBtn');
 const statusBox           = $('statusBox');
 const placeholder         = $('placeholder');
@@ -578,13 +583,8 @@ function buildCalendar() {
       const obs    = buildObserver();
       const mode   = crescentModeInput.value;
       const fb7    = parseDT(fallbackMonth7Input.value);
+      const count  = Number(monthCountInput.value);
       const year   = yearNameInput.value.trim();
-      // Determinar automáticamente 12 o 13 meses según ciclo de Metón
-      const _gregY = parseInt(year);
-      const _hebY  = Number.isFinite(_gregY) ? (_gregY + 3761) : 0;
-      const _pos   = _hebY ? ((_hebY - 1) % 19) + 1 : 0;
-      const _LEAP  = new Set([3,6,8,11,14,17,19]);
-      const count  = (_pos && _LEAP.has(_pos)) ? 13 : 12;
 
       const luns = findLunations(start, obs, mode, count);
 
@@ -641,6 +641,20 @@ function buildCalendar() {
 
 recalcBtn.addEventListener('click', buildCalendar);
 /* Sin buildCalendar() automatico al cargar */
+
+/* ── Auto-selección de meses según año ─────────────────────────────────── */
+function autoSetMonths(yearStr) {
+  const greg = parseInt(yearStr);
+  if (!Number.isFinite(greg)) return;
+  const heb  = greg + 3761;
+  const pos  = ((heb - 1) % 19) + 1;
+  const leap = new Set([3,6,8,11,14,17,19]).has(pos);
+  monthCountInput.value = leap ? '13' : '12';
+}
+yearNameInput.addEventListener('input',  () => autoSetMonths(yearNameInput.value));
+yearNameInput.addEventListener('change', () => autoSetMonths(yearNameInput.value));
+/* Aplicar al valor inicial */
+autoSetMonths(yearNameInput.value);
 
 /* ═══ MODAL: info del día ═══════════════════════════════════════════════════ */
 let currentObs       = null;   // observer activo tras el último cálculo
