@@ -21,72 +21,115 @@
     .app-header h1{font-size:1.2rem;font-weight:700;}
     .app-header small{font-size:.78rem;opacity:.75;}
 
-    /* ── Panel controles ── */
-    .ctrl-wrap{background:#fff;border-bottom:2px solid var(--strong);padding:10px 18px;}
-
-    /* Barra de ubicación compacta */
-    .loc-bar{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap;}
-    .btn-geolocate{
-      display:flex;align-items:center;gap:6px;white-space:nowrap;
-      background:var(--head);color:#fff;border:none;border-radius:5px;
-      padding:7px 13px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;
-      transition:opacity .15s;flex-shrink:0;
-    }
-    .btn-geolocate:hover{opacity:.88;} .btn-geolocate:disabled{opacity:.5;cursor:default;}
-    .city-search-wrap{flex:1;min-width:180px;position:relative;}
-    .city-search-wrap input{
-      width:100%;padding:7px 9px 7px 30px;font:inherit;font-size:.82rem;
-      border:1px solid var(--border);border-radius:5px;background:#fffdf8;
-    }
-    .city-search-wrap input:focus{outline:none;border-color:var(--accent);}
-    .city-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:.85rem;pointer-events:none;}
-    .city-suggestions{
-      position:absolute;top:100%;left:0;right:0;z-index:999;
-      background:#fff;border:1px solid var(--border);border-radius:0 0 6px 6px;
-      box-shadow:0 6px 18px rgba(0,0,0,.1);max-height:200px;overflow-y:auto;display:none;
-    }
-    .city-suggestions.open{display:block;}
-    .city-sugg-item{padding:8px 12px;cursor:pointer;font-size:.82rem;border-bottom:1px solid #f0ede4;}
-    .city-sugg-item:last-child{border-bottom:none;}
-    .city-sugg-item:hover{background:#fdf6ec;}
-    .city-sugg-name{font-weight:700;} .city-sugg-sub{font-size:.72rem;color:var(--muted);}
-
-    /* Status inline mini */
-    .loc-status{font-size:.78rem;display:none;align-items:center;gap:6px;padding:3px 0;}
-    .loc-status.show{display:flex;}
-    .loc-status.ok{color:#276749;} .loc-status.error{color:#c53030;} .loc-status.loading{color:var(--accent);}
-    .loc-status.info{color:#1a56db;}
-
-    /* Pills resultado */
-    .coords-pills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;}
-    .cpill{display:inline-flex;align-items:center;gap:3px;background:#e8f5e9;border:1px solid #68d391;
-      border-radius:20px;padding:2px 8px;font-size:.7rem;color:#276749;font-weight:700;}
-
-    /* Grid de campos */
-    .ctrl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;align-items:end;}
-    .field label{display:block;font-size:.7rem;font-weight:700;color:var(--accent);margin-bottom:3px;}
+    .ctrl-wrap{background:#fff;border-bottom:2px solid var(--strong);padding:14px 22px;}
+    .ctrl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;align-items:end;}
+    .field label{display:block;font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:4px;}
     .field input,.field select{
-      width:100%;padding:6px 8px;font:inherit;font-size:.82rem;
+      width:100%;padding:7px 9px;font:inherit;font-size:.85rem;
       border:1px solid var(--border);border-radius:5px;background:#fffdf8;
     }
-    .field input.autofilled{background:#f0faf3 !important;border-color:#68d391 !important;color:#276749;font-weight:600;}
-    .auto-lbl{display:none;font-size:.62rem;color:#276749;font-weight:700;margin-top:2px;}
-    .auto-lbl.show{display:block;}
-
     .btn-calc{
       background:var(--head);color:#fff;border:none;border-radius:5px;
-      padding:8px 16px;font:inherit;font-size:.85rem;font-weight:700;
+      padding:9px 18px;font:inherit;font-size:.9rem;font-weight:700;
       cursor:pointer;width:100%;transition:opacity .15s;
     }
-    .btn-calc:hover{opacity:.88;} .btn-calc:disabled{opacity:.55;cursor:default;}
+    .btn-calc:hover{opacity:.88;}
+    .btn-calc:disabled{opacity:.55;cursor:default;}
+
+    /* ══ SECCIÓN UBICACIÓN ══ */
+    .loc-section{
+      background:linear-gradient(135deg,#fdf6ec,#fff8f0);
+      border:2px solid var(--border);border-radius:10px;
+      padding:14px 16px;margin-bottom:14px;
+    }
+    .loc-title{
+      font-size:.8rem;font-weight:800;color:var(--head);
+      text-transform:uppercase;letter-spacing:.06em;
+      margin-bottom:10px;display:flex;align-items:center;gap:7px;
+    }
+    .loc-row{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;}
+
+    .btn-geolocate{
+      display:flex;align-items:center;gap:10px;
+      background:var(--head);color:#fff;border:none;border-radius:8px;
+      padding:12px 20px;font:inherit;font-size:.95rem;font-weight:700;
+      cursor:pointer;transition:opacity .15s, transform .1s;
+      box-shadow:0 2px 8px rgba(122,58,10,.25);white-space:nowrap;
+    }
+    .btn-geolocate:hover{opacity:.9;transform:translateY(-1px);}
+    .btn-geolocate:disabled{opacity:.5;cursor:default;transform:none;}
+
+    .city-search-wrap{flex:1;min-width:200px;position:relative;}
+    .city-search-wrap input{
+      width:100%;padding:12px 14px 12px 38px;
+      font:inherit;font-size:.88rem;
+      border:1px solid var(--border);border-radius:8px;
+      background:#fffdf8;
+      transition:border-color .2s,box-shadow .2s;
+    }
+    .city-search-wrap input:focus{
+      outline:none;border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(122,92,30,.12);
+    }
+    .city-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none;}
+
+    .city-suggestions{
+      position:absolute;top:100%;left:0;right:0;z-index:999;
+      background:#fff;border:1px solid var(--border);border-radius:0 0 8px 8px;
+      box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:220px;overflow-y:auto;display:none;
+    }
+    .city-suggestions.open{display:block;}
+    .city-sugg-item{
+      padding:10px 14px;cursor:pointer;font-size:.85rem;
+      border-bottom:1px solid #f0ede4;transition:background .1s;
+    }
+    .city-sugg-item:last-child{border-bottom:none;}
+    .city-sugg-item:hover{background:#fdf6ec;}
+    .city-sugg-name{font-weight:700;color:var(--text);}
+    .city-sugg-sub{font-size:.74rem;color:var(--muted);margin-top:2px;}
+
+    .loc-status{
+      margin-top:10px;padding:8px 12px;border-radius:6px;
+      font-size:.82rem;display:none;align-items:center;gap:8px;
+    }
+    .loc-status.show{display:flex;}
+    .loc-status.loading{background:#fffbeb;border:1px solid #f6ad55;color:#7b341e;}
+    .loc-status.ok{background:#f0faf3;border:1px solid #68d391;color:#276749;}
+    .loc-status.error{background:#fff5f5;border:1px solid #fc8181;color:#9b2c2c;}
+    .loc-status.info{background:#ebf4ff;border:1px solid #76b5ff;color:#1a56db;}
+
+    .load-steps{
+      display:none;flex-direction:column;gap:4px;
+      margin-top:8px;padding:8px 12px;
+      background:#fdf6ec;border:1px solid var(--border);border-radius:6px;font-size:.78rem;
+    }
+    .load-steps.show{display:flex;}
+    .ls{display:flex;align-items:center;gap:6px;color:var(--muted);}
+    .ls.done{color:#276749;font-weight:600;}
+    .ls.active{color:var(--accent);font-weight:700;}
+    .ls.error{color:#c53030;}
+    .ls-icon{width:16px;text-align:center;flex-shrink:0;}
+
+    .coords-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+    .cpill{
+      display:inline-flex;align-items:center;gap:4px;
+      background:#e8f5e9;border:1px solid #68d391;border-radius:20px;
+      padding:3px 10px;font-size:.74rem;color:#276749;font-weight:700;
+    }
+
+    .field input.autofilled{
+      background:#f0faf3 !important;border-color:#68d391 !important;
+      color:#276749;font-weight:600;
+    }
+    .auto-lbl{display:none;font-size:.64rem;color:#276749;font-weight:700;margin-top:2px;}
+    .auto-lbl.show{display:block;}
 
     @keyframes spin{to{transform:rotate(360deg);}}
-    .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);
-      border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
-
-    /* Ocultar pasos intermedios — el estado se muestra inline compacto */
-    .load-steps{display:none !important;}
-    .loc-title{display:none !important;}
+    .spin{
+      display:inline-block;width:16px;height:16px;
+      border:2px solid rgba(255,255,255,.35);border-top-color:#fff;
+      border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;
+    }
 
     #statusBox{margin:10px 22px 0;padding:9px 14px;border-radius:5px;font-size:.86rem;display:none;}
     #statusBox.ok{display:block;background:#f0faf3;border:1px solid #68d391;color:#276749;}
@@ -165,6 +208,38 @@
     .illum-naked-eye.yes{background:#14532d;color:#86efac;}
     .illum-naked-eye.no{background:#7f1d1d;color:#fca5a5;}
 
+    /* ── Sección avanzada ── */
+    .adv-wrap{border-top:1px dashed var(--border);margin-top:10px;padding-top:10px;}
+    .btn-adv{
+      background:none;border:1px solid var(--border);border-radius:5px;
+      padding:5px 12px;font:inherit;font-size:.78rem;color:var(--muted);
+      cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;
+    }
+    .btn-adv:hover{border-color:var(--accent);color:var(--accent);}
+    .adv-content{display:none;margin-top:10px;}
+    .adv-content.open{display:block;}
+    .yom-override-bar{
+      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+      background:#fff8f0;border:1px solid var(--border);border-radius:6px;
+      padding:10px 14px;
+    }
+    .yom-override-bar label{font-size:.8rem;font-weight:700;color:var(--accent);white-space:nowrap;margin:0;}
+    .yom-override-bar input[type=datetime-local]{
+      padding:6px 8px;font:inherit;font-size:.82rem;
+      border:1px solid var(--border);border-radius:5px;background:#fffdf8;flex:1;min-width:180px;
+    }
+    .btn-yom-clear{
+      background:none;border:1px solid #fc8181;color:#c53030;border-radius:5px;
+      padding:5px 10px;font:inherit;font-size:.78rem;cursor:pointer;white-space:nowrap;
+    }
+    .btn-yom-clear:hover{background:#fff5f5;}
+    .yom-active-pill{
+      display:none;align-items:center;gap:6px;
+      background:#feebc8;border:1px solid #f6ad55;border-radius:20px;
+      padding:3px 10px;font-size:.75rem;color:#7b341e;font-weight:700;margin-left:4px;
+    }
+    .yom-active-pill.show{display:inline-flex;}
+
     @media(max-width:900px){.months-grid{grid-template-columns:1fr;}}
     @media(max-width:600px){
       .ctrl-grid{grid-template-columns:1fr 1fr;}
@@ -185,30 +260,40 @@
 
 <div class="ctrl-wrap">
 
-  <!-- Barra ubicación compacta -->
-  <div class="coords-pills" id="coordsPills"></div>
-  <div class="loc-bar">
-    <button class="btn-geolocate" id="btnGeo" onclick="detectarUbicacion()">
-      <span id="geoIco">🎯</span>
-      <span id="geoTxt">Mi ubicación</span>
-    </button>
-    <div class="city-search-wrap">
-      <span class="city-icon">🔍</span>
-      <input type="text" id="cityInput" placeholder="Buscar ciudad…"
-        autocomplete="off" oninput="onCityInput(this.value)" onkeydown="onCityKey(event)"/>
-      <div class="city-suggestions" id="citySugg"></div>
+  <!-- ══ SECCIÓN DE UBICACIÓN AUTOMÁTICA ══ -->
+  <div class="loc-section">
+    <div class="loc-title">📍 Ubicación automática — sin registro, sin API Key</div>
+    <div class="loc-row">
+
+      <button class="btn-geolocate" id="btnGeo" onclick="detectarUbicacion()">
+        <span id="geoIco">🎯</span>
+        <span id="geoTxt">Detectar mi ubicación</span>
+      </button>
+
+      <div class="city-search-wrap">
+        <span class="city-icon">🔍</span>
+        <input
+          type="text" id="cityInput"
+          placeholder="O busca una ciudad… ej: Chihuahua, México City, Jerusalem, Buenos Aires"
+          autocomplete="off"
+          oninput="onCityInput(this.value)"
+          onkeydown="onCityKey(event)"
+        />
+        <div class="city-suggestions" id="citySugg"></div>
+      </div>
     </div>
+
+    <div class="load-steps" id="loadSteps">
+      <div class="ls" id="ls1"><span class="ls-icon">⏳</span> Obteniendo coordenadas GPS…</div>
+      <div class="ls" id="ls2"><span class="ls-icon">⏳</span> Consultando elevación precisa (Open-Meteo)…</div>
+      <div class="ls" id="ls3"><span class="ls-icon">⏳</span> Detectando zona horaria exacta (TimeAPI)…</div>
+    </div>
+
     <div class="loc-status" id="locStatus"></div>
+    <div class="coords-pills" id="coordsPills"></div>
   </div>
 
-  <!-- Elementos dummy para que el JS no rompa -->
-  <div id="loadSteps" style="display:none">
-    <div id="ls1"><span class="ls-icon"></span></div>
-    <div id="ls2"><span class="ls-icon"></span></div>
-    <div id="ls3"><span class="ls-icon"></span></div>
-  </div>
-
-  <!-- Grid de campos -->
+  <!-- ══ GRID DE CONTROLES PRINCIPALES ══ -->
   <div class="ctrl-grid">
     <div class="field"><label>Año</label>
       <input id="yearName" type="text" value="2026"/></div>
@@ -224,30 +309,42 @@
     <div class="field"><label>Elevación (m)</label>
       <input id="elevation" type="number" value="800"/>
       <div class="auto-lbl" id="lbl_el">✓ Auto</div></div>
-    <div class="field"><label>Buscar desde</label>
-      <input id="searchStart" type="datetime-local" value="2026-03-01T12:00"/></div>
-    <div class="field"><label>Visibilidad</label>
+    <div class="field"><label>Visibilidad del creciente</label>
       <select id="crescentMode">
         <option value="strict">Estricto</option>
         <option value="standard" selected>Estándar</option>
         <option value="lenient">Flexible</option>
       </select></div>
-    <div class="field"><label>Ancla Yom Tru'ah</label>
-      <input id="fallbackMonth7" type="datetime-local" value="2026-09-12T19:00"/></div>
-    <div class="field"><label>Ancla mes 7</label>
-      <select id="useFallbackMonth7">
-        <option value="compare" selected>Comparar</option>
-        <option value="force">Forzar</option>
-      </select></div>
-    <div class="field"><label>Meses</label>
+    <div class="field"><label>Meses a generar</label>
       <select id="monthCount">
-        <option value="12" selected>12</option>
-        <option value="13">13</option>
+        <option value="12" selected>12 meses</option>
+        <option value="13">13 meses</option>
       </select></div>
     <div class="field" style="align-self:end">
       <button class="btn-calc" id="recalcBtn">Calcular calendario</button>
     </div>
   </div>
+
+  <!-- ══ OPCIONES AVANZADAS ══ -->
+  <div class="adv-wrap">
+    <button class="btn-adv" onclick="toggleAdv()">
+      <span id="advArrow">▸</span> Opciones avanzadas
+      <span class="yom-active-pill" id="yomPill">📅 Yom Tru'ah diferido</span>
+    </button>
+    <div class="adv-content" id="advContent">
+      <div class="yom-override-bar">
+        <label>📅 Diferir inicio de Yom Tru'ah:</label>
+        <input type="datetime-local" id="fallbackMonth7" value=""/>
+        <button class="btn-yom-clear" onclick="clearYomOverride()">✕ Quitar</button>
+      </div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:6px;padding-left:2px;">
+        Si estableces una fecha, el mes 7 y todas las fiestas de otoño se recalcularán a partir de ese atardecer.
+      </div>
+    </div>
+  </div>
+
+  <!-- Elementos dummy para compatibilidad JS -->
+  <input type="hidden" id="useFallbackMonth7" value="compare"/>
 </div>
 
 <div id="statusBox"></div>
@@ -427,26 +524,38 @@ function buildCalendar(){
     try{
       validateLibs();
       const start=parseDT($('searchStart').value),obs=buildObserver();
-      const mode=$('crescentMode').value,fb7=parseDT($('fallbackMonth7').value);
+      const mode=$('crescentMode').value;
       const count=Number($('monthCount').value),year=$('yearName').value.trim();
       const luns=findLunations(start,obs,mode,count);
       const months=luns.map((item,i)=>({start:item.start,days:i<luns.length-1?diffDays(item.start,luns[i+1].start):29}));
       months[months.length-1].days=29;
-      if($('useFallbackMonth7').value==='force'&&months[6]){
-        months[6].start=fb7;
-        for(let i=7;i<months.length;i++)months[i].start=addDays(months[i-1].start,months[i-1].days);
+
+      // Yom Tru'ah diferido: si el usuario puso fecha en opciones avanzadas, forzar mes 7
+      const fb7val = $('fallbackMonth7').value;
+      let yomDifVal = null;
+      if (fb7val) {
+        try {
+          yomDifVal = parseDT(fb7val);
+          if (months[6]) {
+            months[6].start = yomDifVal;
+            for(let i=7;i<months.length;i++)
+              months[i].start=addDays(months[i-1].start,months[i-1].days);
+          }
+        } catch(e) { /* fecha inválida, ignorar */ }
       }
+
       const avivStart=months[0].start,m7Start=months[6]?.start;
-      const delta=m7Start?diffDays(m7Start,fb7):null;
       const evMap=buildEventMap(months,avivStart,m7Start);
       currentObs=obs;currentEventMap=evMap;
       $('legend').innerHTML=LEGEND.map(l=>`<div class="lg-item"><div class="lg-dot" style="background:${l.color}"></div><span>${l.label}</span></div>`).join('');
       $('monthsGrid').innerHTML=gregRange(evMap).map(({year:y,month:m})=>renderMonth(y,m,evMap)).join('');
       $('placeholder').style.display='none';$('calOutput').style.display='block';
       setTimeout(markDaysWithNotes,200);
-      const cmp=delta===null?'':delta===0?' · Mes 7 coincide con ancla.':` · Mes 7 difiere ${delta} día(s) del ancla.`;
-      $('statusBox').className=(delta===null||Math.abs(delta)<=1)?'ok':'warn';
-      $('statusBox').innerHTML=`<b>✓ Calendario ${year} generado.</b>${cmp}`;
+      const statusMsg = yomDifVal
+        ? ` · Yom Tru'ah diferido al ${DateTime.fromJSDate(yomDifVal,{zone:'utc'}).setZone(tz()).toFormat("d 'de' LLLL")}.`
+        : '';
+      $('statusBox').className='ok';
+      $('statusBox').innerHTML=`<b>✓ Calendario ${year} generado.</b>${statusMsg}`;
     }catch(err){
       $('placeholder').style.display='block';$('calOutput').style.display='none';
       $('statusBox').className='error';$('statusBox').innerHTML=`<b>Error:</b> ${errMsg(err)}`;
@@ -454,6 +563,20 @@ function buildCalendar(){
   },30);
 }
 $('recalcBtn').addEventListener('click',buildCalendar);
+
+function toggleAdv(){
+  const c=$('advContent'),a=$('advArrow');
+  const open=c.classList.toggle('open');
+  a.textContent=open?'▾':'▸';
+}
+function clearYomOverride(){
+  $('fallbackMonth7').value='';
+  $('yomPill').className='yom-active-pill';
+}
+// Mostrar pill cuando se elige fecha
+$('fallbackMonth7').addEventListener('change',function(){
+  $('yomPill').className='yom-active-pill'+(this.value?' show':'');
+});
 
 
 /* ══════════════════════════════════════════════════════════════════
@@ -464,14 +587,7 @@ $('recalcBtn').addEventListener('click',buildCalendar);
    ✓ Búsqueda / Geocodificación: nominatim.openstreetmap.org (gratis, sin key)
    ══════════════════════════════════════════════════════════════════ */
 
-function setLocStatus(msg,type){
-  const el=$('locStatus');
-  // Mostrar solo el mensaje final ok, ignorar los intermedios de loading
-  if(type==='loading')return;
-  const icons={ok:'✅',error:'❌',info:'ℹ️',warn:'⚠️'};
-  el.innerHTML=(icons[type]||'')+' '+msg;
-  el.className='loc-status show '+(type||'');
-}
+function setLocStatus(msg,type){const el=$('locStatus');el.innerHTML=msg;el.className='loc-status show '+type;}
 function setStep(id,state){
   const el=$(id);if(!el)return;
   const icons={done:'✅',active:'⏳',error:'❌',wait:'⏳'};
@@ -613,16 +729,19 @@ async function applyCoords(lat,lon,placeName){
     txt.innerHTML=`<span class="ls-icon">⚠️</span> Zona horaria aproximada por longitud: <b>${tzId}</b>`;
   }
 
-  // Pills resumen compacto
+  // Pills de resumen
   const pills=[];
-  if(placeName)pills.push('📍 '+placeName);
-  if(elev!==null)pills.push('⛰️ '+elev+'m');
-  if(tzId)pills.push('🕐 '+tzId);
+  if(placeName)pills.push(`📍 ${placeName}`);
+  pills.push(`🌐 ${lat.toFixed(5)}, ${lon.toFixed(5)}`);
+  if(elev!==null)pills.push(`⛰️ ${elev} m s.n.m.`);
+  if(tzId)pills.push(`🕐 ${tzId}`);
   $('coordsPills').innerHTML=pills.map(p=>`<span class="cpill">${p}</span>`).join('');
 
   const allOk=!elevErr&&!tzErr;
   setLocStatus(
-    allOk ? (placeName||'Ubicación aplicada') : 'Coordenadas aplicadas (aprox.)',
+    allOk
+      ? `✅ Listo: <b>${placeName||`${lat.toFixed(4)}, ${lon.toFixed(4)}`}</b> — Lat/Lon, elevación y zona horaria aplicadas.`
+      : `⚠️ Coordenadas aplicadas. Algunos datos usaron valores aproximados.`,
     allOk?'ok':'info'
   );
 }
