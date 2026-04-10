@@ -320,7 +320,12 @@
         <option value="standard" selected>Estándar</option>
         <option value="lenient">Flexible</option>
       </select></div>
-<input type="hidden" id="monthCount" value="12"/>
+    <div class="field"><label>Meses a generar</label>
+      <select id="monthCount">
+        <option value="auto" selected>Auto (12/13)</option>
+        <option value="12">12 meses</option>
+        <option value="13">13 meses</option>
+      </select></div>
   </div>
 
   <!-- ══ FILA INFERIOR: Calcular + Opciones avanzadas al lado ══ -->
@@ -525,18 +530,23 @@ function buildCalendar(){
       const yearNum = parseInt(year) || new Date().getFullYear();
       const start = new Date(Date.UTC(yearNum, startMonth - 1, 1, 12, 0, 0));
 
-      // ── Auto-detección de año bisiesto (13 meses) ────────────────────────
-      // Regla caraíta: si el mes 13 comienza ANTES del equinoccio de primavera
-      // del año siguiente, se necesitan 13 meses para que Aviv caiga en primavera.
-      const nextEquinox  = new Date(Astronomy.Seasons(yearNum + 1).mar_equinox.date);
+      // ── Detección de meses: auto o manual ──────────────────────────────────
+      const monthCountVal = $('monthCount').value;
       const luns13 = findLunations(start, obs, mode, 13);
-      const month13start = luns13[12].start; // inicio del posible mes 13
 
-      // Si el mes 13 empieza antes del equinoccio siguiente → año bisiesto de 13 meses
-      const isLeapYear = month13start < nextEquinox;
-      const count = isLeapYear ? 13 : 12;
+      let isLeapYear, count;
+      if (monthCountVal === 'auto') {
+        // Regla caraíta: si el mes 13 empieza ANTES del equinoccio del año siguiente
+        // → se necesitan 13 meses para que Aviv caiga en primavera.
+        const nextEquinox = new Date(Astronomy.Seasons(yearNum + 1).mar_equinox.date);
+        isLeapYear = luns13[12].start < nextEquinox;
+        count = isLeapYear ? 13 : 12;
+      } else {
+        count = Number(monthCountVal);
+        isLeapYear = count === 13;
+      }
 
-      const luns  = isLeapYear ? luns13 : luns13.slice(0, 12);
+      const luns = luns13.slice(0, count);
       const months = luns.map((item,i) => ({
         start: item.start,
         days:  i < luns.length-1 ? diffDays(item.start, luns[i+1].start) : 29
