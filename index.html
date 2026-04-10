@@ -222,8 +222,16 @@
       background:#fff8f0;border:1px solid var(--border);
       border-radius:6px;padding:7px 12px;
     }
-    .adv-panel.open{display:flex;}
-    .adv-panel label{font-size:.72rem;font-weight:700;color:var(--accent);white-space:nowrap;}
+    .adv-panel.open{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;}
+    .adv-group{display:flex;flex-direction:column;gap:4px;}
+    .adv-group--wide{flex:1;min-width:220px;}
+    .adv-sep{width:1px;background:var(--border);align-self:stretch;margin:0 4px;}
+    .adv-panel label{font-size:.7rem;font-weight:700;color:var(--accent);white-space:nowrap;}
+    .adv-panel select,.adv-panel input[type=number]{
+      padding:6px 8px;font:inherit;font-size:.8rem;
+      border:1px solid var(--border);border-radius:5px;background:#fffdf8;
+    }
+    .adv-panel input[type=number]{width:90px;}
     .adv-panel input[type=datetime-local]{
       flex:1;min-width:160px;padding:6px 8px;font:inherit;font-size:.8rem;
       border:1px solid var(--border);border-radius:5px;background:#fffdf8;
@@ -314,12 +322,7 @@
         <option value="3" selected>Marzo</option>
         <option value="4">Abril</option>
       </select></div>
-    <div class="field"><label>Visibilidad creciente</label>
-      <select id="crescentMode">
-        <option value="strict">Estricto</option>
-        <option value="standard" selected>Estándar</option>
-        <option value="lenient">Flexible</option>
-      </select></div>
+
     <div class="field"><label>Meses a generar</label>
       <select id="monthCount">
         <option value="12" selected>12 meses</option>
@@ -335,9 +338,26 @@
       <span class="yom-pill" id="yomPill">📅 Yom Tru'ah diferido</span>
     </button>
     <div class="adv-panel" id="advPanel">
-      <label>📅 Diferir Yom Tru'ah:</label>
-      <input type="datetime-local" id="fallbackMonth7"/>
-      <button class="btn-adv-clear" onclick="clearYomOverride()" title="Quitar">✕ Quitar</button>
+      <div class="adv-group">
+        <label>👁 Visibilidad creciente</label>
+        <select id="crescentMode">
+          <option value="strict">Estricto</option>
+          <option value="standard" selected>Estándar</option>
+          <option value="lenient">Flexible</option>
+        </select>
+      </div>
+      <div class="adv-group">
+        <label>🌙 Ilum. mínima del día (%)</label>
+        <input type="number" id="minDayIllum" value="1.80" min="0" max="10" step="0.1"/>
+      </div>
+      <div class="adv-sep"></div>
+      <div class="adv-group adv-group--wide">
+        <label>📅 Diferir Yom Tru'ah</label>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="datetime-local" id="fallbackMonth7"/>
+          <button class="btn-adv-clear" onclick="clearYomOverride()">✕</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -430,38 +450,33 @@ function evalCrescent(date, obs, mode) {
   const lagMs = ms - su, lagMin = lagMs / 60000;
   if (lagMin < 12) return { visible: false, sunset: su };
 
-  // Evaluar en 3 momentos del día hebreo (24 h desde el atardecer):
-  //   1. T_yallop  — tiempo óptimo de observación del creciente (Yallop 4/9)
-  //   2. T_meridiano — punto medio del día hebreo (~12 h después)
-  //   3. T_max     — momento de iluminación máxima (recorrido cada 2 h)
-  const suNext = new Date(su.getTime() + 24 * 3600000); // siguiente atardecer aprox.
+  // Umbral de iluminación mínima configurable (campo en Opciones avanzadas)
+  const minIllum = parseFloat($('minDayIllum')?.value) || 1.8;
 
-  // Encontrar T_max: muestra cada 2 h durante el día hebreo
+  // Paso 1: buscar iluminación máxima del día hebreo (muestras c/2 h)
   let tMax = su, illumMax = 0;
   for (let h = 0; h <= 24; h += 2) {
     const t = new Date(su.getTime() + h * 3600000);
-    if (t >= suNext) break;
-    const illum = Astronomy.Illumination(Astronomy.Body.Moon, t).phase_fraction;
-    if (illum > illumMax) { illumMax = illum; tMax = t; }
+    const pct = Astronomy.Illumination(Astronomy.Body.Moon, t).phase_fraction * 100;
+    if (pct > illumMax) { illumMax = pct; tMax = t; }
   }
+  // Si el máximo del día es menor al umbral → Difícil visibilidad → rechazar
+  if (illumMax < minIllum) return { visible: false, sunset: su };
 
+  // Paso 2: evaluar Odeh en 3 momentos del día hebreo
   const checkTimes = [
-    new Date(su.getTime() + (4 / 9) * lagMs),  // T_yallop
-    new Date(su.getTime() + 12 * 3600000),       // T_meridiano
-    tMax,                                          // T_max iluminación
+    new Date(su.getTime() + (4/9) * lagMs), // T Yallop (óptimo al atardecer)
+    new Date(su.getTime() + 12 * 3600000),   // T Meridiano
+    tMax,                                      // T Máximo de iluminación
   ];
-
   for (const T of checkTimes) {
     const moonAlt = horizAlt(T, obs);
-    if (moonAlt <= 0) continue;                   // luna bajo el horizonte → saltar
-    const sunAlt  = getSunAlt(T, obs);
-    const ARCL    = elongation(T);
+    if (moonAlt <= 0) continue;
+    const sunAlt = getSunAlt(T, obs), ARCL = elongation(T);
     if (ARCL < 6.5) continue;
-    const ARCV = moonAlt - sunAlt;
-    const W    = crescentWidth(T);
+    const ARCV = moonAlt - sunAlt, W = crescentWidth(T);
     if (ARCV >= odehLimit(W, mode)) return { visible: true, sunset: su };
   }
-
   return { visible: false, sunset: su };
 }
 function findMonthStart(nm, obs, mode) {
