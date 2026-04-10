@@ -218,22 +218,19 @@
     }
     .btn-adv-toggle:hover{border-color:var(--accent);color:var(--accent);}
     .adv-panel{
-      display:none;align-items:center;gap:8px;flex-wrap:wrap;flex:1;
+      display:none;align-items:flex-end;gap:12px;flex-wrap:wrap;
       background:#fff8f0;border:1px solid var(--border);
-      border-radius:6px;padding:7px 12px;
+      border-radius:0 0 5px 5px;border-top:none;padding:8px 12px;
     }
-    .adv-panel.open{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;}
+    .adv-panel.open{display:flex;}
     .adv-group{display:flex;flex-direction:column;gap:4px;}
-    .adv-group--wide{flex:1;min-width:220px;}
-    .adv-sep{width:1px;background:var(--border);align-self:stretch;margin:0 4px;}
     .adv-panel label{font-size:.7rem;font-weight:700;color:var(--accent);white-space:nowrap;}
     .adv-panel select,.adv-panel input[type=number]{
-      padding:6px 8px;font:inherit;font-size:.8rem;
+      padding:6px 8px;font:inherit;font-size:.82rem;
       border:1px solid var(--border);border-radius:5px;background:#fffdf8;
     }
-    .adv-panel input[type=number]{width:90px;}
     .adv-panel input[type=datetime-local]{
-      flex:1;min-width:160px;padding:6px 8px;font:inherit;font-size:.8rem;
+      flex:1;padding:6px 8px;font:inherit;font-size:.82rem;
       border:1px solid var(--border);border-radius:5px;background:#fffdf8;
     }
     .btn-adv-clear{
@@ -330,38 +327,38 @@
       </select></div>
   </div>
 
-  <!-- ══ FILA INFERIOR: Calcular + Opciones avanzadas al lado ══ -->
-  <div class="ctrl-bottom-row">
-    <button class="btn-calc" id="recalcBtn">Calcular calendario</button>
-    <button class="btn-adv-toggle" onclick="toggleAdv()">
-      ⚙ Opciones avanzadas
-      <span class="yom-pill" id="yomPill">📅 Yom Tru'ah diferido</span>
+  <!-- ══ Botones dentro del grid como últimos 2 campos ══ -->
+  <!-- (ya están en el ctrl-grid más arriba si la versión los tiene) -->
+  <div style="display:flex;gap:10px;margin-top:10px;align-items:stretch;flex-wrap:wrap;">
+    <button class="btn-calc" id="recalcBtn" style="flex:1;min-width:160px;">Calcular calendario</button>
+    <button class="btn-adv-toggle" onclick="toggleAdv()" style="flex:1;min-width:140px;">
+      ⚙ Opciones avanzadas<span class="yom-pill" id="yomPill"> 📅</span>
     </button>
-    <div class="adv-panel" id="advPanel">
-      <div class="adv-group">
-        <label>👁 Visibilidad del sistema</label>
-        <select id="crescentMode">
-          <option value="strict">Estricto</option>
-          <option value="standard" selected>Estándar</option>
-          <option value="lenient">Flexible</option>
-        </select>
-      </div>
-      <div class="adv-group">
-        <label>🌙 Ilum. mínima del día (%)</label>
-        <input type="number" id="minDayIllum" value="1.80" min="0" max="10" step="0.1"/>
-      </div>
-      <div class="adv-sep"></div>
-      <div class="adv-group adv-group--wide">
-        <label>📅 Diferir Yom Tru'ah</label>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <input type="datetime-local" id="fallbackMonth7"/>
-          <button class="btn-adv-clear" onclick="clearYomOverride()">✕</button>
-        </div>
+  </div>
+
+  <div class="adv-panel" id="advPanel">
+    <div class="adv-group">
+      <label>👁 Visibilidad creciente</label>
+      <select id="crescentMode">
+        <option value="strict">Estricto</option>
+        <option value="standard" selected>Estándar</option>
+        <option value="lenient">Flexible</option>
+      </select>
+    </div>
+    <div class="adv-group">
+      <label>🌙 Ilum. mínima del día (%)</label>
+      <input type="number" id="minDayIllum" value="1.80" min="0" max="10" step="0.1" style="width:85px;"/>
+    </div>
+    <div style="width:1px;background:var(--border);margin:0 4px;align-self:stretch;"></div>
+    <div class="adv-group" style="flex:1;min-width:220px;">
+      <label>📅 Diferir Yom Tru'ah</label>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input type="datetime-local" id="fallbackMonth7" style="flex:1;"/>
+        <button class="btn-adv-clear" onclick="clearYomOverride()">✕</button>
       </div>
     </div>
   </div>
 
-  <!-- Compatibilidad JS -->
   <input type="hidden" id="useFallbackMonth7" value="compare"/>
 </div>
 
@@ -450,31 +447,32 @@ function evalCrescent(date, obs, mode) {
   const lagMs = ms - su, lagMin = lagMs / 60000;
   if (lagMin < 12) return { visible: false, sunset: su };
 
-  // Umbral de iluminación mínima configurable (campo en Opciones avanzadas)
+  // ── Paso 1: iluminación máxima del día hebreo completo (muestras c/2 h) ──
   const minIllum = parseFloat($('minDayIllum')?.value) || 1.8;
-
-  // Paso 1: buscar iluminación máxima del día hebreo (muestras c/2 h)
-  let tMax = su, illumMax = 0;
+  let illumMax = 0;
   for (let h = 0; h <= 24; h += 2) {
-    const t = new Date(su.getTime() + h * 3600000);
-    const pct = Astronomy.Illumination(Astronomy.Body.Moon, t).phase_fraction * 100;
-    if (pct > illumMax) { illumMax = pct; tMax = t; }
+    const pct = Astronomy.Illumination(Astronomy.Body.Moon,
+      new Date(su.getTime() + h * 3600000)).phase_fraction * 100;
+    if (pct > illumMax) illumMax = pct;
   }
-  // Si el máximo del día es menor al umbral → Difícil visibilidad → rechazar
+  // Si el máximo del día es < umbral → Difícil visibilidad → rechazar
   if (illumMax < minIllum) return { visible: false, sunset: su };
 
-  // Paso 2: evaluar Odeh en 3 momentos del día hebreo
-  const checkTimes = [
-    new Date(su.getTime() + (4/9) * lagMs), // T Yallop (óptimo al atardecer)
-    new Date(su.getTime() + 12 * 3600000),   // T Meridiano
-    tMax,                                      // T Máximo de iluminación
-  ];
-  for (const T of checkTimes) {
-    const moonAlt = horizAlt(T, obs);
+  // ── Paso 2: muestrear cada 10 min durante la ventana real de observación ──
+  // Ventana: desde el atardecer hasta que la luna se ponga (máx 2 h)
+  // Esto cubre inicio, meridiano y máximo dentro de la ventana visible real.
+  const windowEnd = new Date(Math.min(
+    ms.getTime(),
+    su.getTime() + 2 * 3600000
+  ));
+  for (let t = new Date(su); t <= windowEnd; t = new Date(t.getTime() + 10 * 60000)) {
+    const moonAlt = horizAlt(t, obs);
     if (moonAlt <= 0) continue;
-    const sunAlt = getSunAlt(T, obs), ARCL = elongation(T);
+    const sunAlt = getSunAlt(t, obs);
+    const ARCL   = elongation(t);
     if (ARCL < 6.5) continue;
-    const ARCV = moonAlt - sunAlt, W = crescentWidth(T);
+    const ARCV = moonAlt - sunAlt;
+    const W    = crescentWidth(t);
     if (ARCV >= odehLimit(W, mode)) return { visible: true, sunset: su };
   }
   return { visible: false, sunset: su };
