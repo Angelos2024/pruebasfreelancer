@@ -31,7 +31,7 @@
     .btn-calc{
       background:var(--head);color:#fff;border:none;border-radius:5px;
       padding:9px 18px;font:inherit;font-size:.9rem;font-weight:700;
-      cursor:pointer;width:100%;transition:opacity .15s;
+      cursor:pointer;transition:opacity .15s;
     }
     .btn-calc:hover{opacity:.88;}
     .btn-calc:disabled{opacity:.55;cursor:default;}
@@ -423,19 +423,53 @@ function odehLimit(W,mode){
   if(mode==='lenient')return base+4.1872;
   return base+5.6579;
 }
-function evalCrescent(date,obs,mode){
-  const su=getSunset(date,obs),ms=getMoonset(su,obs);
-  if(!ms||ms<=su)return{visible:false,sunset:su};
-  const lagMs=ms-su,lagMin=lagMs/60000;
-  if(lagMin<20)return{visible:false,sunset:su};
-  const T=new Date(su.getTime()+(4/9)*lagMs);
-  const moonAlt=horizAlt(T,obs),sunAlt=getSunAlt(T,obs),ARCL=elongation(T),ARCV=moonAlt-sunAlt,W=crescentWidth(T);
-  if(moonAlt<=0||ARCL<6.5)return{visible:false,sunset:su};
-  return{visible:ARCV>=odehLimit(W,mode),sunset:su};
+function evalCrescent(date, obs, mode) {
+  const su = getSunset(date, obs);
+  const ms = getMoonset(su, obs);
+  if (!ms || ms <= su) return { visible: false, sunset: su };
+  const lagMs = ms - su, lagMin = lagMs / 60000;
+  if (lagMin < 12) return { visible: false, sunset: su };
+
+  // Evaluar en 3 momentos del día hebreo (24 h desde el atardecer):
+  //   1. T_yallop  — tiempo óptimo de observación del creciente (Yallop 4/9)
+  //   2. T_meridiano — punto medio del día hebreo (~12 h después)
+  //   3. T_max     — momento de iluminación máxima (recorrido cada 2 h)
+  const suNext = new Date(su.getTime() + 24 * 3600000); // siguiente atardecer aprox.
+
+  // Encontrar T_max: muestra cada 2 h durante el día hebreo
+  let tMax = su, illumMax = 0;
+  for (let h = 0; h <= 24; h += 2) {
+    const t = new Date(su.getTime() + h * 3600000);
+    if (t >= suNext) break;
+    const illum = Astronomy.Illumination(Astronomy.Body.Moon, t).phase_fraction;
+    if (illum > illumMax) { illumMax = illum; tMax = t; }
+  }
+
+  const checkTimes = [
+    new Date(su.getTime() + (4 / 9) * lagMs),  // T_yallop
+    new Date(su.getTime() + 12 * 3600000),       // T_meridiano
+    tMax,                                          // T_max iluminación
+  ];
+
+  for (const T of checkTimes) {
+    const moonAlt = horizAlt(T, obs);
+    if (moonAlt <= 0) continue;                   // luna bajo el horizonte → saltar
+    const sunAlt  = getSunAlt(T, obs);
+    const ARCL    = elongation(T);
+    if (ARCL < 6.5) continue;
+    const ARCV = moonAlt - sunAlt;
+    const W    = crescentWidth(T);
+    if (ARCV >= odehLimit(W, mode)) return { visible: true, sunset: su };
+  }
+
+  return { visible: false, sunset: su };
 }
-function findMonthStart(nm,obs,mode){
-  for(let d=1;d<=4;d++){const r=evalCrescent(addDays(nm,d),obs,mode);if(r.visible)return r.sunset;}
-  return evalCrescent(addDays(nm,2),obs,mode).sunset;
+function findMonthStart(nm, obs, mode) {
+  for (let d = 1; d <= 5; d++) {
+    const r = evalCrescent(addDays(nm, d), obs, mode);
+    if (r.visible) return r.sunset;
+  }
+  return evalCrescent(addDays(nm, 2), obs, mode).sunset;
 }
 function findLunations(start,obs,mode,n){
   const list=[];let anchor=new Date(start);
