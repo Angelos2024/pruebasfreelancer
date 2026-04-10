@@ -21,115 +21,72 @@
     .app-header h1{font-size:1.2rem;font-weight:700;}
     .app-header small{font-size:.78rem;opacity:.75;}
 
-    .ctrl-wrap{background:#fff;border-bottom:2px solid var(--strong);padding:14px 22px;}
-    .ctrl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;align-items:end;}
-    .field label{display:block;font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:4px;}
-    .field input,.field select{
-      width:100%;padding:7px 9px;font:inherit;font-size:.85rem;
+    /* ── Panel controles ── */
+    .ctrl-wrap{background:#fff;border-bottom:2px solid var(--strong);padding:10px 18px;}
+
+    /* Barra de ubicación compacta */
+    .loc-bar{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap;}
+    .btn-geolocate{
+      display:flex;align-items:center;gap:6px;white-space:nowrap;
+      background:var(--head);color:#fff;border:none;border-radius:5px;
+      padding:7px 13px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;
+      transition:opacity .15s;flex-shrink:0;
+    }
+    .btn-geolocate:hover{opacity:.88;} .btn-geolocate:disabled{opacity:.5;cursor:default;}
+    .city-search-wrap{flex:1;min-width:180px;position:relative;}
+    .city-search-wrap input{
+      width:100%;padding:7px 9px 7px 30px;font:inherit;font-size:.82rem;
       border:1px solid var(--border);border-radius:5px;background:#fffdf8;
     }
-    .btn-calc{
-      background:var(--head);color:#fff;border:none;border-radius:5px;
-      padding:9px 18px;font:inherit;font-size:.9rem;font-weight:700;
-      cursor:pointer;width:100%;transition:opacity .15s;
-    }
-    .btn-calc:hover{opacity:.88;}
-    .btn-calc:disabled{opacity:.55;cursor:default;}
-
-    /* ══ SECCIÓN UBICACIÓN ══ */
-    .loc-section{
-      background:linear-gradient(135deg,#fdf6ec,#fff8f0);
-      border:2px solid var(--border);border-radius:10px;
-      padding:14px 16px;margin-bottom:14px;
-    }
-    .loc-title{
-      font-size:.8rem;font-weight:800;color:var(--head);
-      text-transform:uppercase;letter-spacing:.06em;
-      margin-bottom:10px;display:flex;align-items:center;gap:7px;
-    }
-    .loc-row{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;}
-
-    .btn-geolocate{
-      display:flex;align-items:center;gap:10px;
-      background:var(--head);color:#fff;border:none;border-radius:8px;
-      padding:12px 20px;font:inherit;font-size:.95rem;font-weight:700;
-      cursor:pointer;transition:opacity .15s, transform .1s;
-      box-shadow:0 2px 8px rgba(122,58,10,.25);white-space:nowrap;
-    }
-    .btn-geolocate:hover{opacity:.9;transform:translateY(-1px);}
-    .btn-geolocate:disabled{opacity:.5;cursor:default;transform:none;}
-
-    .city-search-wrap{flex:1;min-width:200px;position:relative;}
-    .city-search-wrap input{
-      width:100%;padding:12px 14px 12px 38px;
-      font:inherit;font-size:.88rem;
-      border:1px solid var(--border);border-radius:8px;
-      background:#fffdf8;
-      transition:border-color .2s,box-shadow .2s;
-    }
-    .city-search-wrap input:focus{
-      outline:none;border-color:var(--accent);
-      box-shadow:0 0 0 3px rgba(122,92,30,.12);
-    }
-    .city-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none;}
-
+    .city-search-wrap input:focus{outline:none;border-color:var(--accent);}
+    .city-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:.85rem;pointer-events:none;}
     .city-suggestions{
       position:absolute;top:100%;left:0;right:0;z-index:999;
-      background:#fff;border:1px solid var(--border);border-radius:0 0 8px 8px;
-      box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:220px;overflow-y:auto;display:none;
+      background:#fff;border:1px solid var(--border);border-radius:0 0 6px 6px;
+      box-shadow:0 6px 18px rgba(0,0,0,.1);max-height:200px;overflow-y:auto;display:none;
     }
     .city-suggestions.open{display:block;}
-    .city-sugg-item{
-      padding:10px 14px;cursor:pointer;font-size:.85rem;
-      border-bottom:1px solid #f0ede4;transition:background .1s;
-    }
+    .city-sugg-item{padding:8px 12px;cursor:pointer;font-size:.82rem;border-bottom:1px solid #f0ede4;}
     .city-sugg-item:last-child{border-bottom:none;}
     .city-sugg-item:hover{background:#fdf6ec;}
-    .city-sugg-name{font-weight:700;color:var(--text);}
-    .city-sugg-sub{font-size:.74rem;color:var(--muted);margin-top:2px;}
+    .city-sugg-name{font-weight:700;} .city-sugg-sub{font-size:.72rem;color:var(--muted);}
 
-    .loc-status{
-      margin-top:10px;padding:8px 12px;border-radius:6px;
-      font-size:.82rem;display:none;align-items:center;gap:8px;
-    }
+    /* Status inline mini */
+    .loc-status{font-size:.78rem;display:none;align-items:center;gap:6px;padding:3px 0;}
     .loc-status.show{display:flex;}
-    .loc-status.loading{background:#fffbeb;border:1px solid #f6ad55;color:#7b341e;}
-    .loc-status.ok{background:#f0faf3;border:1px solid #68d391;color:#276749;}
-    .loc-status.error{background:#fff5f5;border:1px solid #fc8181;color:#9b2c2c;}
-    .loc-status.info{background:#ebf4ff;border:1px solid #76b5ff;color:#1a56db;}
+    .loc-status.ok{color:#276749;} .loc-status.error{color:#c53030;} .loc-status.loading{color:var(--accent);}
+    .loc-status.info{color:#1a56db;}
 
-    .load-steps{
-      display:none;flex-direction:column;gap:4px;
-      margin-top:8px;padding:8px 12px;
-      background:#fdf6ec;border:1px solid var(--border);border-radius:6px;font-size:.78rem;
-    }
-    .load-steps.show{display:flex;}
-    .ls{display:flex;align-items:center;gap:6px;color:var(--muted);}
-    .ls.done{color:#276749;font-weight:600;}
-    .ls.active{color:var(--accent);font-weight:700;}
-    .ls.error{color:#c53030;}
-    .ls-icon{width:16px;text-align:center;flex-shrink:0;}
+    /* Pills resultado */
+    .coords-pills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;}
+    .cpill{display:inline-flex;align-items:center;gap:3px;background:#e8f5e9;border:1px solid #68d391;
+      border-radius:20px;padding:2px 8px;font-size:.7rem;color:#276749;font-weight:700;}
 
-    .coords-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
-    .cpill{
-      display:inline-flex;align-items:center;gap:4px;
-      background:#e8f5e9;border:1px solid #68d391;border-radius:20px;
-      padding:3px 10px;font-size:.74rem;color:#276749;font-weight:700;
+    /* Grid de campos */
+    .ctrl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;align-items:end;}
+    .field label{display:block;font-size:.7rem;font-weight:700;color:var(--accent);margin-bottom:3px;}
+    .field input,.field select{
+      width:100%;padding:6px 8px;font:inherit;font-size:.82rem;
+      border:1px solid var(--border);border-radius:5px;background:#fffdf8;
     }
-
-    .field input.autofilled{
-      background:#f0faf3 !important;border-color:#68d391 !important;
-      color:#276749;font-weight:600;
-    }
-    .auto-lbl{display:none;font-size:.64rem;color:#276749;font-weight:700;margin-top:2px;}
+    .field input.autofilled{background:#f0faf3 !important;border-color:#68d391 !important;color:#276749;font-weight:600;}
+    .auto-lbl{display:none;font-size:.62rem;color:#276749;font-weight:700;margin-top:2px;}
     .auto-lbl.show{display:block;}
 
-    @keyframes spin{to{transform:rotate(360deg);}}
-    .spin{
-      display:inline-block;width:16px;height:16px;
-      border:2px solid rgba(255,255,255,.35);border-top-color:#fff;
-      border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;
+    .btn-calc{
+      background:var(--head);color:#fff;border:none;border-radius:5px;
+      padding:8px 16px;font:inherit;font-size:.85rem;font-weight:700;
+      cursor:pointer;width:100%;transition:opacity .15s;
     }
+    .btn-calc:hover{opacity:.88;} .btn-calc:disabled{opacity:.55;cursor:default;}
+
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);
+      border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+
+    /* Ocultar pasos intermedios — el estado se muestra inline compacto */
+    .load-steps{display:none !important;}
+    .loc-title{display:none !important;}
 
     #statusBox{margin:10px 22px 0;padding:9px 14px;border-radius:5px;font-size:.86rem;display:none;}
     #statusBox.ok{display:block;background:#f0faf3;border:1px solid #68d391;color:#276749;}
@@ -228,65 +185,45 @@
 
 <div class="ctrl-wrap">
 
-  <!-- ══ SECCIÓN DE UBICACIÓN AUTOMÁTICA ══ -->
-  <div class="loc-section">
-    <div class="loc-title">📍 Ubicación automática — sin registro, sin API Key</div>
-    <div class="loc-row">
-
-      <button class="btn-geolocate" id="btnGeo" onclick="detectarUbicacion()">
-        <span id="geoIco">🎯</span>
-        <span id="geoTxt">Detectar mi ubicación</span>
-      </button>
-
-      <div class="city-search-wrap">
-        <span class="city-icon">🔍</span>
-        <input
-          type="text" id="cityInput"
-          placeholder="O busca una ciudad… ej: Chihuahua, México City, Jerusalem, Buenos Aires"
-          autocomplete="off"
-          oninput="onCityInput(this.value)"
-          onkeydown="onCityKey(event)"
-        />
-        <div class="city-suggestions" id="citySugg"></div>
-      </div>
+  <!-- Barra ubicación compacta -->
+  <div class="coords-pills" id="coordsPills"></div>
+  <div class="loc-bar">
+    <button class="btn-geolocate" id="btnGeo" onclick="detectarUbicacion()">
+      <span id="geoIco">🎯</span>
+      <span id="geoTxt">Mi ubicación</span>
+    </button>
+    <div class="city-search-wrap">
+      <span class="city-icon">🔍</span>
+      <input type="text" id="cityInput" placeholder="Buscar ciudad…"
+        autocomplete="off" oninput="onCityInput(this.value)" onkeydown="onCityKey(event)"/>
+      <div class="city-suggestions" id="citySugg"></div>
     </div>
-
-    <div class="load-steps" id="loadSteps">
-      <div class="ls" id="ls1"><span class="ls-icon">⏳</span> Obteniendo coordenadas GPS…</div>
-      <div class="ls" id="ls2"><span class="ls-icon">⏳</span> Consultando elevación precisa (Open-Meteo)…</div>
-      <div class="ls" id="ls3"><span class="ls-icon">⏳</span> Detectando zona horaria exacta (TimeAPI)…</div>
-    </div>
-
     <div class="loc-status" id="locStatus"></div>
-    <div class="coords-pills" id="coordsPills"></div>
   </div>
 
-  <!-- ══ GRID DE CONTROLES ══ -->
+  <!-- Elementos dummy para que el JS no rompa -->
+  <div id="loadSteps" style="display:none">
+    <div id="ls1"><span class="ls-icon"></span></div>
+    <div id="ls2"><span class="ls-icon"></span></div>
+    <div id="ls3"><span class="ls-icon"></span></div>
+  </div>
+
+  <!-- Grid de campos -->
   <div class="ctrl-grid">
     <div class="field"><label>Año</label>
       <input id="yearName" type="text" value="2026"/></div>
-
-    <div class="field">
-      <label>Zona horaria</label>
+    <div class="field"><label>Zona horaria</label>
       <input id="timezone" type="text" value="Asia/Jerusalem"/>
-      <div class="auto-lbl" id="lbl_tz">✓ Auto-detectada</div>
-    </div>
-    <div class="field">
-      <label>Latitud</label>
+      <div class="auto-lbl" id="lbl_tz">✓ Auto</div></div>
+    <div class="field"><label>Latitud</label>
       <input id="latitude" type="number" step="0.000001" value="31.768300"/>
-      <div class="auto-lbl" id="lbl_lat">✓ Auto-detectada</div>
-    </div>
-    <div class="field">
-      <label>Longitud</label>
+      <div class="auto-lbl" id="lbl_lat">✓ Auto</div></div>
+    <div class="field"><label>Longitud</label>
       <input id="longitude" type="number" step="0.000001" value="35.213700"/>
-      <div class="auto-lbl" id="lbl_lon">✓ Auto-detectada</div>
-    </div>
-    <div class="field">
-      <label>Elevación (m)</label>
+      <div class="auto-lbl" id="lbl_lon">✓ Auto</div></div>
+    <div class="field"><label>Elevación (m)</label>
       <input id="elevation" type="number" value="800"/>
-      <div class="auto-lbl" id="lbl_el">✓ Auto-detectada</div>
-    </div>
-
+      <div class="auto-lbl" id="lbl_el">✓ Auto</div></div>
     <div class="field"><label>Buscar desde</label>
       <input id="searchStart" type="datetime-local" value="2026-03-01T12:00"/></div>
     <div class="field"><label>Visibilidad</label>
@@ -297,18 +234,17 @@
       </select></div>
     <div class="field"><label>Ancla Yom Tru'ah</label>
       <input id="fallbackMonth7" type="datetime-local" value="2026-09-12T19:00"/></div>
-    <div class="field"><label>Uso ancla mes 7</label>
+    <div class="field"><label>Ancla mes 7</label>
       <select id="useFallbackMonth7">
-        <option value="compare" selected>Solo comparar</option>
-        <option value="force">Forzar mes 7</option>
+        <option value="compare" selected>Comparar</option>
+        <option value="force">Forzar</option>
       </select></div>
     <div class="field"><label>Meses</label>
       <select id="monthCount">
-        <option value="12" selected>12 meses</option>
-        <option value="13">13 meses</option>
+        <option value="12" selected>12</option>
+        <option value="13">13</option>
       </select></div>
     <div class="field" style="align-self:end">
-      <label>&nbsp;</label>
       <button class="btn-calc" id="recalcBtn">Calcular calendario</button>
     </div>
   </div>
@@ -528,7 +464,14 @@ $('recalcBtn').addEventListener('click',buildCalendar);
    ✓ Búsqueda / Geocodificación: nominatim.openstreetmap.org (gratis, sin key)
    ══════════════════════════════════════════════════════════════════ */
 
-function setLocStatus(msg,type){const el=$('locStatus');el.innerHTML=msg;el.className='loc-status show '+type;}
+function setLocStatus(msg,type){
+  const el=$('locStatus');
+  // Mostrar solo el mensaje final ok, ignorar los intermedios de loading
+  if(type==='loading')return;
+  const icons={ok:'✅',error:'❌',info:'ℹ️',warn:'⚠️'};
+  el.innerHTML=(icons[type]||'')+' '+msg;
+  el.className='loc-status show '+(type||'');
+}
 function setStep(id,state){
   const el=$(id);if(!el)return;
   const icons={done:'✅',active:'⏳',error:'❌',wait:'⏳'};
@@ -670,19 +613,16 @@ async function applyCoords(lat,lon,placeName){
     txt.innerHTML=`<span class="ls-icon">⚠️</span> Zona horaria aproximada por longitud: <b>${tzId}</b>`;
   }
 
-  // Pills de resumen
+  // Pills resumen compacto
   const pills=[];
-  if(placeName)pills.push(`📍 ${placeName}`);
-  pills.push(`🌐 ${lat.toFixed(5)}, ${lon.toFixed(5)}`);
-  if(elev!==null)pills.push(`⛰️ ${elev} m s.n.m.`);
-  if(tzId)pills.push(`🕐 ${tzId}`);
+  if(placeName)pills.push('📍 '+placeName);
+  if(elev!==null)pills.push('⛰️ '+elev+'m');
+  if(tzId)pills.push('🕐 '+tzId);
   $('coordsPills').innerHTML=pills.map(p=>`<span class="cpill">${p}</span>`).join('');
 
   const allOk=!elevErr&&!tzErr;
   setLocStatus(
-    allOk
-      ? `✅ Listo: <b>${placeName||`${lat.toFixed(4)}, ${lon.toFixed(4)}`}</b> — Lat/Lon, elevación y zona horaria aplicadas.`
-      : `⚠️ Coordenadas aplicadas. Algunos datos usaron valores aproximados.`,
+    allOk ? (placeName||'Ubicación aplicada') : 'Coordenadas aplicadas (aprox.)',
     allOk?'ok':'info'
   );
 }
