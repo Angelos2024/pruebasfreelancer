@@ -309,6 +309,8 @@
     <div class="field"><label>Elevación (m)</label>
       <input id="elevation" type="number" value="800"/>
       <div class="auto-lbl" id="lbl_el">✓ Auto</div></div>
+    <div class="field"><label>Buscar desde</label>
+      <input id="searchStart" type="datetime-local" value="2026-03-01T12:00"/></div>
     <div class="field"><label>Visibilidad creciente</label>
       <select id="crescentMode">
         <option value="strict">Estricto</option>
@@ -517,19 +519,11 @@ function buildCalendar(){
     try{
       validateLibs();
 
-      const yearNum = parseInt($('yearName').value) || new Date().getFullYear();
-      const mode    = $('crescentMode').value;
-      const count   = Number($('monthCount').value);
-      const year    = String(yearNum);
-      const obs     = buildObserver();
-
-      // Ancla astronómica: equinoccio de primavera del año pedido.
-      // Aviv = primer mes que inicia CON O DESPUÉS del equinoccio (regla caraíta).
-      // Buscamos desde el equinoccio - 1 día para no perder una luna nueva
-      // que caiga exactamente en el equinoccio.
-      const seasons  = Astronomy.Seasons(yearNum);
-      const equinox  = new Date(seasons.mar_equinox.date);
-      const start    = new Date(equinox.getTime() - 86400000); // equinoccio - 1 día
+      const year  = $('yearName').value.trim();
+      const mode  = $('crescentMode').value;
+      const count = Number($('monthCount').value);
+      const obs   = buildObserver();
+      const start = parseDT($('searchStart').value);
 
       const luns  = findLunations(start, obs, mode, count);
       const months = luns.map((item,i) => ({
@@ -559,12 +553,11 @@ function buildCalendar(){
       $('monthsGrid').innerHTML=gregRange(evMap).map(({year:y,month:m})=>renderMonth(y,m,evMap)).join('');
       $('placeholder').style.display='none';$('calOutput').style.display='block';
       setTimeout(markDaysWithNotes,200);
-      const eqStr = DateTime.fromJSDate(equinox,{zone:'utc'}).setZone(tz()).toFormat("d 'de' LLLL");
       const yomMsg = yomDifVal
         ? ` · Yom Tru'ah diferido al ${DateTime.fromJSDate(yomDifVal,{zone:'utc'}).setZone(tz()).toFormat("d 'de' LLLL")}.`
         : '';
       $('statusBox').className='ok';
-      $('statusBox').innerHTML=`<b>✓ Calendario ${year} generado.</b> Equinoccio: ${eqStr}.${yomMsg}`;
+      $('statusBox').innerHTML=`<b>✓ Calendario ${year} generado.</b>${yomMsg}`;
     }catch(err){
       $('placeholder').style.display='block';$('calOutput').style.display='none';
       $('statusBox').className='error';$('statusBox').innerHTML=`<b>Error:</b> ${errMsg(err)}`;
