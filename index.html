@@ -100,8 +100,8 @@
       z-index:9999;align-items:center;justify-content:center;padding:16px;
     }
     .modal-box{
-      background:#fff;border-radius:10px;width:100%;max-width:460px;
-      box-shadow:0 24px 64px rgba(0,0,0,.35);overflow:hidden;
+      background:#fff;border-radius:10px;width:100%;max-width:500px;
+      box-shadow:0 24px 64px rgba(0,0,0,.35);overflow:hidden;max-height:92vh;overflow-y:auto;
     }
     .modal-header{
       background:var(--head);color:#fff;padding:14px 18px;
@@ -143,6 +143,34 @@
       padding:8px;font-size:.88rem;color:#276749;font-weight:700;margin-top:10px;
     }
     .modal-loading{padding:24px;text-align:center;color:#888;font-size:.9rem;}
+
+
+    /* Notas del día */
+    .notes-section{margin-top:12px;border-top:1px solid #ece8df;padding-top:12px;}
+    .notes-label{font-size:.72rem;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;}
+    .notes-label span{color:var(--accent);font-weight:700;}
+    .notes-textarea{
+      width:100%;min-height:72px;padding:8px 10px;font:inherit;font-size:.84rem;
+      border:1px solid var(--border);border-radius:6px;background:#fffdf8;
+      resize:vertical;color:var(--text);line-height:1.5;
+    }
+    .notes-textarea:focus{outline:none;border-color:var(--accent);}
+    .notes-save-row{display:flex;gap:8px;margin-top:6px;align-items:center;}
+    .btn-save-note{
+      background:var(--head);color:#fff;border:none;border-radius:5px;
+      padding:6px 16px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;transition:opacity .15s;
+    }
+    .btn-save-note:hover{opacity:.85;}
+    .btn-del-note{
+      background:none;border:1px solid #fc8181;color:#c53030;border-radius:5px;
+      padding:6px 12px;font:inherit;font-size:.82rem;cursor:pointer;transition:background .15s;
+    }
+    .btn-del-note:hover{background:#fff5f5;}
+    .note-status{font-size:.75rem;color:#276749;margin-left:4px;}
+    .day-has-note{position:relative;}
+    .day-has-note::after{
+      content:'📝';font-size:.6rem;position:absolute;top:2px;right:3px;line-height:1;
+    }
 
     /* Panel de iluminación lunar mejorado */
     .illum-panel{
@@ -218,16 +246,16 @@
         <option value="standard" selected>Estándar</option>
         <option value="lenient">Flexible</option>
       </select></div>
-    <div class="field"><label>Ancla Yom Teruah</label>
+    <div class="field"><label>Ancla Yom Tru'ah</label>
       <input id="fallbackMonth7" type="datetime-local" value="2026-09-12T19:00"/></div>
     <div class="field"><label>Uso ancla mes 7</label>
       <select id="useFallbackMonth7">
         <option value="compare" selected>Solo comparar</option>
         <option value="force">Forzar mes 7</option>
       </select></div>
-    <div class="field"><label>Meses (auto / forzar)</label>
+    <div class="field"><label>Meses</label>
       <select id="monthCount">
-        <option value="12">12 meses</option>
+        <option value="12" selected>12 meses</option>
         <option value="13">13 meses</option>
       </select></div>
     <div class="field" style="align-self:end">
@@ -262,13 +290,13 @@ const C = {
 const LEGEND = [
   {color:C.mes,    label:'Inicio mes hebreo'},
   {color:C.prep,   label:'14 Aviv - Preparacion'},
-  {color:C.fiesta, label:'Jag HaMatzot / Sucot'},
+  {color:C.fiesta, label:'Jag HaMatzot / Sukot'},
   {color:C.shabbat,label:'Shabbat en la fiesta'},
   {color:C.omer,   label:'Omer Reshit'},
   {color:C.shavuot,label:'Shavuot'},
-  {color:C.teruah, label:'Yom Teruah'},
-  {color:C.kippur, label:'Yom Kippur'},
-  {color:C.shemini,label:'Shemini Atzeret'},
+  {color:C.teruah, label:'Yom Tru\'ah'},
+  {color:C.kippur, label:'Yom HaKipurim'},
+  {color:C.shemini,label:'Shminí Atzéret'},
 ];
 
 const MESES_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
@@ -465,7 +493,7 @@ function buildEventMap(months, avivStart, m7Start) {
 
   // Aviv
   mark(incRange(avivStart,14),   '14 Aviv Prep.',    C.prep);
-  markRange(incRange(avivStart,15), 7, '\u{1F33E} Jag HaMatzot', C.fiesta, '\u{1F33E} 15 Aviv Pesaj');
+  markRange(incRange(avivStart,15), 7, '\u{1F33E} Jag HaMatzot', C.fiesta, '\u{1F33E} 15 Aviv Pésaj');
   mark(incRange(avivStart,21),   '21 Aviv Cierre',   C.fiestaFin);
   const shab = sabbathInFeast(incRange(avivStart,15));
   mark(shab,                      '\u2721 Shabbat',  C.shabbat);
@@ -475,10 +503,10 @@ function buildEventMap(months, avivStart, m7Start) {
 
   // Mes 7
   if (m7Start) {
-    mark(m7Start,                   '\u{1F4EF} Yom Teruah',    C.teruah);
-    mark(incRange(m7Start,10),      '\u{1F56F} Yom Kippur',    C.kippur);
-    markRange(incRange(m7Start,15), 7, '\u{1F33F} Sucot', C.fiesta, '\u{1F33F} 15 Sucot');
-    mark(incRange(m7Start,22),      '\u{1F389} Shemini Atz.',  C.shemini);
+    mark(m7Start,                   '\u{1F4EF} Yom Tru\'ah',    C.teruah);
+    mark(incRange(m7Start,10),      '\u{1F56F} Yom HaKipurim',    C.kippur);
+    markRange(incRange(m7Start,15), 7, '\u{1F33F} Sukot', C.fiesta, '\u{1F33F} 15 Sukot');
+    mark(incRange(m7Start,22),      '\u{1F389} Shminí Atzéret',  C.shemini);
   }
   return map;
 }
@@ -620,6 +648,7 @@ function buildCalendar() {
 
       placeholder.style.display = 'none';
       calOutput.style.display   = 'block';
+      setTimeout(markDaysWithNotes, 200);
 
       const cmp = delta===null ? '' : delta===0
         ? ' \u00b7 Mes 7 coincide con ancla.'
@@ -642,19 +671,105 @@ function buildCalendar() {
 recalcBtn.addEventListener('click', buildCalendar);
 /* Sin buildCalendar() automatico al cargar */
 
-/* ── Auto-selección de meses según año ─────────────────────────────────── */
-function autoSetMonths(yearStr) {
-  const greg = parseInt(yearStr);
-  if (!Number.isFinite(greg)) return;
-  const heb  = greg + 3761;
-  const pos  = ((heb - 1) % 19) + 1;
-  const leap = new Set([3,6,8,11,14,17,19]).has(pos);
-  monthCountInput.value = leap ? '13' : '12';
+
+/* ═══ NOTAS POR DÍA — IndexedDB ════════════════════════════════════════════ */
+let _db = null;
+
+function openDB() {
+  if (_db) return Promise.resolve(_db);
+  return new Promise((res, rej) => {
+    const req = indexedDB.open('CalCaraita', 1);
+    req.onupgradeneeded = e => {
+      e.target.result.createObjectStore('notas', { keyPath: 'id' });
+    };
+    req.onsuccess = e => { _db = e.target.result; res(_db); };
+    req.onerror   = e => rej(e.target.error);
+  });
 }
-yearNameInput.addEventListener('input',  () => autoSetMonths(yearNameInput.value));
-yearNameInput.addEventListener('change', () => autoSetMonths(yearNameInput.value));
-/* Aplicar al valor inicial */
-autoSetMonths(yearNameInput.value);
+
+function dbGet(key) {
+  return openDB().then(db => new Promise((res, rej) => {
+    const tx = db.transaction('notas', 'readonly');
+    const req = tx.objectStore('notas').get(key);
+    req.onsuccess = e => res(e.target.result?.texto || '');
+    req.onerror   = e => rej(e.target.error);
+  }));
+}
+
+function dbPut(key, texto) {
+  return openDB().then(db => new Promise((res, rej) => {
+    const tx = db.transaction('notas', 'readwrite');
+    if (texto.trim()) {
+      tx.objectStore('notas').put({ id: key, texto });
+    } else {
+      tx.objectStore('notas').delete(key);
+    }
+    tx.oncomplete = () => res();
+    tx.onerror    = e => rej(e.target.error);
+  }));
+}
+
+/* Carga qué días tienen notas y marca sus celdas con 📝 */
+async function markDaysWithNotes() {
+  const db = await openDB();
+  return new Promise(res => {
+    const tx  = db.transaction('notas', 'readonly');
+    const req = tx.objectStore('notas').getAllKeys();
+    req.onsuccess = e => {
+      const keys = e.target.result;
+      // quitar marcas previas
+      document.querySelectorAll('.day-has-note').forEach(el => el.classList.remove('day-has-note'));
+      keys.forEach(k => {
+        const td = document.querySelector(`td[onclick*="'${k}'"]`);
+        if (td) td.classList.add('day-has-note');
+      });
+      res();
+    };
+  });
+}
+
+/* Inserta sección de notas al final del modalBody */
+async function renderNotesSection(dateStr) {
+  const nota = await dbGet(dateStr);
+  const sec = document.createElement('div');
+  sec.className = 'notes-section';
+  sec.id = 'notesSection';
+  sec.innerHTML = `
+    <div class="notes-label">
+      <span>📝 Nota personal</span>
+      <span id="noteCharCount" style="font-weight:400">${nota.length}/500</span>
+    </div>
+    <textarea class="notes-textarea" id="noteText" maxlength="500" placeholder="Escribe una nota para este día hebreo…">${nota}</textarea>
+    <div class="notes-save-row">
+      <button class="btn-save-note" onclick="saveNote('${dateStr}')">Guardar</button>
+      <button class="btn-del-note" onclick="deleteNote('${dateStr}')">Borrar</button>
+      <span class="note-status" id="noteStatus"></span>
+    </div>`;
+  document.getElementById('modalBody').appendChild(sec);
+
+  const ta = document.getElementById('noteText');
+  const cc = document.getElementById('noteCharCount');
+  ta.addEventListener('input', () => { cc.textContent = ta.value.length + '/500'; });
+}
+
+async function saveNote(dateStr) {
+  const texto = document.getElementById('noteText').value;
+  await dbPut(dateStr, texto);
+  const st = document.getElementById('noteStatus');
+  st.textContent = texto.trim() ? '✓ Guardada' : '✓ Borrada';
+  setTimeout(() => { if (st) st.textContent = ''; }, 2000);
+  markDaysWithNotes();
+}
+
+async function deleteNote(dateStr) {
+  await dbPut(dateStr, '');
+  document.getElementById('noteText').value = '';
+  document.getElementById('noteCharCount').textContent = '0/500';
+  const st = document.getElementById('noteStatus');
+  st.textContent = '✓ Borrada';
+  setTimeout(() => { if (st) st.textContent = ''; }, 2000);
+  markDaysWithNotes();
+}
 
 /* ═══ MODAL: info del día ═══════════════════════════════════════════════════ */
 let currentObs       = null;   // observer activo tras el último cálculo
@@ -863,6 +978,8 @@ function showDayModal(dateStr) {
 
         <div class="modal-duration">⏱ Duración del día hebreo: ${durH}h ${durMin}min</div>
       `;
+      // Cargar notas guardadas
+      renderNotesSection(dateStr);
     } catch(e) {
       body.innerHTML = `<div class="modal-loading" style="color:#c53030">Error: ${e.message||e}</div>`;
     }
