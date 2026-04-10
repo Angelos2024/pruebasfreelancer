@@ -192,6 +192,11 @@
     .note-status{font-size:.75rem;color:#276749;margin-left:4px;}
     .day-has-note{position:relative;}
     .day-has-note::after{content:'📝';font-size:.6rem;position:absolute;top:2px;right:3px;line-height:1;}
+    .note-preview{
+      display:block;font-size:.60rem;color:#7a5c1e;font-style:italic;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      max-width:100%;margin-top:2px;line-height:1.3;
+    }
 
     .illum-panel{background:#1a1a2e;border-radius:10px;padding:14px 16px;margin-top:10px;color:#e0e0e0;}
     .illum-panel-title{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#a78bfa;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
@@ -913,11 +918,26 @@ function dbGet(key){return openDB().then(db=>new Promise((res,rej)=>{const req=d
 function dbPut(key,texto){return openDB().then(db=>new Promise((res,rej)=>{const tx=db.transaction('notas','readwrite');if(texto.trim())tx.objectStore('notas').put({id:key,texto});else tx.objectStore('notas').delete(key);tx.oncomplete=()=>res();tx.onerror=e=>rej(e.target.error);}));}
 async function markDaysWithNotes(){
   const db=await openDB();
+  // Remove existing previews
+  document.querySelectorAll('.day-has-note').forEach(el=>el.classList.remove('day-has-note'));
+  document.querySelectorAll('.note-preview').forEach(el=>el.remove());
   return new Promise(res=>{
-    const req=db.transaction('notas','readonly').objectStore('notas').getAllKeys();
+    const tx=db.transaction('notas','readonly'),store=tx.objectStore('notas');
+    const req=store.getAll();
     req.onsuccess=e=>{
-      document.querySelectorAll('.day-has-note').forEach(el=>el.classList.remove('day-has-note'));
-      e.target.result.forEach(k=>{const td=document.querySelector(`td[onclick*="'${k}'"]`);if(td)td.classList.add('day-has-note');});
+      e.target.result.forEach(record=>{
+        const td=document.querySelector(`td[onclick*="'${record.id}'"]`);
+        if(!td)return;
+        td.classList.add('day-has-note');
+        // Show first 2 words of the note as a small preview
+        const words=(record.texto||'').trim().split(/\s+/).slice(0,2).join(' ');
+        if(words){
+          const span=document.createElement('span');
+          span.className='note-preview';
+          span.textContent=words;
+          td.appendChild(span);
+        }
+      });
       res();
     };
   });
