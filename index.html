@@ -447,7 +447,8 @@ function evalCrescent(date, obs, mode) {
   const lagMs = ms - su, lagMin = lagMs / 60000;
   if (lagMin < 12) return { visible: false, sunset: su };
 
-  // ── Paso 1: iluminación máxima del día hebreo completo (muestras c/2 h) ──
+  // Filtro 1: iluminación máxima del día hebreo (muestras c/2 h, 24 h)
+  // Si el máximo es menor al umbral → Difícil visibilidad → pasar al día siguiente
   const minIllum = parseFloat($('minDayIllum')?.value) || 1.8;
   let illumMax = 0;
   for (let h = 0; h <= 24; h += 2) {
@@ -455,27 +456,18 @@ function evalCrescent(date, obs, mode) {
       new Date(su.getTime() + h * 3600000)).phase_fraction * 100;
     if (pct > illumMax) illumMax = pct;
   }
-  // Si el máximo del día es < umbral → Difícil visibilidad → rechazar
   if (illumMax < minIllum) return { visible: false, sunset: su };
 
-  // ── Paso 2: muestrear cada 10 min durante la ventana real de observación ──
-  // Ventana: desde el atardecer hasta que la luna se ponga (máx 2 h)
-  // Esto cubre inicio, meridiano y máximo dentro de la ventana visible real.
-  const windowEnd = new Date(Math.min(
-    ms.getTime(),
-    su.getTime() + 2 * 3600000
-  ));
-  for (let t = new Date(su); t <= windowEnd; t = new Date(t.getTime() + 10 * 60000)) {
-    const moonAlt = horizAlt(t, obs);
-    if (moonAlt <= 0) continue;
-    const sunAlt = getSunAlt(t, obs);
-    const ARCL   = elongation(t);
-    if (ARCL < 6.5) continue;
-    const ARCV = moonAlt - sunAlt;
-    const W    = crescentWidth(t);
-    if (ARCV >= odehLimit(W, mode)) return { visible: true, sunset: su };
-  }
-  return { visible: false, sunset: su };
+  // Filtro 2: criterio Odeh en el tiempo óptimo de Yallop (4/9 del lag)
+  const T = new Date(su.getTime() + (4 / 9) * lagMs);
+  const moonAlt = horizAlt(T, obs);
+  if (moonAlt <= 0) return { visible: false, sunset: su };
+  const sunAlt = getSunAlt(T, obs);
+  const ARCL   = elongation(T);
+  if (ARCL < 6.5) return { visible: false, sunset: su };
+  const ARCV = moonAlt - sunAlt;
+  const W    = crescentWidth(T);
+  return { visible: ARCV >= odehLimit(W, mode), sunset: su };
 }
 function findMonthStart(nm, obs, mode) {
   for (let d = 1; d <= 5; d++) {
