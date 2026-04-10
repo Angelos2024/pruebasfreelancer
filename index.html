@@ -31,7 +31,7 @@
     .btn-calc{
       background:var(--head);color:#fff;border:none;border-radius:5px;
       padding:9px 18px;font:inherit;font-size:.9rem;font-weight:700;
-      cursor:pointer;transition:opacity .15s;
+      cursor:pointer;width:100%;transition:opacity .15s;
     }
     .btn-calc:hover{opacity:.88;}
     .btn-calc:disabled{opacity:.55;cursor:default;}
@@ -309,8 +309,11 @@
     <div class="field"><label>Elevación (m)</label>
       <input id="elevation" type="number" value="800"/>
       <div class="auto-lbl" id="lbl_el">✓ Auto</div></div>
-    <div class="field"><label>Buscar desde</label>
-      <input id="searchStart" type="datetime-local" value="2026-03-01T12:00"/></div>
+    <div class="field"><label>El año inicia en:</label>
+      <select id="startMonth">
+        <option value="3" selected>Marzo</option>
+        <option value="4">Abril</option>
+      </select></div>
     <div class="field"><label>Visibilidad creciente</label>
       <select id="crescentMode">
         <option value="strict">Estricto</option>
@@ -523,7 +526,9 @@ function buildCalendar(){
       const mode  = $('crescentMode').value;
       const count = Number($('monthCount').value);
       const obs   = buildObserver();
-      const start = parseDT($('searchStart').value);
+      const startMonth = Number($('startMonth').value);
+      const yearNum = parseInt(year) || new Date().getFullYear();
+      const start = new Date(Date.UTC(yearNum, startMonth - 1, 1, 12, 0, 0));
 
       const luns  = findLunations(start, obs, mode, count);
       const months = luns.map((item,i) => ({
