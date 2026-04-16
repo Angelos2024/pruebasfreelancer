@@ -595,8 +595,12 @@ function buildCalendar(){
         // año siguiente caería demasiado tarde → se necesitan 13 meses → año bisiesto.
         // Si la lunación 13 ya empieza ANTES del equinoccio, el año regular de 12 meses
         // es suficiente para que Aviv quede en primavera.
+        // Regla caraíta: si el potencial mes 1 del año siguiente (luns13[12])
+        // cae ANTES del equinoccio vernal → el aviv sería demasiado temprano →
+        // se necesita el mes 13 intercalar → año bisiesto.
+        // Si cae DESPUÉS del equinoccio, el año de 12 meses ya posiciona bien el aviv.
         const nextEquinox = new Date(Astronomy.Seasons(yearNum + 1).mar_equinox.date);
-        isLeapYear = luns13[12].start >= nextEquinox;
+        isLeapYear = luns13[12].start < nextEquinox;
         count = isLeapYear ? 13 : 12;
       } else {
         count = Number(monthCountVal);
@@ -663,8 +667,8 @@ function buildCalendar(){
         ? ` · Yom Tru'ah diferido al ${DateTime.fromJSDate(yomDifVal,{zone:'utc'}).setZone(tz()).toFormat("d 'de' LLLL")}.`
         : '';
       const leapMsg = isLeapYear
-        ? ' · <b>Año bisiesto</b> (13 meses) — el mes 13 cae antes del siguiente equinoccio.'
-        : ' · Año regular (12 meses).';
+        ? ' · <b>Año bisiesto</b> (13 meses) — el Aviv del año siguiente caería antes del equinoccio.'
+        : ' · Año regular (12 meses) — el Aviv del año siguiente cae después del equinoccio.';
       $('statusBox').className='ok';
       $('statusBox').innerHTML=`<b>✓ Calendario ${year} generado.</b>${leapMsg}${yomMsg}`;
     }catch(err){
