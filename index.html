@@ -588,19 +588,21 @@ function buildCalendar(){
       const monthCountVal = $('monthCount').value;
       const luns13 = findLunations(start, obs, mode, 13);
 
+      // Años bisiestos caraítas según el patrón establecido, extendido por ciclos de 19 años.
+      const LEAP_YEARS = new Set([
+        1991,1994,1996,1999,2002,2005,2007,
+        2010,2013,2015,2018,2021,2023,2026,
+        2029,2031,2034,2037,2040,2042,2045,
+        2048,2050,2053,2056,2059,2061,2064,
+        2067,2069,2072,2075,2078,2080,2083,
+        2086,2088,2091,2094,2097,2099,2102,
+        2105,2107,2110,2113,2116,2118,2121,
+        2124,2126,2129
+      ]);
+
       let isLeapYear, count;
       if (monthCountVal === 'auto') {
-        // Regla caraíta: si el mes 13 (la lunación 13) empieza DESPUÉS del equinoccio
-        // de primavera del año siguiente, significa que sin ese mes extra el Aviv del
-        // año siguiente caería demasiado tarde → se necesitan 13 meses → año bisiesto.
-        // Si la lunación 13 ya empieza ANTES del equinoccio, el año regular de 12 meses
-        // es suficiente para que Aviv quede en primavera.
-        // Regla caraíta: si el potencial mes 1 del año siguiente (luns13[12])
-        // cae ANTES del equinoccio vernal → el aviv sería demasiado temprano →
-        // se necesita el mes 13 intercalar → año bisiesto.
-        // Si cae DESPUÉS del equinoccio, el año de 12 meses ya posiciona bien el aviv.
-        const nextEquinox = new Date(Astronomy.Seasons(yearNum + 1).mar_equinox.date);
-        isLeapYear = luns13[12].start < nextEquinox;
+        isLeapYear = LEAP_YEARS.has(yearNum);
         count = isLeapYear ? 13 : 12;
       } else {
         count = Number(monthCountVal);
