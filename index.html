@@ -590,10 +590,13 @@ function buildCalendar(){
 
       let isLeapYear, count;
       if (monthCountVal === 'auto') {
-        // Regla caraíta: si el mes 13 empieza ANTES del equinoccio del año siguiente
-        // → se necesitan 13 meses para que Aviv caiga en primavera.
+        // Regla caraíta: si el mes 13 (la lunación 13) empieza DESPUÉS del equinoccio
+        // de primavera del año siguiente, significa que sin ese mes extra el Aviv del
+        // año siguiente caería demasiado tarde → se necesitan 13 meses → año bisiesto.
+        // Si la lunación 13 ya empieza ANTES del equinoccio, el año regular de 12 meses
+        // es suficiente para que Aviv quede en primavera.
         const nextEquinox = new Date(Astronomy.Seasons(yearNum + 1).mar_equinox.date);
-        isLeapYear = luns13[12].start < nextEquinox;
+        isLeapYear = luns13[12].start >= nextEquinox;
         count = isLeapYear ? 13 : 12;
       } else {
         count = Number(monthCountVal);
