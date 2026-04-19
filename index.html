@@ -773,7 +773,6 @@ function initMobileAdvancedFields(){
 }
 function syncMobileAdvancedFields(){
   const advHost=$('advMobileFields');
-  const advPanel=$('advPanel');
   if(!advHost)return;
   const isMobile=isMobileLayout();
   MOBILE_ADV_FIELD_IDS.forEach(id=>{
@@ -791,10 +790,6 @@ function syncMobileAdvancedFields(){
       }
     }
   });
-  if(advPanel){
-    if(isMobile)advPanel.classList.add('open');
-    else if(!$('fallbackMonth7').value)advPanel.classList.remove('open');
-  }
 }
 initMobileAdvancedFields();
 window.addEventListener('load',syncMobileAdvancedFields);
