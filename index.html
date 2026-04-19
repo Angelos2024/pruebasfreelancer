@@ -158,10 +158,43 @@
     .ev{display:block;font-size:.72rem;font-weight:600;color:#fff;border-radius:3px;padding:2px 6px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.6;}
     .cal-table td:not(.empty){cursor:pointer;transition:background .12s;}
     .cal-table td:not(.empty):hover{background:#f0ebff !important;}
+    .cal-table td.hebrew-today{
+      position:relative;
+      box-shadow:inset 0 0 0 3px #d69e2e,inset 0 0 0 6px rgba(255,247,230,.95);
+      background:#fffaf0;
+    }
+    .cal-table td.hebrew-today::before{
+      content:'HOY';
+      position:absolute;top:3px;right:3px;
+      font-size:.55rem;font-weight:800;letter-spacing:.03em;
+      padding:1px 5px;border-radius:10px;
+      background:#7a3a0a;color:#fff;
+      z-index:1;pointer-events:none;
+    }
+
+    .today-heb-corner{
+      display:none;position:fixed;top:14px;right:14px;z-index:9998;
+      background:#fffdf8;border:2px solid #d69e2e;border-radius:10px;
+      box-shadow:0 8px 24px rgba(0,0,0,.18);
+      padding:10px 12px;max-width:320px;
+    }
+    .today-heb-corner.show{display:block;}
+    .today-heb-corner .thc-title{font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#7a3a0a;}
+    .today-heb-corner .thc-date{font-size:.9rem;font-weight:700;color:#1d1d1d;margin-top:2px;line-height:1.3;}
+    .today-heb-corner .thc-note{font-size:.7rem;color:#666;margin-top:2px;}
+    .today-heb-corner.warn{border-color:#f6ad55;background:#fffbeb;}
 
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;padding:16px;}
     .modal-box{background:#fff;border-radius:10px;width:100%;max-width:500px;box-shadow:0 24px 64px rgba(0,0,0,.35);overflow:hidden;max-height:92vh;overflow-y:auto;}
     .modal-header{background:var(--head);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;}
+    .modal-header-right{display:flex;align-items:center;gap:8px;}
+    .modal-heb-date{
+      font-size:.72rem;font-weight:700;line-height:1.25;
+      background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.32);
+      border-radius:8px;padding:5px 8px;text-align:right;
+      max-width:220px;
+    }
     .modal-header-title{font-weight:700;font-size:1rem;line-height:1.3;}
     .modal-close{background:rgba(255,255,255,.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;}
     .modal-close:hover{background:rgba(255,255,255,.35);}
@@ -265,6 +298,8 @@
       #calOutput,#placeholder,.ctrl-wrap{padding-left:12px;padding-right:12px;}
       .loc-row{flex-direction:column;}
       .btn-geolocate{width:100%;justify-content:center;}
+      .today-heb-corner{top:auto;right:10px;left:10px;bottom:10px;max-width:none;}
+      .modal-heb-date{font-size:.66rem;max-width:170px;}
     }
   </style>
 </head>
@@ -374,6 +409,7 @@
 </div>
 
 <div id="statusBox"></div>
+<div id="todayHebrewCorner" class="today-heb-corner"></div>
 
 <div id="placeholder">
   <div class="ico">&#127769;</div>
@@ -582,6 +618,7 @@ function buildCalendar(){
       const obs   = buildObserver();
       const startMonth = Number($('startMonth').value);
       const yearNum = parseInt(year) || new Date().getFullYear();
+      currentHebrewYear = yearNum + 3760;
       const start = new Date(Date.UTC(yearNum, startMonth - 1, 1, 12, 0, 0));
 
       // ── Detección de meses: auto o manual ──────────────────────────────────
@@ -660,9 +697,10 @@ function buildCalendar(){
           }
         }
       });
-      currentObs=obs;currentEventMap=evMap;
+      currentObs=obs;currentEventMap=evMap;currentHebrewIndex=buildHebrewIndex(months,currentHebrewYear);
       $('legend').innerHTML=LEGEND.map(l=>`<div class="lg-item"><div class="lg-dot" style="background:${l.color}"></div><span>${l.label}</span></div>`).join('');
       $('monthsGrid').innerHTML=gregRangeArr.map(({year:y,month:m})=>renderMonth(y,m,evMap,shabbatMap)).join('');
+      updateTodayHebrewCorner();
       $('placeholder').style.display='none';$('calOutput').style.display='block';
       setTimeout(markDaysWithNotes,200);
       const yomMsg = yomDifVal
@@ -676,6 +714,8 @@ function buildCalendar(){
     }catch(err){
       $('placeholder').style.display='block';$('calOutput').style.display='none';
       $('statusBox').className='error';$('statusBox').innerHTML=`<b>Error:</b> ${errMsg(err)}`;
+      currentHebrewIndex={};
+      updateTodayHebrewCorner();
     }finally{$('recalcBtn').disabled=false;$('recalcBtn').textContent='Calcular calendario';}
   },30);
 }
@@ -697,6 +737,8 @@ if($('fallbackMonth7')){
     $('yomPill').className='yom-pill'+(this.value?' show':'');
   });
 }
+$('timezone').addEventListener('change',updateTodayHebrewCorner);
+setInterval(updateTodayHebrewCorner,60000);
 
 
 /* ══════════════════════════════════════════════════════════════════
@@ -978,6 +1020,59 @@ async function deleteNote(dateStr){
 
 /* ═══ MODAL ════════════════════════════════════════════════════════════════ */
 let currentObs=null,currentEventMap={};
+let currentHebrewIndex={};
+let currentHebrewYear=0;
+
+function shiftKey(key,days){
+  return DateTime.fromISO(key,{zone:tz()}).plus({days}).toFormat('yyyy-MM-dd');
+}
+function buildHebrewIndex(months,hebrewYear){
+  const idx={};
+  months.forEach((m,i)=>{
+    for(let d=0;d<m.days;d++){
+      const k=dateKey(addDays(m.start,d));
+      idx[k]={monthNumber:i+1,day:d+1,year:hebrewYear,monthName:MESES_HEB[i]||('Mes '+(i+1))};
+    }
+  });
+  return idx;
+}
+function hebrewInfoForCivil(dateStr){
+  const anchor=shiftKey(dateStr,-1);
+  return currentHebrewIndex[anchor]||null;
+}
+function clearHebrewTodayMark(){
+  document.querySelectorAll('td.hebrew-today').forEach(td=>td.classList.remove('hebrew-today'));
+}
+function updateTodayHebrewCorner(){
+  const corner=$('todayHebrewCorner');
+  clearHebrewTodayMark();
+  if(!currentObs||!Object.keys(currentHebrewIndex).length){
+    corner.className='today-heb-corner';
+    corner.innerHTML='';
+    return;
+  }
+  const now=DateTime.now().setZone(tz());
+  const civilKey=now.toFormat('yyyy-MM-dd');
+  let anchorKey=shiftKey(civilKey,-1);
+  try{
+    const noonToday=now.set({hour:12,minute:0,second:0,millisecond:0}).toUTC().toJSDate();
+    const todaySunset=getSunset(noonToday,currentObs);
+    if(now.toUTC().toMillis()>=todaySunset.getTime())anchorKey=civilKey;
+  }catch(e){}
+  const info=currentHebrewIndex[anchorKey];
+  if(!info){
+    corner.className='today-heb-corner show warn';
+    corner.innerHTML='<div class="thc-title">Hoy hebreo</div><div class="thc-date">Fuera del rango generado</div><div class="thc-note">Recalcula el calendario para este periodo.</div>';
+    return;
+  }
+  const cellKey=shiftKey(anchorKey,1);
+  const td=document.querySelector(`td[onclick*="'${cellKey}'"]`);
+  if(td)td.classList.add('hebrew-today');
+  corner.className='today-heb-corner show';
+  corner.innerHTML=`<div class="thc-title">Hoy hebreo (${tz()})</div>
+    <div class="thc-date">Mes ${info.monthNumber} (${info.monthName}) · Día ${info.day} · Año ${info.year}</div>
+    <div class="thc-note">Contexto regional aplicado por zona horaria y atardecer local.</div>`;
+}
 
 function moonPhaseData(date){
   const iN=Astronomy.Illumination(Astronomy.Body.Moon,date).phase_fraction;
@@ -1033,6 +1128,8 @@ function showDayModal(dateStr){
   body.innerHTML='<div class="modal-loading">Calculando atardeceres…</div>';
   const[year,month,day]=dateStr.split('-').map(Number);
   $('modalTitleText').textContent=DateTime.fromObject({year,month,day},{zone:tz()}).setLocale('es').toFormat("cccc, d 'de' LLLL yyyy");
+  const hInfo=hebrewInfoForCivil(dateStr);
+  $('modalHebDate').textContent=hInfo?`Mes ${hInfo.monthNumber} · Día ${hInfo.day} · Año ${hInfo.year}`:'Mes/Día hebreo no disponible';
   const evs=currentEventMap[dateStr]||[];
   $('modalEvents').innerHTML=evs.length?evs.map(e=>`<span class="modal-ev" style="background:${e.color}">${e.label}</span>`).join(''):'<span style="color:#aaa;font-size:.8rem">Sin eventos especiales</span>';
   setTimeout(()=>{
@@ -1098,7 +1195,10 @@ function showDayModal(dateStr){
   <div class="modal-box">
     <div class="modal-header">
       <div><div class="modal-header-title" id="modalTitleText"></div></div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-header-right">
+        <div class="modal-heb-date" id="modalHebDate"></div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
     </div>
     <div class="modal-events" id="modalEvents"></div>
     <div class="modal-body" id="modalBody"><div class="modal-loading">Cargando…</div></div>
