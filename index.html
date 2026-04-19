@@ -328,7 +328,7 @@
     <div class="field"><label>Elevación (m)</label>
       <input id="elevation" type="number" value="800"/>
       <div class="auto-lbl" id="lbl_el">✓ Auto</div></div>
-    <div class="field"><label>El año inicia en:</label>
+    <div class="field"><label>El mes de Aviv inicia en:</label>
       <select id="startMonth">
         <option value="3" selected>Marzo</option>
         <option value="4">Abril</option>
@@ -397,7 +397,7 @@ const LEGEND = [
   {color:C.mes,    label:'Inicio mes hebreo'},
   {color:C.prep,   label:'14 Aviv - Preparacion'},
   {color:C.fiesta, label:'Jag HaMatzot / Sukot'},
-  {color:C.shabbat,label:'Shabbat en la fiesta'},
+  {color:C.shabbat,label:'Shabat en la fiesta'},
   {color:C.omer,   label:'Omer Reshit'},
   {color:C.shavuot,label:'Shavuot'},
   {color:C.teruah, label:"Yom Tru'ah"},
@@ -508,7 +508,7 @@ function buildEventMap(months,avivStart,m7Start){
   markRange(incRange(avivStart,15),7,'\u{1F33E} Jag HaMatzot',C.fiesta,'\u{1F33E} 15 Aviv Pésaj');
   mark(incRange(avivStart,21),'21 Aviv Cierre',C.fiestaFin);
   const shab=sabbathInFeast(incRange(avivStart,15));
-  mark(shab,'\u2721 Shabbat',C.shabbat);
+  mark(shab,'\\u2721 Shabat',C.shabbat);
   const omer=addDays(shab,1);
   mark(omer,'\u{1F33F} Omer Reshit',C.omer);
   mark(addDays(omer,49),'\u2728 Shavuot',C.shavuot);
@@ -543,10 +543,10 @@ function renderMonth(year,month,eventMap,shabbatMap){
       let shabH='';
       if(shabbatMap){
         if(dow===5&&shabbatMap[k]){
-          shabH=`<span class="shab-start" title="Inicio Shabbat">${shabbatMap[k].inicio}</span>`;
+          shabH=`<span class="shab-start" title="Inicio Shabat">${shabbatMap[k].inicio}</span>`;
         }
         if(dow===6&&shabbatMap[k]){
-          shabH=`<span class="shab-end" title="Fin Shabbat">${shabbatMap[k].fin}</span>`;
+          shabH=`<span class="shab-end" title="Fin Shabat">${shabbatMap[k].fin}</span>`;
         }
       }
       html+=`<td class="${tc}" onclick="showDayModal('${k}')" title="Ver detalle"><div class="dn">${day}</div>${evH}${shabH}</td>`;
