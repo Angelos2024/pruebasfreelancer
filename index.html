@@ -305,7 +305,7 @@
     .yom-pill.show{display:inline-flex;}
 
     @media(max-width:900px){.months-grid{grid-template-columns:1fr;}}
-    @media(max-width:600px){
+    @media(max-width:768px){
       .ctrl-grid{grid-template-columns:1fr 1fr;}
       #calOutput,#placeholder,.ctrl-wrap{padding-left:12px;padding-right:12px;}
       .loc-row{flex-direction:column;}
@@ -756,7 +756,12 @@ $('timezone').addEventListener('change',updateTodayHebrewCorner);
 setInterval(updateTodayHebrewCorner,60000);
 
 const MOBILE_ADV_FIELD_IDS=['fieldTimezone','fieldLatitude','fieldLongitude','fieldElevation','fieldCrescentMode'];
+const MOBILE_LAYOUT_MAX=768;
 const mobileFieldState={};
+function isMobileLayout(){
+  const w=Math.min(window.innerWidth||9999,document.documentElement.clientWidth||9999);
+  return w<=MOBILE_LAYOUT_MAX;
+}
 function initMobileAdvancedFields(){
   MOBILE_ADV_FIELD_IDS.forEach(id=>{
     const el=$(id);
@@ -768,8 +773,9 @@ function initMobileAdvancedFields(){
 }
 function syncMobileAdvancedFields(){
   const advHost=$('advMobileFields');
+  const advPanel=$('advPanel');
   if(!advHost)return;
-  const isMobile=window.matchMedia('(max-width:600px)').matches;
+  const isMobile=isMobileLayout();
   MOBILE_ADV_FIELD_IDS.forEach(id=>{
     const state=mobileFieldState[id];
     if(!state||!state.el)return;
@@ -785,8 +791,13 @@ function syncMobileAdvancedFields(){
       }
     }
   });
+  if(advPanel){
+    if(isMobile)advPanel.classList.add('open');
+    else if(!$('fallbackMonth7').value)advPanel.classList.remove('open');
+  }
 }
 initMobileAdvancedFields();
+window.addEventListener('load',syncMobileAdvancedFields);
 
 
 /* ══════════════════════════════════════════════════════════════════
