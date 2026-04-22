@@ -1143,7 +1143,10 @@ function moonPhaseData(date){
   const ph=Astronomy.Illumination(Astronomy.Body.Moon,date).phase_angle;
   const angle=waxing?ph:360-ph;
   let emoji,name;
-  if(pctNum<1){emoji='🌑';name='Luna nueva';}
+  // Luna oscura: sin astilla visible.
+  if(pctNum<0.8){emoji='🌑';name='Luna oscura';}
+  // Rosh Jodesh: primera astilla visible muy fina (~2%).
+  else if(waxing&&pctNum<=2.5){emoji='🌒';name='Rosh Jodesh (astilla visible)';}
   else if(pctNum>=99){emoji='🌕';name='Luna llena';}
   else if(waxing){
     if(pctNum<40){emoji='🌒';name='Creciente joven';}
