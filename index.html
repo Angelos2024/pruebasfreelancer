@@ -1136,25 +1136,26 @@ function updateTodayHebrewCorner(){
     <div class="thc-note">Contexto regional aplicado por zona horaria y atardecer local.</div>`;
 }
 
-function moonPhaseData(date){
+function moonPhaseData(date,pctBasis){
   const iN=Astronomy.Illumination(Astronomy.Body.Moon,date).phase_fraction;
   const iX=Astronomy.Illumination(Astronomy.Body.Moon,new Date(date.getTime()+3600000)).phase_fraction;
   const waxing=iX>=iN,pctNum=iN*100,pct=pctNum.toFixed(1);
+  const refPct=Number.isFinite(pctBasis)?pctBasis:pctNum;
   const ph=Astronomy.Illumination(Astronomy.Body.Moon,date).phase_angle;
   const angle=waxing?ph:360-ph;
   const visThresh=getIllumThreshold();
   let emoji,name;
   // Misma referencia del calendario: umbral de visibilidad del creciente (1.80% por defecto).
-  if(waxing&&pctNum<visThresh){emoji='🌑';name='Luna oscura';}
-  else if(waxing&&pctNum<=visThresh+0.7){emoji='🌒';name='Rosh Jodesh (astilla visible)';}
-  else if(pctNum>=99){emoji='🌕';name='Luna llena';}
+  if(waxing&&refPct<visThresh){emoji='🌑';name='Luna oscura';}
+  else if(waxing&&refPct<=visThresh+0.7){emoji='🌒';name='Rosh Jodesh (astilla visible)';}
+  else if(refPct>=99){emoji='🌕';name='Luna llena';}
   else if(waxing){
-    if(pctNum<40){emoji='🌒';name='Creciente joven';}
-    else if(pctNum<60){emoji='🌓';name='Cuarto creciente';}
+    if(refPct<40){emoji='🌒';name='Creciente joven';}
+    else if(refPct<60){emoji='🌓';name='Cuarto creciente';}
     else{emoji='🌔';name='Gibosa creciente';}
   }else{
-    if(pctNum>60){emoji='🌖';name='Gibosa menguante';}
-    else if(pctNum>40){emoji='🌗';name='Cuarto menguante';}
+    if(refPct>60){emoji='🌖';name='Gibosa menguante';}
+    else if(refPct>40){emoji='🌗';name='Cuarto menguante';}
     else{emoji='🌘';name='Creciente menguante';}
   }
   return{emoji,name,pct,waxing,angle};
@@ -1206,7 +1207,8 @@ function showDayModal(dateStr){
       const pU=new Date(Date.UTC(year,month-1,day-1,12,0,0)),tU=new Date(Date.UTC(year,month-1,day,12,0,0));
       const ss=getSunset(pU,currentObs),se=getSunset(tU,currentObs);
       const dMs=se-ss,dH=Math.floor(dMs/3600000),dM=Math.floor((dMs%3600000)/60000);
-      const phase=moonPhaseData(ss),illum=moonIllumProfile(ss,se,currentObs);
+      const illum=moonIllumProfile(ss,se,currentObs);
+      const phase=moonPhaseData(ss,illum?parseFloat(illum.maximo):undefined);
       const ic=p=>{const v=parseFloat(p);if(v<2)return'low';if(v<50)return'mid';if(v<95)return'high';return'full';};
       const fw=p=>Math.min(100,parseFloat(p)).toFixed(1);
       const mx=parseFloat(illum.maximo);
