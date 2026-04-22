@@ -1142,11 +1142,11 @@ function moonPhaseData(date){
   const waxing=iX>=iN,pctNum=iN*100,pct=pctNum.toFixed(1);
   const ph=Astronomy.Illumination(Astronomy.Body.Moon,date).phase_angle;
   const angle=waxing?ph:360-ph;
+  const visThresh=getIllumThreshold();
   let emoji,name;
-  // Luna oscura: sin astilla visible.
-  if(pctNum<0.8){emoji='🌑';name='Luna oscura';}
-  // Rosh Jodesh: primera astilla visible muy fina (~2%).
-  else if(waxing&&pctNum<=2.5){emoji='🌒';name='Rosh Jodesh (astilla visible)';}
+  // Misma referencia del calendario: umbral de visibilidad del creciente (1.80% por defecto).
+  if(waxing&&pctNum<visThresh){emoji='🌑';name='Luna oscura';}
+  else if(waxing&&pctNum<=visThresh+0.7){emoji='🌒';name='Rosh Jodesh (astilla visible)';}
   else if(pctNum>=99){emoji='🌕';name='Luna llena';}
   else if(waxing){
     if(pctNum<40){emoji='🌒';name='Creciente joven';}
