@@ -1139,17 +1139,21 @@ function updateTodayHebrewCorner(){
 function moonPhaseData(date){
   const iN=Astronomy.Illumination(Astronomy.Body.Moon,date).phase_fraction;
   const iX=Astronomy.Illumination(Astronomy.Body.Moon,new Date(date.getTime()+3600000)).phase_fraction;
-  const waxing=iX>=iN,pct=(iN*100).toFixed(1);
-  const ph=Astronomy.Illumination(Astronomy.Body.Moon,date).phase_angle,angle=waxing?ph:360-ph;
+  const waxing=iX>=iN,pctNum=iN*100,pct=pctNum.toFixed(1);
+  const ph=Astronomy.Illumination(Astronomy.Body.Moon,date).phase_angle;
+  const angle=waxing?ph:360-ph;
   let emoji,name;
-  if(angle<15||angle>=345){emoji='🌑';name='Luna nueva';}
-  else if(angle<75){emoji='🌒';name='Creciente joven';}
-  else if(angle<105){emoji='🌓';name='Cuarto creciente';}
-  else if(angle<165){emoji='🌔';name='Gibosa creciente';}
-  else if(angle<195){emoji='🌕';name='Luna llena';}
-  else if(angle<255){emoji='🌖';name='Gibosa menguante';}
-  else if(angle<285){emoji='🌗';name='Cuarto menguante';}
-  else{emoji='🌘';name='Creciente menguante';}
+  if(pctNum<1){emoji='🌑';name='Luna nueva';}
+  else if(pctNum>=99){emoji='🌕';name='Luna llena';}
+  else if(waxing){
+    if(pctNum<40){emoji='🌒';name='Creciente joven';}
+    else if(pctNum<60){emoji='🌓';name='Cuarto creciente';}
+    else{emoji='🌔';name='Gibosa creciente';}
+  }else{
+    if(pctNum>60){emoji='🌖';name='Gibosa menguante';}
+    else if(pctNum>40){emoji='🌗';name='Cuarto menguante';}
+    else{emoji='🌘';name='Creciente menguante';}
+  }
   return{emoji,name,pct,waxing,angle};
 }
 function moonIllumProfile(s0,s1,obs){
